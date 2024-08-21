@@ -121,6 +121,7 @@ const Scanner = () => {
     });
   };
 
+  // change data to backend stuff
   const filteredProducts = data.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.itemCode.toLowerCase().includes(searchTerm.toLowerCase())
