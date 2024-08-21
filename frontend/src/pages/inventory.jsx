@@ -37,7 +37,7 @@ const Inventory = () => {
   const handleAddProduct = () => {
     const errors = validateForm()
     if (Object.keys(errors).length > 0) {
-      setError('Please fill out all fields')
+      setError('')
       return
     }
 
@@ -218,7 +218,6 @@ const Inventory = () => {
                     />
                   </div>
                   <div className='w-full flex items-end justify-end'>
-                    {error && <p className='text-white text-lg font-light tracking-tighter'>{error}</p>}
                     <button onClick={handleAddProduct} className='w-4/12 py-2 px-4 bg-white text-sm border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'>
                       Confirm
                     </button>
