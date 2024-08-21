@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@200..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.button {
+  @apply transition duration-300 ease-in-out
+}
+
+/* Hide scrollbar for all browsers */
+.hide-scrollbar {
+  overflow: -moz-scrollbars-none;
+  /* For older versions of Firefox */
+  -ms-overflow-style: none;
+  /* For Internet Explorer and Edge */
+  scrollbar-width: none;
+  /* For Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+  /* For Chrome, Safari, and newer versions of Edge */
+}
+
+/* Hide the arrows for Webkit browsers */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide the arrows for Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+}
