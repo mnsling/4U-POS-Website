@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/sidebar';
-import data from '../components/data';
 import bg from '../assets/bg.jpg';
 
 const Scanner = () => {
@@ -120,14 +119,6 @@ const Scanner = () => {
       change: 0,
     });
   };
-
-  // change data to backend stuff
-  const filteredProducts = data.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.itemCode.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const sortedProducts = [...filteredProducts].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
@@ -265,19 +256,7 @@ const Scanner = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedProducts.map(product => (
-                    <tr
-                      key={product.id}
-                      className={`cursor-pointer ${selectedProduct?.id === product.id ? 'bg-darkp2 text-white' : 'hover:bg-gray-100'}`}
-                      onClick={() => handleProductClick(product)}
-                    >
-                      <td className='py-2 px-4'>{product.itemCode}</td>
-                      <td className='py-2 px-4'>{product.name}</td>
-                      <td className='py-2 px-4'>{product.supplier}</td>
-                      <td className='py-2 px-4'>₱ {product.wholesalePrice.toFixed(2)}</td>
-                      <td className='py-2 px-4'>₱ {product.unitPrice.toFixed(2)}</td>
-                    </tr>
-                  ))}
+                  
                 </tbody>
               </table>
             </div>
