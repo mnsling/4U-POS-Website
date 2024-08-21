@@ -37,7 +37,7 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => {
-    navigate('/');
+    navigate('/scanner');
   };
 
   return (

@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import bg from '../assets/bg.jpg'
 import Sidebar from '../components/sidebar'
+import del from '../assets/delete.png'
+import edit from '../assets/edit.png'
 
 const Inventory = () => {
   const [form, setForm] = useState({
@@ -66,7 +68,7 @@ const Inventory = () => {
 
   const getInputBorderClass = (field) => {
     const errors = validateForm()
-    return errors[field] ? 'border-red-500' : 'border-black'
+    return errors[field] ? 'border-red-500 border-2 placeholder:text-red-500' : 'border-black'
   }
 
   
@@ -113,7 +115,10 @@ const Inventory = () => {
                     <h1 className='w-2/12'>{formatDecimal(product.unitPrice)}</h1>
                     <h1 className='w-2/12'>{product.wsmq}</h1>
                     <h1 className='w-2/12'>{formatDecimal(product.wsp)}</h1>
-                    <h1 className='w-2/12'>Edit/Delete</h1>
+                    <h1 className='w-2/12 flex gap-5 justify-center'>
+                      <button><img src={edit} className='w-5'/></button>
+                      <button><img src={del} className='w-6'/></button>
+                    </h1>
                   </div>
                 ))}
               </div>
@@ -129,7 +134,7 @@ const Inventory = () => {
                       value={form.barcode}
                       onChange={handleInputChange}
                       className={`bg-white px-5 py-3 border ${getInputBorderClass('barcode')} outline-none text-xs rounded-lg`}
-                      placeholder="enter barcode"
+                      placeholder="enter barcode (required)"
                     />
                   </div>
                   <div className='flex flex-col gap-1'>
@@ -140,7 +145,7 @@ const Inventory = () => {
                       value={form.productName}
                       onChange={handleInputChange}
                       className={`bg-white px-5 py-3 border ${getInputBorderClass('productName')} outline-none text-xs rounded-lg`}
-                      placeholder="enter product name"
+                      placeholder="enter product name (required)"
                     />
                   </div>
                   <div className='flex flex-col gap-1'>
@@ -174,7 +179,7 @@ const Inventory = () => {
                       value={form.unitPrice}
                       onChange={handleInputChange}
                       className={`bg-white px-5 py-3 border ${getInputBorderClass('unitPrice')} outline-none text-xs rounded-lg`}
-                      placeholder="enter unit price"
+                      placeholder="enter unit price (required)"
                     />
                   </div>
                   <div className='flex flex-col gap-1'>
@@ -185,7 +190,7 @@ const Inventory = () => {
                       value={form.wsmq}
                       onChange={handleInputChange}
                       className={`bg-white px-5 py-3 border ${getInputBorderClass('wsmq')} outline-none text-xs rounded-lg`}
-                      placeholder="enter WSMQ"
+                      placeholder="enter WSMQ (required)"
                     />
                   </div>
                   <div className='flex flex-col gap-1'>
@@ -196,7 +201,7 @@ const Inventory = () => {
                       value={form.wsp}
                       onChange={handleInputChange}
                       className={`bg-white px-5 py-3 border ${getInputBorderClass('wsp')} outline-none text-xs rounded-lg`}
-                      placeholder="enter WSP"
+                      placeholder="enter WSP (required)"
                     />
                   </div>
                 </div>
@@ -209,7 +214,7 @@ const Inventory = () => {
                       value={form.reorderLevel}
                       onChange={handleInputChange}
                       className={`bg-white px-5 py-3 border ${getInputBorderClass('reorderLevel')} outline-none text-xs rounded-lg`}
-                      placeholder="enter reorder level"
+                      placeholder="enter reorder level (required)"
                     />
                   </div>
                   <div className='w-full flex items-end justify-end'>

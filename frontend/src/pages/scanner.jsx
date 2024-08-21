@@ -256,7 +256,21 @@ const Scanner = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  
+                  {/* 
+                                    {sortedProducts.map(product => (
+                    <tr
+                      key={product.id}
+                      className={`cursor-pointer ${selectedProduct?.id === product.id ? 'bg-darkp2 text-white' : 'hover:bg-gray-100'}`}
+                      onClick={() => handleProductClick(product)}
+                    >
+                      <td className='py-2 px-4'>{product.itemCode}</td>
+                      <td className='py-2 px-4'>{product.name}</td>
+                      <td className='py-2 px-4'>{product.supplier}</td>
+                      <td className='py-2 px-4'>₱ {product.wholesalePrice.toFixed(2)}</td>
+                      <td className='py-2 px-4'>₱ {product.unitPrice.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                  */}
                 </tbody>
               </table>
             </div>
