@@ -135,22 +135,22 @@ const Inventory = () => {
         <div className='w-full h-20 bg-white flex items-center justify-between px-10 drop-shadow-xl z-10'>
           <h1 className='text-2xl text-darkp font-medium tracking-tighter'>Inventory</h1>
         </div>
-        <div className='h-5/6 w-full p-10 pb-0 flex flex-col gap-5'>
-          <div className='w-full flex justify-between gap-2'>
+        <div className='h-4/5 w-full p-10 pb-0 flex flex-col gap-5'>
+          <div className='w-full h-fit flex justify-between gap-2'>
             <div className='flex gap-2'>
-              <button className='py-2 px-4 bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>All</button>
-              <button className='py-2 px-4 bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>No Stock</button>
-              <button className='py-2 px-4 bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Low Stock</button>
+              <button className='py-2 px-4 h-fit bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>All</button>
+              <button className='py-2 px-4 h-fit bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>No Stock</button>
+              <button className='py-2 px-4 h-fit bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Low Stock</button>
             </div>
             <input
               type="text"
-              className='bg-white px-4 py-2 text-darkp text-md font-light outline-none w-4/12 rounded-xl border border-darkp placeholder:text-darkp2'
+              className='bg-white h-fit px-4 py-2 text-darkp text-md font-light outline-none w-4/12 rounded-xl border border-darkp placeholder:text-darkp2'
               placeholder="search for products"
             />
           </div>
           <div className='w-full h-full rounded-2xl flex flex-col justify-between items-center gap-5'>
-            <div className='h-full w-full flex flex-col rounded-b-2xl drop-shadow-2xl overflow-y-scroll hide-scrollbar'>
-              <div className='h-10 bg-darkp opacity-80 rounded-t-2xl text-white text-sm flex justify-between items-center px-10'>
+            <div className='h-4/5 w-full flex flex-col rounded-b-2xl drop-shadow-2xl overflow-y-scroll hide-scrollbar'>
+              <div className='h-14 bg-darkp opacity-80 rounded-t-2xl text-white text-sm flex justify-between items-center px-10'>
                 <h1 className='w-2/12 text-center'>Barcode #</h1>
                 <h1 className='w-2/12 text-center'>Product Name</h1>
                 <h1 className='w-2/12 text-center'>Category</h1>
@@ -178,9 +178,9 @@ const Inventory = () => {
                 ))}
               </div>
             </div>
-            <div className='w-full h-2/4 bg-darkp opacity-80 rounded-2xl drop-shadow-2xl px-10 py-5'>
-              <div className='flex gap-5'>
-                <div className='w-full flex flex-col gap-3 justify-between'>
+            <div className='w-full h-3/6 bg-darkp opacity-80 rounded-2xl drop-shadow-2xl px-10 py-3'>
+              <div className='h-full flex gap-5'>
+                <div className='w-full h-full flex flex-col justify-between'>
                   <div className='flex flex-col gap-1'>
                     <label className='text-white font-bold'>Barcode #</label>
                     <input
@@ -225,7 +225,7 @@ const Inventory = () => {
                     </select>
                   </div>
                 </div>
-                <div className='w-full flex flex-col gap-3'>
+                <div className='w-full flex flex-col justify-between'>
                   <div className='flex flex-col gap-1'>
                     <label className='text-white font-bold'>Unit Price</label>
                     <input
@@ -260,7 +260,7 @@ const Inventory = () => {
                     />
                   </div>
                 </div>
-                <div className='w-full flex flex-col justify-between gap-3'>
+                <div className='w-full flex flex-col justify-between'>
                   <div className='flex flex-col gap-1'>
                     <label className='text-white font-bold'>Reorder Level</label>
                     <input
