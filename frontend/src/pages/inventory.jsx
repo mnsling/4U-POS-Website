@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
-import bg from '../assets/bg.jpg'
-import Sidebar from '../components/sidebar'
-import del from '../assets/delete.png'
-import edit from '../assets/edit.png'
+import React, { useState } from 'react';
+import bg from '../assets/bg.jpg';
+import Sidebar from '../components/sidebar';
+import del from '../assets/delete.png';
+import edit from '../assets/edit.png';
 
 const Inventory = () => {
+  // State to manage the form inputs
   const [form, setForm] = useState({
     barcode: '',
     productName: '',
@@ -13,43 +14,54 @@ const Inventory = () => {
     wsmq: '',
     wsp: '',
     reorderLevel: ''
-  })
+  });
 
-  const [products, setProducts] = useState([])
-  const [error, setError] = useState('')
-  const [editingIndex, setEditingIndex] = useState(null); // New state to track the product being edited
+  // State to manage the list of products
+  const [products, setProducts] = useState([]);
+  // State to manage error messages
+  const [error, setError] = useState('');
+  // State to track which product is being edited
+  const [editingIndex, setEditingIndex] = useState(null);
 
-
+  // Function to validate the form inputs
   const validateForm = () => {
-    const errors = {}
+    const errors = {};
+    // Check if any form field is empty and add it to the errors object
     for (const key in form) {
-      if (!form[key]) errors[key] = true
+      if (!form[key]) errors[key] = true;
     }
-    return errors
-  }
+    return errors;
+  };
 
+  // Function to handle input changes in the form
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+    // Update the form state with the new value
     setForm({
       ...form,
       [name]: value
-    })
-  }
+    });
+  };
 
+  // Function to handle adding a new product
   const handleAddProduct = () => {
-    const errors = validateForm()
+    const errors = validateForm();
+    // If there are errors, set the error state and return
     if (Object.keys(errors).length > 0) {
-      setError('')
-      return
+      setError('');
+      return;
     }
 
+    // Create a new product object with the form data
     const newProduct = {
       ...form,
       currentStock: 0
-    }
+    };
 
-    setProducts([...products, newProduct])
+    // Add the new product to the products list
+    setProducts([...products, newProduct]);
 
+    // Reset the form fields
     setForm({
       barcode: '',
       productName: '',
@@ -58,24 +70,29 @@ const Inventory = () => {
       wsmq: '',
       wsp: '',
       reorderLevel: ''
-    })
+    });
 
-    setError('')
-  }
+    setError('');
+  };
 
+  // Function to handle deleting a product
   const handleDeleteProduct = (index) => {
+    // Create a new list of products excluding the one to be deleted
     const updatedProducts = products.filter((_, i) => i !== index);
     setProducts(updatedProducts);
   };
 
-  // New function to handle editing
+  // Function to handle editing a product
   const handleEditProduct = (index) => {
+    // Set the form state with the product data to be edited
     const product = products[index];
     setForm(product);
     setEditingIndex(index);
   };
 
+  // Function to handle saving an edited product
   const handleSaveProduct = () => {
+    // Update the product in the list with the edited data
     const updatedProducts = products.map((product, index) =>
       index === editingIndex ? form : product
     );
@@ -85,6 +102,7 @@ const Inventory = () => {
     setEditingIndex(null);
   };
 
+  // Function to reset the form fields and clear errors
   const resetForm = () => {
     setForm({
       barcode: '',
@@ -98,17 +116,17 @@ const Inventory = () => {
     setError('');
   };
 
+  // Function to format numbers to two decimal places
   const formatDecimal = (value) => {
-    const number = parseFloat(value)
-    return isNaN(number) ? '0.00' : number.toFixed(2)
-  }
+    const number = parseFloat(value);
+    return isNaN(number) ? '0.00' : number.toFixed(2);
+  };
 
+  // Function to get the input border class based on validation
   const getInputBorderClass = (field) => {
-    const errors = validateForm()
-    return errors[field] ? 'border-red-500 border-2 placeholder:text-red-500' : 'border-black'
-  }
-
-
+    const errors = validateForm();
+    return errors[field] ? 'border-red-500 border-2 placeholder:text-red-500' : 'border-black';
+  };
 
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
@@ -275,7 +293,7 @@ const Inventory = () => {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Inventory
+export default Inventory;
