@@ -17,7 +17,9 @@ const Inventory = () => {
 
   const [products, setProducts] = useState([])
   const [error, setError] = useState('')
-  
+  const [editingIndex, setEditingIndex] = useState(null); // New state to track the product being edited
+
+
   const validateForm = () => {
     const errors = {}
     for (const key in form) {
@@ -61,6 +63,41 @@ const Inventory = () => {
     setError('')
   }
 
+  const handleDeleteProduct = (index) => {
+    const updatedProducts = products.filter((_, i) => i !== index);
+    setProducts(updatedProducts);
+  };
+
+  // New function to handle editing
+  const handleEditProduct = (index) => {
+    const product = products[index];
+    setForm(product);
+    setEditingIndex(index);
+  };
+
+  const handleSaveProduct = () => {
+    const updatedProducts = products.map((product, index) =>
+      index === editingIndex ? form : product
+    );
+
+    setProducts(updatedProducts);
+    resetForm();
+    setEditingIndex(null);
+  };
+
+  const resetForm = () => {
+    setForm({
+      barcode: '',
+      productName: '',
+      category: '',
+      unitPrice: '',
+      wsmq: '',
+      wsp: '',
+      reorderLevel: ''
+    });
+    setError('');
+  };
+
   const formatDecimal = (value) => {
     const number = parseFloat(value)
     return isNaN(number) ? '0.00' : number.toFixed(2)
@@ -71,7 +108,7 @@ const Inventory = () => {
     return errors[field] ? 'border-red-500 border-2 placeholder:text-red-500' : 'border-black'
   }
 
-  
+
 
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
@@ -116,8 +153,8 @@ const Inventory = () => {
                     <h1 className='w-2/12'>{product.wsmq}</h1>
                     <h1 className='w-2/12'>{formatDecimal(product.wsp)}</h1>
                     <h1 className='w-2/12 flex gap-5 justify-center'>
-                      <button><img src={edit} className='w-5'/></button>
-                      <button><img src={del} className='w-6'/></button>
+                      <button onClick={() => handleEditProduct(index)}><img src={edit} className='w-5' /></button>
+                      <button onClick={() => handleDeleteProduct(index)}><img src={del} className='w-6' /></button>
                     </h1>
                   </div>
                 ))}
@@ -218,7 +255,16 @@ const Inventory = () => {
                     />
                   </div>
                   <div className='w-full flex items-end justify-end'>
-                    <button onClick={handleAddProduct} className='w-4/12 py-2 px-4 bg-white text-sm border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'>
+                    <button
+                      onClick={handleSaveProduct}
+                      className={`w-4/12 py-2 px-4 bg-white text-sm border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button ${editingIndex === null ? 'hidden' : ''}`}
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleAddProduct}
+                      className={`w-4/12 py-2 px-4 bg-white text-sm border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button ${editingIndex !== null ? 'hidden' : ''}`}
+                    >
                       Confirm
                     </button>
                   </div>
