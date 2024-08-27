@@ -41,51 +41,51 @@ const Sidebar = () => {
   };
 
   return (
-    <div className='w-2/12 h-screen font-poppins bg-darkp relative z-20'>
+    <div className='w-[20%] h-screen font-poppins bg-darkp relative z-20'>
       <div className='w-full h-full absolute opacity-30 bg-cover' style={{ backgroundImage: `url(${logo})` }} />
-      <div className='w-full h-full p-5 flex flex-col gap-20 z-20 relative'>
-        <img src={logo} className='w-5/12' />
-        <div className='flex flex-col gap-1 justify-center'>
-          <button onClick={handleScanner} className='flex gap-4 items-center px-6 py-4 rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
-            <img src={scanner} className='w-7' />
+      <div className='w-full h-full flex flex-col gap-[10vh] relative p-[5%] pt-[10%]'>
+        <img src={logo} className='w-[5vw] pl-[6%]'/>
+        <div className='flex flex-col gap-[1vw] justify-center'>
+          <button onClick={handleScanner} className='w-[95%] flex gap-[1.5vh] items-center justify-center px-[10%] py-[4%] rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
+            <img src={scanner} className='w-[1.5vw]'/>
             <div className='w-full text-white flex justify-between items-center'>
-              <h1 className='text-md'>Point of Sale System</h1>
+              <h1 className='text-[1vw]'>Point of Sale System</h1>
             </div>
           </button>
-          <button onClick={handleTransaction} className='flex gap-4 items-center px-6 py-4 rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
-            <img src={transaction} className='w-8' />
+          <button onClick={handleTransaction} className='w-[95%] flex gap-[1vh] items-center px-[10%] py-[4%] rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
+            <img src={transaction} className='w-[1.5vw]' />
             <div className='w-full text-white flex justify-between items-center'>
-              <h1 className='text-md'>Transaction</h1>
+              <h1 className='text-[1vw]'>Transaction</h1>
             </div>
           </button>
-          <button onClick={handleInventory} className='flex gap-4 items-center px-6 py-4 rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
-            <img src={inventory} className='w-7' />
+          <button onClick={handleInventory} className='w-[95%] flex gap-[1vh] items-center px-[10%] py-[4%] rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
+            <img src={inventory} className='w-[1.5vw]' />
             <div className='w-full text-white flex justify-between items-center'>
-              <h1 className='text-md'>Inventory</h1>
+              <h1 className='text-[1vw]'>Inventory</h1>
             </div>
           </button>
-          <button onClick={handleReturn} className='flex gap-4 items-center px-6 py-4 rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
-            <img src={returnp} className='w-7' />
+          <button onClick={handleReturn} className='w-[95%] flex gap-[1vh] items-center px-[10%] py-[4%] rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
+            <img src={returnp} className='w-[1.5vw]' />
             <div className='w-full text-white flex justify-between items-center'>
-              <h1 className='text-md'>Returns</h1>
+              <h1 className='text-[1vw]'>Returns</h1>
             </div>
           </button>
-          <button onClick={handleStock} className='flex gap-4 items-center px-6 py-4 rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
-            <img src={stock} className='w-7' />
+          <button onClick={handleStock} className='w-[95%] flex gap-[1vh] items-center px-[10%] py-[4%] rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
+            <img src={stock} className='w-[1.5vw]' />
             <div className='w-full text-white flex justify-between items-center'>
-              <h1 className='text-md'>Stock In</h1>
+              <h1 className='text-[1vw]'>Stock In</h1>
             </div>
           </button>
-          <button onClick={handleReport} className='flex gap-4 items-center px-6 py-4 rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
-            <img src={bar} className='w-7' />
+          <button onClick={handleReport} className='w-[95%] flex gap-[1vh] items-center px-[10%] py-[4%] rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
+            <img src={bar} className='w-[1.5vw]' />
             <div className='w-full text-white flex justify-between items-center'>
-              <h1 className='text-md'>Reports</h1>
+              <h1 className='text-[1vw]'>Reports</h1>
             </div>
           </button>
-          <button onClick={handleLogout} className='flex gap-4 items-center px-6 py-4 rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
-            <img src={right} className='w-7' />
+          <button onClick={handleLogout} className='w-[95%] flex gap-[1vh] items-center px-6 py-4 rounded-full border border-transparent hover:bg-darkp2 hover:border-white button'>
+            <img src={right} className='w-[1.5vw]'/>
             <div className='w-full text-white flex justify-between items-center'>
-              <h1 className='text-md'>Logout</h1>
+              <h1 className='text-[1vw]'>Logout</h1>
             </div>
           </button>
         </div>

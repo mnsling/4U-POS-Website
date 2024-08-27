@@ -121,37 +121,39 @@ const Scanner = () => {
   };
 
   return (
-    <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
+    <div className='w-screen h-full bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
-      <div className='flex flex-col gap-10 w-10/12 h-full'>
-        <div className='w-full h-20 bg-white flex items-center justify-between px-10 drop-shadow-xl z-10'>
+      <div className='flex flex-col w-[80%] h-screen'>
+        <div className='w-full h-[10%] bg-white flex items-center justify-between px-[2vw] drop-shadow-xl z-10'>
           <h1 className='text-2xl text-darkp font-medium tracking-tighter'>Point of Sale System</h1>
         </div>
-        <div className='w-full h-full flex'>
-          <div className='flex flex-col gap-8 w-8/12 h-full'>
-            <div className='flex w-full h-3/4'>
-              <div className='w-full h-full bg-white rounded-2xl mx-10 drop-shadow-xl'>
-                <div className='flex gap-5 justify-between items-center text-white text-sm h-10 w-full px-10 py-6 bg-darkp opacity-80 rounded-t-2xl'>
-                  <h1 className='w-2/12 text-center'>Quantity</h1>
-                  <h1 className='w-3/12 text-center'>Unit of Measurement</h1>
-                  <h1 className='w-3/12 text-center'>Product Name</h1>
-                  <h1 className='w-3/12 text-center'>Unit Price</h1>
-                  <h1 className='w-3/12 text-center'>Amount</h1>
+        <div className='w-full h-[5%]'/>
+        <div className='w-full h-[85%] flex'>
+          <div className='flex flex-col w-[65%] h-full items-center'>
+            <div className='flex w-full h-[32vw] justify-center items-center'>
+              <div className='w-[90%] h-full bg-white rounded-2xl drop-shadow-xl'>
+                <div className='flex gap-[3vw] justify-between items-center text-white text-sm h-[4vw] w-full px-10 py-6 bg-darkp opacity-80 rounded-t-2xl'>
+                  <h1 className='w-[15%] text-center'>Quantity</h1>
+                  <h1 className='w-[15%] text-center'>Unit of Measurement</h1>
+                  <h1 className='w-[15%] text-center'>Product Name</h1>
+                  <h1 className='w-[15%]text-center'>Unit Price</h1>
+                  <h1 className='w-[15%] text-center'>Amount</h1>
                 </div>
-                <div ref={listRef} className='h-[550px] mt-3 overflow-y-auto'>
+                <div ref={listRef} className='overflow-y-auto'>
                   {addedProducts.map((product, index) => (
                     <div key={index} className='flex gap-8 justify-between px-10 py-3 border-b border-gray-200'>
-                      <span className='w-2/12 text-sm text-center'>{product.quantity}</span>
-                      <span className='w-3/12 text-center text-sm'>{product.uom}</span>
-                      <span className='w-3/12 text-sm text-center'>{product.name}</span>
-                      <span className='w-3/12 text-center text-sm'>₱ {product.unitPrice.toFixed(2)}</span>
-                      <span className='w-3/12 text-center text-sm'>₱ {(product.unitPrice * product.quantity).toFixed(2)}</span>
+                      <span className='w-[15%] text-sm text-center'>{product.quantity}</span>
+                      <span className='w-[15%] text-center text-sm'>{product.uom}</span>
+                      <span className='w-[15%] text-sm text-center'>{product.name}</span>
+                      <span className='w-[15%] text-center text-sm'>₱ {product.unitPrice.toFixed(2)}</span>
+                      <span className='w-[15%] text-center text-sm'>₱ {(product.unitPrice * product.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-            <div className='bg-darkp opacity-80 h-1/6 rounded-2xl mx-10 px-10 flex flex-col justify-center gap-1 text-white drop-shadow-xl'>
+            <div className='w-full h-[2vw]'/>
+            <div className='w-[90%] bg-darkp opacity-80 h-1/6 rounded-2xl px-10 flex flex-col justify-center gap-1 text-white drop-shadow-xl'>
               <div className='w-full flex justify-between'>
                 <h1>Cost before discount:</h1>
                 <h1>₱ {totalCost.toFixed(2)}</h1>
@@ -162,9 +164,9 @@ const Scanner = () => {
               </div>
             </div>
           </div>
-          <div className='w-1/3 h-full mr-10'>
-            <div className='h-1/6 w-full bg-white drop-shadow-xl rounded-2xl'>
-              <div className='w-full h-10 py-6 text-sm text-white bg-darkp flex opacity-80 items-center px-5 rounded-t-2xl'>
+          <div className='w-[32%] h-full'>
+            <div className='h-[7vw] w-full bg-white drop-shadow-xl rounded-2xl'>
+              <div className='w-full h-[3vw] py-6 text-sm text-white bg-darkp flex opacity-80 items-center px-5 rounded-t-2xl'>
                 Quantity:
               </div>
               <input
@@ -176,7 +178,7 @@ const Scanner = () => {
                 onChange={handleQuantityChange}
               />
             </div>
-            <div className='flex gap-2 w-full h-2/5 justify-between mt-5'>
+            <div className='flex gap-2 w-full h-2/5 justify-between mt-[2vw]'>
               <div className='flex flex-col gap-2 justify-between w-full'>
                 <button onClick={() => handleNumberClick('7')} className='h-full rounded-2xl bg-white drop-shadow-xl text-2xl hover:bg-darkp2 hover:text-white button'>7</button>
                 <button onClick={() => handleNumberClick('4')} className='h-full rounded-2xl bg-white drop-shadow-xl text-2xl hover:bg-darkp2 hover:text-white button'>4</button>
@@ -199,21 +201,21 @@ const Scanner = () => {
                 <button onClick={() => handleNumberClick('0')} className='h-full rounded-2xl bg-white drop-shadow-xl text-2xl hover:bg-darkp2 hover:text-white button'>0</button>
               </div>
             </div>
-            <div className='flex gap-1 mt-6'>
+            <div className='flex mt-6 justify-between'>
               <button
                 onClick={handleSearchProducts}
-                className='w-full h-28 bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button'
+                className='w-[24%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'
               >
-                <h1 className='h-full text-sm font-medium flex justify-center items-center px-5'>Search P.</h1>
+                <h1 className='text-[0.9vw] font-medium p-[8%]'>Search P.</h1>
               </button>
-              <button className='w-full h-28 bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button'>
-                <h1 className='h-full text-sm font-medium flex justify-center items-center px-5'>Discount</h1>
+              <button className='w-[24%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
+                <h1 className='text-[0.9vw] font-medium p-[8%]'>Discount</h1>
               </button>
-              <button className='w-full h-28 bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button'>
-                <h1 className='h-full text-sm font-medium flex justify-center items-center px-5'>S. Charge</h1>
+              <button className='w-[24%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
+                <h1 className='text-[0.9vw] font-medium p-[8%]'>S. Charge</h1>
               </button>
-              <button onClick={handlePaymentButtonClick} className='w-full h-28 bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button'>
-                <h1 className='h-full w-full text-sm font-medium flex justify-center items-center px-5'>Payment</h1>
+              <button onClick={handlePaymentButtonClick} className='w-[24%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
+                <h1 className='text-[0.9vw] font-medium p-[8%]'>Payment</h1>
               </button>
             </div>
           </div>
