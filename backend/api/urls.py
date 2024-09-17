@@ -4,9 +4,6 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register('product', ProductViewset, basename='product')
+router.register('stock', StockViewset, basename='stock')
 
 urlpatterns = router.urls
-
-# urlpatterns = [
-#     path('', home)
-# ]

@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h2>Convert Stock</h2>
+<form method="POST">
+    {% csrf_token %}
+    <label for="stock">Select Stock:</label>
+    <select name="stock_id" id="stock">
+        {% for stock in stock_list %}
+            <option value="{{ stock.id }}">{{ stock.productId.name }} (Current Stock: {{ stock.backhouseStock }})</option>
+        {% endfor %}
+    </select>    
+    <label for="quantity">Enter Quantity:</label>
+    <input type="number" name="quantity" id="quantity" min="1" required>
+
+    <button type="submit">Convert Stock</button>
+</form>
+
+{% endblock %}
