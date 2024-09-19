@@ -3,10 +3,9 @@ import bg from '../assets/bg.jpg';
 import Sidebar from '../components/sidebar';
 import del from '../assets/delete.png';
 import edit from '../assets/edit.png';
-import convert from '../assets/loop.png'
 // import axios from 'axios';
 
-const stock = () => {
+const suppliers = () => {
   const [stocks, setStocks] = useState([]);
   const [stock, setStock] = useState({
     productId: '',
@@ -163,13 +162,22 @@ const stock = () => {
   }, []);
 
   const [showPrompt, setShowPrompt] = useState(false);
+  const [showPrompt2, setShowPrompt2] = useState(false);
 
-  const handleConvertClick = () => {
+  const handleAddStockClick = () => {
     setShowPrompt(true);
   };
 
-  const handleCloseConvertPrompt = () => {
+  const handleClosePrompt = () => {
     setShowPrompt(false);
+  };
+
+  const handleConvertClick = () => {
+    setShowPrompt2(true);
+  };
+
+  const handleCloseConvertPrompt = () => {
+    setShowPrompt2(false);
   };
 
   const getStockForProduct = (productId) => {
@@ -182,7 +190,7 @@ const stock = () => {
       <Sidebar />
       <div className='w-[83.5vw] h-screen flex flex-col items-center z-50'>
         <div className='w-full h-[10vh] bg-white flex items-center justify-between px-[2vw] drop-shadow-xl'>
-          <h1 className='text-[1.5vw] text-darkp font-medium tracking-tighter z-10'>Product Stock</h1>
+          <h1 className='text-[1.5vw] text-darkp font-medium tracking-tighter z-10'>Suppliers</h1>
         </div>
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-end'>
@@ -192,12 +200,13 @@ const stock = () => {
               placeholder="search for supplier"
             />
           </div>
-          <div className='w-full h-[60vh] rounded-2xl flex flex-col drop-shadow'>
+          <div className='w-full h-[52vh] rounded-2xl flex flex-col drop-shadow'>
             <div className='h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
-              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Product ID</h1>
-              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Backhouse Stock</h1>
-              <h1 className='w-[8vw] text-[0.7vw] text-center'>Display Stock</h1>
-              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Conversion Rate</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Name</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Cellphone #</h1>
+              <h1 className='w-[8vw] text-[0.7vw] text-center'>Telephone #</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Email</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Point Person</h1>
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
@@ -205,61 +214,88 @@ const stock = () => {
 
                 {/*replace the value for suppliers */}
 
-                <h1 className='w-[8vw] text-[0.7vw] text-center'>001</h1>
-                <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
-                <h1 className='w-[8vw] text-[0.7vw] text-center'>100</h1>
-                <h1 className='w-[8vw] text-[0.7vw] text-center'>50</h1>
+                <h1 className='w-[8vw] text-[0.7vw] text-center'>Greenleaf Supply Co.</h1>
+                <h1 className='w-[8vw] text-[0.7vw] text-center'>(082) 234-5678</h1>
+                <h1 className='w-[8vw] text-[0.7vw] text-center'>+63 912 345 6789</h1>
+                <h1 className='w-[8vw] text-[0.7vw] text-center'>sales@greenleafsupply.ph</h1>
+                <h1 className='w-[8vw] text-[0.7vw] text-center'>John Doe</h1>
                 <div className='w-[8vw] flex justify-center gap-5'>
                   <img
                     src={edit}
                     alt='edit'
-                    className='w-[0.8vw] h-[0.8vw] cursor-pointer'
+                    className='w-[1vw] h-[1vw] cursor-pointer'
                   />
                   <img
                     src={del}
                     alt='delete'
-                    className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                  />
-                  <img
-                    src={convert}
-                    alt='delete'
-                    className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                    onClick={handleConvertClick}
+                    className='w-[1.1vw] h-[1.1vw] cursor-pointer'
                   />
                 </div>
               </div>
             </div>
           </div>
-          <div className='w-full h-[14vh] bg-darkp opacity-80 flex items-center justify-start rounded-2xl px-[1vw] py-[1vh] drop-shadow'>
-            <div className='w-full h-fit flex items-end justify-between'>
-              <div className='flex justify-center items-center gap-5'>
-                <div className='w-[30vw] flex flex-col gap-[0.5vh]'>
-                  <label className='text-white font-bold text-[0.6vw]'>Product Id</label>
+          <div className='w-full h-[22vh] bg-darkp opacity-80 flex items-center justify-center rounded-2xl px-[1vw] py-[1vh] drop-shadow'>
+            <div className='h-fit flex gap-5 justify-between'>
+              <div className='w-[25vw] flex flex-col gap-5'>
+                <div className='flex flex-col gap-[0.5vh]'>
+                  <label className='text-white font-bold text-[0.6vw]'>Supplier Name</label>
                   <input
                     type="text"
-                    name="id"
+                    name="name"
                     onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
-                    placeholder="enter product id*"
+                    placeholder="enter supplier name*"
                   />
                 </div>
-                <div className='w-[30vw] flex flex-col gap-[0.5vh]'>
-                  <label className='text-white font-bold text-[0.6vw]'>Conversion Rate</label>
+                <div className='flex flex-col gap-[0.5vh]'>
+                  <label className='text-white font-bold text-[0.6vw]'>Cellphone #</label>
                   <input
-                    type="number"
-                    name="rate"
+                    type="text"
+                    name="cell"
                     onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
-                    placeholder="enter conversion rate*"
+                    placeholder="enter cellphone no.*"
                   />
                 </div>
               </div>
-              <div className='w-[10vw] flex flex-col gap-5 justify-end'>
+              <div className='w-[25vw] flex flex-col gap-5'>
+                <div className='flex flex-col gap-[0.5vh]'>
+                  <label className='text-white font-bold text-[0.6vw]'>Telephone #</label>
+                  <input
+                    type="text"
+                    name="tel"
+                    onChange={handleChange}
+                    className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
+                    placeholder="enter telephone no.*"
+                  />
+                </div>
+                <div className='flex flex-col gap-[0.5vh]'>
+                  <label className='text-white font-bold text-[0.6vw]'>Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    onChange={handleChange}
+                    className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
+                    placeholder="enter email address*"
+                  />
+                </div>
+              </div>
+              <div className='w-[25vw] flex flex-col justify-between'>
+                <div className='flex flex-col gap-[0.3vh]'>
+                  <label className='text-white font-bold text-[0.6vw]'>Point Person</label>
+                  <input
+                    type="text"
+                    name="point"
+                    onChange={handleChange}
+                    className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
+                    placeholder="enter point person*"
+                  />
+                </div>
                 <div className='w-full flex items-end justify-end'>
                   {showConfirmButton ? (
                     <button
                       onClick={handleSubmit}
-                      className='w-full px-[1vw] py-[1vh] bg-white text-[0.7vw] border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'
+                      className='w-[48%] px-[1vw] py-[1vh] bg-white text-[0.7vw] border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'
                     >
                       Confirm
                     </button>
@@ -275,45 +311,10 @@ const stock = () => {
               </div>
             </div>
           </div>
-          {/* Prompt (Modal) */}
-          {showPrompt && (
-            <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-[20vw] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
-                <h2 className='text-black text-[1vw] font-black'>Convert to Backhouse Stock</h2>
-                {/* Input for adding stock */}
-                <div className='w-full flex flex-col gap-2'>
-                  <div className='w-full flex flex-col justify-start'>
-                    <label className='text-sm'>Product</label>
-                    <select className='w-full border border-darkp rounded-md px-5 py-1'>
-                      <option>1.</option>
-                    </select>
-                  </div>
-                  <div className='w-full flex flex-col justify-start'>
-                    <label className='text-sm'>Quantity</label>
-                    <input type='text' className='w-full border border-darkp rounded-md px-5 py-1' />
-                  </div>
-                </div>
-                <div className='flex gap-4'>
-                  <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
-                    onClick={handleCloseConvertPrompt}
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
-                    onClick={handleCloseConvertPrompt}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default stock;
+export default suppliers;
