@@ -7,160 +7,8 @@ import convert from '../assets/loop.png'
 // import axios from 'axios';
 
 const stock = () => {
-  const [stocks, setStocks] = useState([]);
-  const [stock, setStock] = useState({
-    productId: '',
-    backhouseStock: '',
-    displayStock: '',
-    conversionRate: '',
-  });
-
-  const [products, setProducts] = useState([]);
-  const [product, setProduct] = useState({
-    name: '',
-    barcodeNo: '',
-    category: '',
-    unitPrice: '',
-    wsmq: '',
-    wsp: '',
-    reorderLevel: '',
-  });
-
-  const [upProductId, setUpProductId] = useState([]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setProduct(prevProduct => {
-      const updatedProduct = {
-        ...prevProduct,
-        [name]: value,
-      };
-      console.log('Updated product:', updatedProduct);
-      return updatedProduct;
-    });
-  };
-
-  // const fetchProducts = () => {
-  //   axios.get('http://127.0.0.1:8000/product/')
-  //     .then(response => {
-  //       setProducts(response.data);
-  //       console.log(response.data);
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching data:', error);
-  //     });
-  // };
-
-  // const fetchStocks = () => {
-  //   axios.get('http://127.0.0.1:8000/stock/')
-  //     .then(response => {
-  //       setStocks(response.data);
-  //       console.log(response.data);
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching data:', error);
-  //     });
-  // };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // Send POST request
-    // axios.post('http://127.0.0.1:8000/product/', {
-    //   name: product.name,
-    //   barcodeNo: product.barcodeNo,
-    //   category: product.category,
-    //   unitPrice: parseFloat(product.unitPrice),
-    //   wsmq: parseInt(product.wsmq),
-    //   wsp: parseFloat(product.wsp),
-    //   reorderLevel: parseInt(product.reorderLevel),
-    // })
-    //   .then(response => {
-    //     console.log('Product created:', response.data);
-    //     setProduct({
-    //       name: '',
-    //       barcodeNo: '',
-    //       category: '',
-    //       unitPrice: '',
-    //       wsmq: '',
-    //       wsp: '',
-    //       reorderLevel: '',
-    //     });
-    //     fetchProducts();
-    //     fetchStocks();
-    //   })
-    //   .catch(error => {
-    //     console.error('Error creating product:', error);
-    //   });
-  };
-
-  const handleDelete = (productId) => {
-    // axios.delete(`http://127.0.0.1:8000/product/${productId}/`)
-    //   .then(response => {
-    //     console.log('Product deleted:', response.data);
-    //     fetchProducts();
-    //     fetchStocks();
-    //   })
-    //   .catch(error => {
-    //     console.error('Error deleting product:', error.response ? error.response.data : error.message);
-    //   });
-  };
 
   const [showConfirmButton, setShowConfirmButton] = useState(true);
-
-  const handleUpdatePass = (upProduct) => {
-    setProduct({
-      name: upProduct.name,
-      barcodeNo: upProduct.barcodeNo,
-      category: upProduct.category,
-      unitPrice: upProduct.unitPrice,
-      wsmq: upProduct.wsmq,
-      wsp: upProduct.wsp,
-      reorderLevel: upProduct.reorderLevel,
-    });
-    setUpProductId(upProduct.id);
-    setShowConfirmButton(false);
-    console.log(product);
-    console.log(upProductId);
-  };
-
-  const handleUpdate = () => {
-    // Send PUT request
-    // axios.put(`http://127.0.0.1:8000/product/${upProductId}/`, {
-    //   name: product.name,
-    //   barcodeNo: product.barcodeNo,
-    //   category: product.category,
-    //   unitPrice: parseFloat(product.unitPrice),
-    //   wsmq: parseInt(product.wsmq),
-    //   wsp: parseFloat(product.wsp),
-    //   reorderLevel: parseInt(product.reorderLevel),
-    // })
-    //   .then(response => {
-    //     console.log('Product updated:', response.data);
-    //     setProduct({
-    //       name: '',
-    //       barcodeNo: '',
-    //       category: '',
-    //       unitPrice: '',
-    //       wsmq: '',
-    //       wsp: '',
-    //       reorderLevel: '',
-    //     });
-    //     setShowConfirmButton(true);
-    //     setUpProductId();
-    //     fetchProducts();
-    //     fetchStocks();
-    //   })
-    //   .catch(error => {
-    //     console.error('Error updating product:', error);
-    //   });
-  };
-
-  useEffect(() => {
-    // fetchProducts();
-    // fetchStocks();
-  }, []);
 
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -170,11 +18,6 @@ const stock = () => {
 
   const handleCloseConvertPrompt = () => {
     setShowPrompt(false);
-  };
-
-  const getStockForProduct = (productId) => {
-    const stock = stocks.find(stock => stock.productId === productId);
-    return stock || { backhouseStock: 0, displayStock: 0 };
   };
 
   return (
@@ -202,9 +45,6 @@ const stock = () => {
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
               <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
-
-                {/*replace the value for suppliers */}
-
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>001</h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>100</h1>
@@ -238,7 +78,6 @@ const stock = () => {
                   <input
                     type="text"
                     name="id"
-                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter product id*"
                   />
@@ -248,7 +87,6 @@ const stock = () => {
                   <input
                     type="number"
                     name="rate"
-                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter conversion rate*"
                   />
@@ -258,14 +96,12 @@ const stock = () => {
                 <div className='w-full flex items-end justify-end'>
                   {showConfirmButton ? (
                     <button
-                      onClick={handleSubmit}
                       className='w-full px-[1vw] py-[1vh] bg-white text-[0.7vw] border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'
                     >
                       Confirm
                     </button>
                   ) : (
                     <button
-                      onClick={handleUpdate}
                       className='w-[48%] px-[1vw] py-[1vh] bg-white text-[1vw] border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'
                     >
                       Update

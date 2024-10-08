@@ -5,81 +5,21 @@ import info from '../assets/info.png'
 import exit from '../assets/reject.png'
 import edit from '../assets/edit.png'
 import del from '../assets/delete.png'
+import right from '../assets/right-chevron.png'
 
 const Records = () => {
-  const [form, setForm] = useState({
-    barcode: '',
-    productName: '',
-    category: '',
-    unitPrice: '',
-    wsmq: '',
-    wsp: '',
-    reorderLevel: ''
-  })
-
-  const [products, setProducts] = useState([])
-
-  const validateForm = () => {
-    const errors = {}
-    for (const key in form) {
-      if (!form[key]) errors[key] = true
-    }
-    return errors
-  }
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setForm({
-      ...form,
-      [name]: value
-    })
-  }
-
-  const handleAddProduct = () => {
-    const errors = validateForm()
-    if (Object.keys(errors).length > 0) return
-
-    const newProduct = {
-      ...form,
-      currentStock: 0
-    }
-
-    setProducts([...products, newProduct])
-
-    setForm({
-      barcode: '',
-      productName: '',
-      category: '',
-      unitPrice: '',
-      wsmq: '',
-      wsp: '',
-      reorderLevel: ''
-    })
-  }
-
-  const formatDecimal = (value) => {
-    const number = parseFloat(value)
-    return isNaN(number) ? '0.00' : number.toFixed(2)
-  }
 
   const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
   const [showFormPrompt, setShowFormPrompt] = useState(false);
   const [showAddPrompt, setShowAddPrompt] = useState(false);
+  const [showEdit2Prompt, setShowEdit2Prompt] = useState(false);
 
   const handleDetailsClick = () => {
     setShowDetailsPrompt(true);
   };
 
-  const handleCloseDetailsPrompt = () => {
-    setShowDetailsPrompt(false);
-  };
-
   const handleFormClick = () => {
     setShowFormPrompt(true);
-  };
-
-  const handleCloseFormPrompt = () => {
-    setShowFormPrompt(false);
   };
 
   const handleAddClick = () => {
@@ -88,6 +28,25 @@ const Records = () => {
 
   const handleCloseAddPrompt = () => {
     setShowAddPrompt(false);
+  };
+
+  const handleEdit2Click = () => {
+    setShowEdit2Prompt(true);
+  };
+
+  const handleCloseEdit2Prompt = () => {
+    setShowEdit2Prompt(false);
+  };
+
+  const handleClosePrompt = () => {
+    setShowDetailsPrompt(false);
+    setShowFormPrompt(false);
+  };
+
+  const [activeButton, setActiveButton] = useState('DRAFT'); // Set the initial active button
+
+  const handleButtonClick = (status) => {
+    setActiveButton(status); // Update the active button state
   };
 
   return (
@@ -176,13 +135,13 @@ const Records = () => {
                 <div className='flex gap-4 mt-10'>
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
-                    onClick={handleCloseFormPrompt}
+                    onClick={handleClosePrompt}
                   >
                     Confirm
                   </button>
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
-                    onClick={handleCloseFormPrompt}
+                    onClick={handleClosePrompt}
                   >
                     Cancel
                   </button>
@@ -200,7 +159,7 @@ const Records = () => {
                       <div className='flex gap-10 items-end'>
                         <h1 className='text-[3vw] font-bold tracking-tighter'>STOCK RECORD #1</h1>
                         <div className='flex gap-3 h-fit justify-end items-end pb-5'>
-                          <button className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Edit</button>
+                          <button className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button' onClick={handleEdit2Click}>Edit</button>
                           <button className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Delete</button>
                         </div>
                       </div>
@@ -238,14 +197,14 @@ const Records = () => {
                       </div>
                     </div>
                   </div>
-                  <button onClick={handleCloseDetailsPrompt} className='h-full pt-5 flex items-start'><img src={exit} className='w-[1.8vw] h-[1.8vw]' /></button>
+                  <button onClick={handleClosePrompt} className='h-full pt-5 flex items-start'><img src={exit} className='w-[1.8vw] h-[1.8vw]' /></button>
                 </div>
                 <div className='w-full flex flex-col gap-2'>
                   <div className='w-full flex justify-between items-end'>
                     <h1 className='text-[1vw] text-darkp font-bold tracking-tighter'>Items Ordered:</h1>
                     <button onClick={handleAddClick} className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Add Item</button>
                   </div>
-                  <div className='w-full h-[65vh] flex flex-col drop-shadow'>
+                  <div className='w-full h-[50vh] flex flex-col drop-shadow'>
                     <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Product</h1>
                       <h1 className='w-[8vw] text-[0.7vw] text-center'>Price</h1>
@@ -276,6 +235,23 @@ const Records = () => {
                           />
                         </div>
                       </div>
+                    </div>
+                  </div>
+                  <div className='mt-3'>
+                    <h1 className='text-[1vw] text-darkp font-bold tracking-tighter mb-2'>Status Bar:</h1>
+                    <div className='w-[40vw] h-[3.5vw] rounded-2xl border border-darkp flex justify-center gap-2 font-medium tracking-tighter text-[.7vw] text-darkp'>
+                      {['DRAFT', 'PENDING', 'IN TRANSIT', 'REJECTED', 'DELIVERED', 'CANCELLED'].map((status, index) => (
+                        <div key={index} className='flex gap-2 h-full items-center'>
+                          <button
+                            onClick={() => handleButtonClick(status)}
+                            className={`py-3 px-4 hover:bg-darkp hover:text-white rounded-xl hover:rounded-xl button ${activeButton === status ? 'bg-darkp text-white rounded-xl' : ''
+                              }`}
+                          >
+                            {status}
+                          </button>
+                          {index < 5 && <img src={right} className='w-[1.2vw]' />}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -310,6 +286,55 @@ const Records = () => {
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
                     onClick={handleCloseAddPrompt}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Prompt (Modal) */}
+          {showEdit2Prompt && (
+            <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
+              <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+                <h2 className='text-black text-[1.3vw] font-black'>Stock Record</h2>
+                {/* Input for adding stock */}
+                <div className='w-full flex gap-5'>
+                  <div className='w-full flex flex-col gap-5'>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Tracking #</label>
+                      <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter tracking #' />
+                    </div>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Supplier Name</label>
+                      <input type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter supplier name' />
+                    </div>
+                  </div>
+                  <div className='w-full flex flex-col gap-5'>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Date Delivered</label>
+                      <input type='date' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter date' />
+                    </div>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Delivery Fee</label>
+                      <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
+                    </div>
+                  </div>
+                  <div className='w-full flex flex-col justify-start gap-1'>
+                    <label className='text-[0.7vw]'>Total Amount</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
+                  </div>
+                </div>
+                <div className='flex gap-4 mt-10'>
+                  <button
+                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                    onClick={handleCloseEdit2Prompt}
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    onClick={handleCloseEdit2Prompt}
                   >
                     Cancel
                   </button>

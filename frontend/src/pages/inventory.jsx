@@ -6,184 +6,8 @@ import edit from '../assets/edit.png';
 // import axios from 'axios';
 
 const Inventory = () => {
-  const [stocks, setStocks] = useState([]);
-  const [stock, setStock] = useState({
-    productId: '',
-    backhouseStock: '',
-    displayStock: '',
-    conversionRate: '',
-  });
-
-  const [products, setProducts] = useState([]);
-  const [product, setProduct] = useState({
-    name: '',
-    barcodeNo: '',
-    category: '',
-    unitPrice: '',
-    wsmq: '',
-    wsp: '',
-    reorderLevel: '',
-  });
-
-  const [upProductId, setUpProductId] = useState([]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setProduct(prevProduct => {
-      const updatedProduct = {
-        ...prevProduct,
-        [name]: value,
-      };
-      console.log('Updated product:', updatedProduct);
-      return updatedProduct;
-    });
-  };
-
-  // const fetchProducts = () => {
-  //   axios.get('http://127.0.0.1:8000/product/')
-  //     .then(response => {
-  //       setProducts(response.data);
-  //       console.log(response.data);
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching data:', error);
-  //     });
-  // };
-
-  // const fetchStocks = () => {
-  //   axios.get('http://127.0.0.1:8000/stock/')
-  //     .then(response => {
-  //       setStocks(response.data);
-  //       console.log(response.data);
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching data:', error);
-  //     });
-  // };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // Send POST request
-    // axios.post('http://127.0.0.1:8000/product/', {
-    //   name: product.name,
-    //   barcodeNo: product.barcodeNo,
-    //   category: product.category,
-    //   unitPrice: parseFloat(product.unitPrice),
-    //   wsmq: parseInt(product.wsmq),
-    //   wsp: parseFloat(product.wsp),
-    //   reorderLevel: parseInt(product.reorderLevel),
-    // })
-    //   .then(response => {
-    //     console.log('Product created:', response.data);
-    //     setProduct({
-    //       name: '',
-    //       barcodeNo: '',
-    //       category: '',
-    //       unitPrice: '',
-    //       wsmq: '',
-    //       wsp: '',
-    //       reorderLevel: '',
-    //     });
-    //     fetchProducts();
-    //     fetchStocks();
-    //   })
-    //   .catch(error => {
-    //     console.error('Error creating product:', error);
-    //   });
-  };
-
-  const handleDelete = (productId) => {
-    // axios.delete(`http://127.0.0.1:8000/product/${productId}/`)
-    //   .then(response => {
-    //     console.log('Product deleted:', response.data);
-    //     fetchProducts();
-    //     fetchStocks();
-    //   })
-    //   .catch(error => {
-    //     console.error('Error deleting product:', error.response ? error.response.data : error.message);
-    //   });
-  };
 
   const [showConfirmButton, setShowConfirmButton] = useState(true);
-
-  const handleUpdatePass = (upProduct) => {
-    setProduct({
-      name: upProduct.name,
-      barcodeNo: upProduct.barcodeNo,
-      category: upProduct.category,
-      unitPrice: upProduct.unitPrice,
-      wsmq: upProduct.wsmq,
-      wsp: upProduct.wsp,
-      reorderLevel: upProduct.reorderLevel,
-    });
-    setUpProductId(upProduct.id);
-    setShowConfirmButton(false);
-    console.log(product);
-    console.log(upProductId);
-  };
-
-  const handleUpdate = () => {
-    // Send PUT request
-    // axios.put(`http://127.0.0.1:8000/product/${upProductId}/`, {
-    //   name: product.name,
-    //   barcodeNo: product.barcodeNo,
-    //   category: product.category,
-    //   unitPrice: parseFloat(product.unitPrice),
-    //   wsmq: parseInt(product.wsmq),
-    //   wsp: parseFloat(product.wsp),
-    //   reorderLevel: parseInt(product.reorderLevel),
-    // })
-    //   .then(response => {
-    //     console.log('Product updated:', response.data);
-    //     setProduct({
-    //       name: '',
-    //       barcodeNo: '',
-    //       category: '',
-    //       unitPrice: '',
-    //       wsmq: '',
-    //       wsp: '',
-    //       reorderLevel: '',
-    //     });
-    //     setShowConfirmButton(true);
-    //     setUpProductId();
-    //     fetchProducts();
-    //     fetchStocks();
-    //   })
-    //   .catch(error => {
-    //     console.error('Error updating product:', error);
-    //   });
-  };
-
-  useEffect(() => {
-    // fetchProducts();
-    // fetchStocks();
-  }, []);
-
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [showPrompt2, setShowPrompt2] = useState(false);
-
-  const handleAddStockClick = () => {
-    setShowPrompt(true);
-  };
-
-  const handleClosePrompt = () => {
-    setShowPrompt(false);
-  };
-
-  const handleConvertClick = () => {
-    setShowPrompt2(true);
-  };
-
-  const handleCloseConvertPrompt = () => {
-    setShowPrompt2(false);
-  };
-
-  const getStockForProduct = (productId) => {
-    const stock = stocks.find(stock => stock.productId === productId);
-    return stock || { backhouseStock: 0, displayStock: 0 };
-  };
 
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
@@ -218,35 +42,28 @@ const Inventory = () => {
               <h1 className='w-[6vw] text-[0.7vw] text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
-              {products.map((prod, index) => {
-                const stock = getStockForProduct(prod.id);
-                return (
-                  <div key={prod.id} className='h-[9%] border-b border-darkp flex items-center justify-between px-10'>
-                    <h1 className='w-[8%] text-[1vw] text-center'>{prod.barcodeNo}</h1>
-                    <h1 className='w-[8%] text-[1vw] text-center'>{prod.name}</h1>
-                    <h1 className='w-[8%] text-[1vw] text-center'>{prod.category}</h1>
-                    <h1 className='w-[8%] text-[1vw] text-center'>{stock.backhouseStock}</h1>
-                    <h1 className='w-[8%] text-[1vw] text-center'>{stock.displayStock}</h1>
-                    <h1 className='w-[8%] text-[1vw] text-center'>{prod.unitPrice}</h1>
-                    <h1 className='w-[8%] text-[1vw] text-center'>{prod.wsmq}</h1>
-                    <h1 className='w-[8%] text-[1vw] text-center'>{prod.wsp}</h1>
-                    <div className='w-[8%] flex justify-center'>
-                      <img
-                        src={edit}
-                        alt='edit'
-                        className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                        onClick={() => handleUpdatePass(prod)}
-                      />
-                      <img
-                        src={del}
-                        alt='delete'
-                        className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                        onClick={() => handleDelete(prod.id)}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+              <div className='h-[9%] border-b border-darkp flex items-center justify-between px-10'>
+                <h1 className='w-[6vw] text-[0.7vw] text-center'>01223456</h1>
+                <h1 className='w-[6vw] text-[0.7vw] text-center'>Milk</h1>
+                <h1 className='w-[6vw] text-[0.7vw] text-center'>Beverages</h1>
+                <h1 className='w-[6vw] text-[0.7vw] text-center'>100</h1>
+                <h1 className='w-[6vw] text-[0.7vw] text-center'>100</h1>
+                <h1 className='w-[6vw] text-[0.7vw] text-center'>30.00</h1>
+                <h1 className='w-[6vw] text-[0.7vw] text-center'>100.00</h1>
+                <h1 className='w-[6vw] text-[0.7vw] text-center'>200.00</h1>
+                <div className='w-[6vw] flex justify-center gap-5'>
+                  <img
+                    src={edit}
+                    alt='edit'
+                    className='w-[0.8vw] h-[0.8vw] cursor-pointer'
+                  />
+                  <img
+                    src={del}
+                    alt='delete'
+                    className='w-[0.8vw] h-[0.8vw] cursor-pointer'
+                  />
+                </div>
+              </div>
             </div>
           </div>
           <div className='w-full h-[30vh] bg-darkp opacity-80 flex items-center justify-center rounded-2xl px-[1vw] py-[1vh] drop-shadow'>
@@ -255,10 +72,8 @@ const Inventory = () => {
                 <div className='flex flex-col gap-[0.5vh]'>
                   <label className='text-white font-bold text-[0.6vw]'>Barcode #</label>
                   <input
-                    type="text"
+                    type="number"
                     name="barcodeNo"
-                    value={product.barcodeNo}
-                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter barcode*"
                   />
@@ -268,8 +83,6 @@ const Inventory = () => {
                   <input
                     type="text"
                     name="name"
-                    value={product.name}
-                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter product name*"
                   />
@@ -278,8 +91,6 @@ const Inventory = () => {
                   <label className='text-white font-bold text-[0.6vw]'>Category</label>
                   <select
                     name="category"
-                    value={product.category}
-                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                   >
                     <option value=""></option>
@@ -302,8 +113,6 @@ const Inventory = () => {
                   <input
                     type="number"
                     name="unitPrice"
-                    value={product.unitPrice}
-                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter unit price*"
                   />
@@ -313,8 +122,6 @@ const Inventory = () => {
                   <input
                     type="number"
                     name="wsmq"
-                    value={product.wsmq}
-                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter WSMQ*"
                   />
@@ -324,8 +131,6 @@ const Inventory = () => {
                   <input
                     type="number"
                     name="wsp"
-                    value={product.wsp}
-                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter WSP*"
                   />
@@ -337,8 +142,6 @@ const Inventory = () => {
                   <input
                     type="number"
                     name="reorderLevel"
-                    value={product.reorderLevel}
-                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter reorder level*"
                   />
@@ -347,14 +150,12 @@ const Inventory = () => {
                   <div className='w-full flex items-end justify-end'>
                     {showConfirmButton ? (
                       <button
-                        onClick={handleSubmit}
-                        className='w-[48%] px-[1vw] py-[1vh] bg-white text-[1vw] border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'
+                        className='bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg button hover:bg-green-600 hover:text-white'
                       >
                         Confirm
                       </button>
                     ) : (
                       <button
-                        onClick={handleUpdate}
                         className='w-[48%] px-[1vw] py-[1vh] bg-white text-[1vw] border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'
                       >
                         Update

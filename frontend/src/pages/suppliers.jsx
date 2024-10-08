@@ -223,12 +223,12 @@ const suppliers = () => {
                   <img
                     src={edit}
                     alt='edit'
-                    className='w-[1vw] h-[1vw] cursor-pointer'
+                    className='w-[0.8vw] h-[0.8vw] cursor-pointer'
                   />
                   <img
                     src={del}
                     alt='delete'
-                    className='w-[1.1vw] h-[1.1vw] cursor-pointer'
+                    className='w-[0.8vw] h-[0.8vw] cursor-pointer'
                   />
                 </div>
               </div>
