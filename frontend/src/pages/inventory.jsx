@@ -42,7 +42,7 @@ const Inventory = () => {
               <h1 className='w-[6vw] text-[0.7vw] text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
-              <div className='h-[9%] border-b border-darkp flex items-center justify-between px-10'>
+              <div className='h-[9%] py-6 border-b border-darkp flex items-center justify-between px-10'>
                 <h1 className='w-[6vw] text-[0.7vw] text-center'>01223456</h1>
                 <h1 className='w-[6vw] text-[0.7vw] text-center'>Milk</h1>
                 <h1 className='w-[6vw] text-[0.7vw] text-center'>Beverages</h1>
@@ -82,7 +82,7 @@ const Inventory = () => {
                   <label className='text-white font-bold text-[0.6vw]'>Product Name</label>
                   <input
                     type="text"
-                    name="name"
+                    name="productName"
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter product name*"
                   />
