@@ -79,7 +79,7 @@ const Transaction = () => {
               <h1 className='w-[8vw] text-[0.7vw] text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
-              <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
+              <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10 hover:bg-gray-200 button'>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>11:30 AM</h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>03/20/24</h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>1</h1>
@@ -98,8 +98,8 @@ const Transaction = () => {
           </div>
           <div className='w-full h-[12vh] rounded-2xl flex flex-col drop-shadow bg-darkp opacity-80'>
             <div className='w-full h-full flex px-10 justify-between items-center text-white font-bold tracking-tighter'>
-              <h1 className='text-2xl'>Total Amount:</h1>
-              <h1 className='text-2xl'>P30.00</h1>
+              <h1 className='text-[2vw]'>Total Amount:</h1>
+              <h1 className='text-[2vw]'>P30.00</h1>
             </div>
           </div>
           {/* Prompt (Modal) */}
@@ -152,7 +152,7 @@ const Transaction = () => {
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Amount</h1>
                     </div>
                     <div className='w-full h-full bg-white border-x rounded-b-2xl border-b border-darkp overflow-auto'>
-                      <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
+                      <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10 hover:bg-gray-200 button'>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'>4</h1>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'>PCS</h1>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'>Ballpen</h1>
@@ -164,8 +164,8 @@ const Transaction = () => {
                   </div>
                   <div className='w-full h-[12vh] rounded-2xl flex flex-col drop-shadow bg-darkp opacity-80'>
                     <div className='w-full h-full flex px-10 justify-between items-center text-white font-bold tracking-tighter'>
-                      <h1 className='text-2xl'>Total Amount:</h1>
-                      <h1 className='text-2xl'>P30.00</h1>
+                      <h1 className='text-[2vw]'>Total Amount:</h1>
+                      <h1 className='text-[2vw]'>P30.00</h1>
                     </div>
                   </div>
                 </div>

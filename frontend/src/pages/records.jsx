@@ -13,6 +13,7 @@ const Records = () => {
   const [showFormPrompt, setShowFormPrompt] = useState(false);
   const [showAddPrompt, setShowAddPrompt] = useState(false);
   const [showEdit2Prompt, setShowEdit2Prompt] = useState(false);
+  const [showEdit3Prompt, setShowEdit3Prompt] = useState(false);
 
   const handleDetailsClick = () => {
     setShowDetailsPrompt(true);
@@ -24,6 +25,14 @@ const Records = () => {
 
   const handleAddClick = () => {
     setShowAddPrompt(true);
+  };
+
+  const handleEdit3Click = () => {
+    setShowEdit3Prompt(true);
+  };
+
+  const handleCloseEdit3Prompt = () => {
+    setShowEdit3Prompt(false);
   };
 
   const handleCloseAddPrompt = () => {
@@ -97,7 +106,7 @@ const Records = () => {
               </div>
             </div>
           </div>
-          {/* Prompt (Modal) */}
+          {/* Prompt (Modal) pang add lng sa stock records na wa details sa sulod*/}
           {showFormPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
               <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
@@ -149,7 +158,7 @@ const Records = () => {
               </div>
             </div>
           )}
-          {/* Prompt (Modal) */}
+          {/* Prompt (Modal) kini kay mao na ni tong mga specific details sa records mismo */}
           {showDetailsPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex'>
               <div className='bg-white w-full h-full p-[2vw] flex flex-col items-start gap-5'>
@@ -225,13 +234,12 @@ const Records = () => {
                             src={edit}
                             alt='edit'
                             className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                            onClick={() => handleUpdatePass(prod)}
+                            onClick={handleEdit3Click}
                           />
                           <img
                             src={del}
                             alt='delete'
                             className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                            onClick={() => handleDelete(prod.id)}
                           />
                         </div>
                       </div>
@@ -258,7 +266,7 @@ const Records = () => {
               </div>
             </div>
           )}
-          {/* Prompt (Modal) */}
+          {/* Prompt (Modal) kani sauna pmn ni nmo girequest pero yeah*/}
           {showAddPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
               <div className='bg-white w-[20vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
@@ -293,7 +301,7 @@ const Records = () => {
               </div>
             </div>
           )}
-          {/* Prompt (Modal) */}
+          {/* Prompt (Modal) na girequest ni master tung sa tapad sa stock record#1 na edit button */}
           {showEdit2Prompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
               <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
@@ -335,6 +343,47 @@ const Records = () => {
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
                     onClick={handleCloseEdit2Prompt}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Prompt (Modal) na girequest ni master para sa edit item sa sulod sa stock records ngayong oct 17 lang */}
+          {showEdit3Prompt && (
+            <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
+              <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+                <h2 className='text-black text-[1.3vw] font-black'>Edit Item</h2>
+                {/* Input for adding stock */}
+                <div className='w-full flex gap-5'>
+                  <div className='w-full flex flex-col gap-5'>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Product Name</label>
+                      <input type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter supplier' />
+                    </div>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Price</label>
+                      <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter tracking #' />
+                    </div>
+                  </div>
+                  <div className='w-full flex flex-col gap-5'>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Quantity Ordered</label>
+                      <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter fee amount' />
+                    </div>
+                  </div>
+                </div>
+                <div className='flex gap-4 mt-10'>
+                  <button
+                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                    onClick={handleCloseEdit3Prompt}
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    onClick={handleCloseEdit3Prompt}
                   >
                     Cancel
                   </button>

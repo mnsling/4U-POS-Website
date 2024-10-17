@@ -35,11 +35,14 @@ const stock = () => {
               placeholder="search for supplier"
             />
           </div>
-          <div className='w-full h-[60vh] rounded-2xl flex flex-col drop-shadow'>
+          {/*Gidungag nlng pod nako sa table ang backhouse of display uom*/}
+          <div className='w-full h-[52vh] rounded-2xl flex flex-col drop-shadow'>
             <div className='h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Product ID</h1>
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Backhouse Stock</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Backhouse UoM</h1>
               <h1 className='w-[8vw] text-[0.7vw] text-center'>Display Stock</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Display UoM</h1>
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Conversion Rate</h1>
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Actions</h1>
             </div>
@@ -47,7 +50,9 @@ const stock = () => {
               <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>001</h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
+                <h1 className='w-[8vw] text-[0.7vw] text-center'></h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>100</h1>
+                <h1 className='w-[8vw] text-[0.7vw] text-center'></h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>50</h1>
                 <div className='w-[8vw] flex justify-center gap-5'>
                   <img
@@ -70,26 +75,49 @@ const stock = () => {
               </div>
             </div>
           </div>
-          <div className='w-full h-[14vh] bg-darkp opacity-80 flex items-center justify-start rounded-2xl px-[1vw] py-[1vh] drop-shadow'>
+          <div className='w-full h-[22vh] bg-darkp opacity-80 flex items-center justify-start rounded-2xl px-[1vw] py-[1vh] drop-shadow'>
             <div className='w-full h-fit flex items-end justify-between'>
-              <div className='flex justify-center items-center gap-5'>
-                <div className='w-[30vw] flex flex-col gap-[0.5vh]'>
-                  <label className='text-white font-bold text-[0.6vw]'>Product Id</label>
-                  <input
-                    type="text"
-                    name="id"
-                    className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
-                    placeholder="enter product id*"
-                  />
+              <div className='flex w-full gap-10'>
+                <div className='flex flex-col justify-center items-center gap-5'>
+                  <div className='w-[30vw] flex flex-col gap-[0.5vh]'>
+                    <label className='text-white font-bold text-[0.6vw]'>Product Id</label>
+                    <input
+                      type="text"
+                      name="id"
+                      className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
+                      placeholder="enter product id*"
+                    />
+                  </div>
+                  <div className='w-[30vw] flex flex-col gap-[0.5vh]'>
+                    <label className='text-white font-bold text-[0.6vw]'>Conversion Rate</label>
+                    <input
+                      type="number"
+                      name="rate"
+                      className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
+                      placeholder="enter conversion rate*"
+                    />
+                  </div>
                 </div>
-                <div className='w-[30vw] flex flex-col gap-[0.5vh]'>
-                  <label className='text-white font-bold text-[0.6vw]'>Conversion Rate</label>
-                  <input
-                    type="number"
-                    name="rate"
-                    className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
-                    placeholder="enter conversion rate*"
-                  />
+                {/*Gipadagdag ang backhouse og display na UOM sa form*/}
+                <div className='flex flex-col justify-center items-center gap-5'>
+                  <div className='w-[30vw] flex flex-col gap-[0.5vh]'>
+                    <label className='text-white font-bold text-[0.6vw]'>Backhouse UoM</label>
+                    <input
+                      type="text"
+                      name="backUom"
+                      className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
+                      placeholder="enter UoM*"
+                    />
+                  </div>
+                  <div className='w-[30vw] flex flex-col gap-[0.5vh]'>
+                    <label className='text-white font-bold text-[0.6vw]'>Display UoM</label>
+                    <input
+                      type="text"
+                      name="dispUom"
+                      className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
+                      placeholder="enter UoM*"
+                    />
+                  </div>
                 </div>
               </div>
               <div className='w-[10vw] flex flex-col gap-5 justify-end'>
