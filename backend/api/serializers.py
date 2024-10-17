@@ -12,7 +12,25 @@ class ProductSerializer(serializers.ModelSerializer):
         return obj.get_category_display()
 
 class StockSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Stock
-        fields = ('productId', 'backhouseStock', 'displayStock', 'conversionRate')
+        fields = ('id', 'productId', 'backhouseStock', 'backUoM', 'displayStock', 'displayUoM', 'conversionRate')
+
+class SupplierSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Supplier
+        fields = ('id', 'supplierName', 'cellphoneNumber', 'telephoneNumber', 'email', 'pointPerson')
+
+class StockRecordSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StockRecord
+        fields = ('id', 'supplierId', 'trackingNumber', 'dateOrdered', 'dateDelivered', 'deliveryFee', 'totalAmount', 'status')
+
+class StockRecordItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StockRecordItem
+        fields =('stockRecordID', 'productID', 'price', 'qtyOrdered', 'qtyDelivered', 'total')

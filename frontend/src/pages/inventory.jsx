@@ -8,12 +8,6 @@ import axios from 'axios'
 const Inventory = () => {
 
   const[stocks, setStocks] = useState([]);
-  const [stock, setStock] = useState({
-    productId: '',
-    backhouseStock: '',
-    displayStock: '',
-    conversionRate: '',
-  });
 
   const [products, setProducts] = useState([]);
   const [product, setProduct] = useState({
@@ -189,9 +183,9 @@ const Inventory = () => {
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
-      <div className='w-[80%] h-screen flex flex-col items-center z-50'>
-        <div className='w-full h-[10%] bg-white flex items-center justify-between px-[2vw] drop-shadow-xl'>
-          <h1 className='text-2xl text-darkp font-medium tracking-tighter z-10'>Inventory</h1>
+      <div className='w-[83.5vw] h-screen flex flex-col items-center z-50'>
+        <div className='w-full h-[10vh] bg-white flex items-center justify-between px-[2vw] drop-shadow-xl'>
+          <h1 className='text-[1.5vw] text-darkp font-medium tracking-tighter z-10'>Inventory</h1>
         </div>
         <div className='h-[90%] w-[95%] flex flex-col items-center'>
           <div className='w-full h-[2vw]' />

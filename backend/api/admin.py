@@ -2,11 +2,11 @@ from django.contrib import admin
 from django.shortcuts import render, redirect
 from django.urls import path
 from django.http import HttpResponseBadRequest
-from .models import Stock, Product
+from .models import *
 from .forms import QuantityForm
 
 class StockAdmin(admin.ModelAdmin):
-    list_display = ['id', 'productId', 'backhouseStock', 'displayStock', 'conversionRate']
+    list_display = ['id', 'productId', 'backhouseStock', 'backUoM', 'displayStock', 'displayUoM', 'conversionRate']
 
     def get_urls(self):
         urls = super().get_urls()
@@ -47,3 +47,6 @@ class StockAdmin(admin.ModelAdmin):
 
 admin.site.register(Stock, StockAdmin)
 admin.site.register(Product)
+admin.site.register(Supplier)
+admin.site.register(StockRecord)
+admin.site.register(StockRecordItem)

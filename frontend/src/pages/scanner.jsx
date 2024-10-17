@@ -123,7 +123,7 @@ const Scanner = () => {
   return (
     <div className='w-screen h-full bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
-      <div className='flex flex-col w-[80%] h-screen'>
+      <div className='flex flex-col w-[83.5vw] h-screen'>
         <div className='w-full h-[10%] bg-white flex items-center justify-between px-[2vw] drop-shadow-xl z-10'>
           <h1 className='text-2xl text-darkp font-medium tracking-tighter'>Point of Sale System</h1>
         </div>
