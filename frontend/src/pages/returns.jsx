@@ -31,9 +31,6 @@ const Returns = () => {
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
               <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
-
-                {/*replace the value for suppliers */}
-
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>0123456</h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>06/04/24</h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>111111</h1>
