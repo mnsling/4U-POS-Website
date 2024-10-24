@@ -116,7 +116,7 @@ const stock = () => {
       backhouseStock: upStock.backhouseStock,
       backUoM: upStock.backUoM,
       displayStock: upStock.displayStock,
-      backUoM: upStock.displayUoM,
+      displayUoM: upStock.displayUoM,
       conversionRate: upStock.conversionRate,
     })
     setUpStockId(upStock.id)
