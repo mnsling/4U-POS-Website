@@ -98,7 +98,7 @@ const Sidebar = () => {
                 <h1 className='text-[0.8vw]'>Suppliers</h1>
               </button>
               <button onClick={handleStockRecords} className='text-white flex gap-4 px-6 items-start py-3 border-white hover:bg-darkp2 button'>
-                <h1 className='text-[0.8vw]'>Stock Records</h1>
+                <h1 className='text-[0.8vw]'>Delivery Records</h1>
               </button>
             </div>
           )}

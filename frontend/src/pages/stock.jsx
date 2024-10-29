@@ -154,15 +154,63 @@ const stock = () => {
       });
   };
 
+  const [convertQty, setConvertQty] = useState(0);
+
+  const handleConvertQtyChange = (e) => {
+    setConvertQty(e.target.value);
+  };
+
+  const convertStock = () => {
+    // Find the stock with the current upStockId
+    const currentStock = stocks.find(s => s.id === upStockId);
+    if (!currentStock) {
+      console.error(`Stock with ID ${upStockId} not found`);
+      return;
+    }
+  
+    // Calculate new quantities based on the conversion rate
+    const newBackhouseQty = currentStock.backhouseStock - convertQty;
+    const newDisplayQty = (currentStock.conversionRate * convertQty) + currentStock.displayStock;
+  
+    // Send PUT request to update the stock
+    axios.put(`http://127.0.0.1:8000/stock/${upStockId}/`, {
+      productId: currentStock.productId,
+      backhouseStock: newBackhouseQty,
+      displayStock: newDisplayQty,
+      conversionRate: currentStock.conversionRate,
+    })
+      .then(response => {
+        console.log('Stock converted:', response.data);
+  
+        // Reset form states
+        setStock({
+          productId: currentStock.productId,
+          backhouseStock: newBackhouseQty,
+          displayStock: newDisplayQty,
+          conversionRate: currentStock.conversionRate,
+        });
+        setShowConfirmButton(true);
+        setUpStockId();
+        setConvertQty(0); // Reset convert quantity input
+        handleCloseConvertPrompt();
+        fetchStocks(); // Fetch the updated stock list
+      })
+      .catch(error => {
+        console.error('Error converting stock:', error.response ? error.response.data : error.message);
+      });
+  };  
+
   const [showConfirmButton, setShowConfirmButton] = useState(true);
 
   const [showPrompt, setShowPrompt] = useState(false);
 
-  const handleConvertClick = () => {
+  const handleConvertClick = (stockId) => {
+    setUpStockId(stockId);
     setShowPrompt(true);
   };
 
   const handleCloseConvertPrompt = () => {
+    setUpStockId();
     setShowPrompt(false);
   };
 
@@ -206,7 +254,7 @@ const stock = () => {
                       <h1 className='w-[14%] flex gap-[1vw] justify-center'>
                         <button onClick={() => handleUpdatePass(stock)}><img src={edit} alt="Edit" className='w-[1.5vw]' /></button>
                         <button onClick={() => handleDelete(stock.id)}><img src={del} alt="Delete" className='w-[1.5vw]' /></button>
-                        <button onClick={handleConvertClick}><img src={convert} alt="Convert" className='w-[1.5vw]' /></button>
+                        <button onClick={() => handleConvertClick(stock.id)}><img src={convert} alt="Convert" className='w-[1.5vw]' /></button>
                       </h1>
                     </div>
                   );
@@ -259,7 +307,7 @@ const stock = () => {
                   ) : (
                     <button
                       onClick={handleUpdate}
-                      className='w-[48%] px-[1vw] py-[1vh] bg-white text-[1vw] border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'
+                      className='w-[full] px-[1vw] py-[1vh] bg-white text-[1vw] border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'
                     >
                       Update
                     </button>
@@ -272,24 +320,18 @@ const stock = () => {
           {showPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
               <div className='bg-white w-[20vw] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
-                <h2 className='text-black text-[1vw] font-black'>Convert to Backhouse Stock</h2>
+                <h2 className='text-black text-[1vw] font-black'>Convert to Display Stock</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex flex-col gap-2'>
                   <div className='w-full flex flex-col justify-start'>
-                    <label className='text-sm'>Product</label>
-                    <select className='w-full border border-darkp rounded-md px-5 py-1'>
-                      <option>1.</option>
-                    </select>
-                  </div>
-                  <div className='w-full flex flex-col justify-start'>
                     <label className='text-sm'>Quantity</label>
-                    <input type='text' className='w-full border border-darkp rounded-md px-5 py-1' />
+                    <input type='text' name='convertQty' value={convertQty} onChange={handleConvertQtyChange} className='w-full border border-darkp rounded-md px-5 py-1' />
                   </div>
                 </div>
                 <div className='flex gap-4'>
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
-                    onClick={handleCloseConvertPrompt}
+                    onClick={convertStock}
                   >
                     Confirm
                   </button>

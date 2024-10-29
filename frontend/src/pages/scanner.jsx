@@ -3,41 +3,27 @@ import Sidebar from '../components/sidebar';
 import bg from '../assets/bg.jpg';
 
 const Scanner = () => {
-  const [quantity, setQuantity] = useState('');
-  const [showProductList, setShowProductList] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [addedProducts, setAddedProducts] = useState([]);
-  const [totalCost, setTotalCost] = useState(0);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentDetails, setPaymentDetails] = useState({
-    amountPaid: '',
-    change: 0,
+
+  const [transaction, setTransaction] = useState([]);
+  const [transactionItems, setTransactionItems] = useState([]);
+  const [transactionItem, setTransactionItem] = useState({
+    id: '',
+    supplierId: 1,
+    trackingNumber: '', 
+    deliveryFee: 0,
+    totalAmount: 0,
+    status: 'TO ARRIVE',
   });
-  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
-  const listRef = useRef(null);
 
-  useEffect(() => {
-    const calculateTotalCost = () => {
-      const total = addedProducts.reduce((sum, product) => sum + (product.unitPrice * product.quantity), 0);
-      setTotalCost(total);
-    };
-
-    calculateTotalCost();
-  }, [addedProducts]);
-
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight;
-    }
-  }, [addedProducts]);
+  const [showProductList, setShowProductList] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const handleNumberClick = (number) => {
     setQuantity(prev => (parseInt(prev + number) > 0 ? prev + number : ''));
   };
 
   const handleClear = () => {
-    setQuantity('');
+
   };
 
   const handleSearchProducts = () => {
@@ -46,78 +32,14 @@ const Scanner = () => {
 
   const handleCloseProductList = () => {
     setShowProductList(false);
-    setSelectedProduct(null);
-    setSearchTerm('');
-  };
-
-  const handleProductClick = (product) => {
-    setSelectedProduct(product);
-    setQuantity(product.quantity.toString()); // Set quantity to selected product's quantity
-  };
-
-  const handleAddProduct = () => {
-    if (selectedProduct) {
-      const existingProduct = addedProducts.find(product => product.id === selectedProduct.id);
-      let updatedProducts;
-
-      if (existingProduct) {
-        updatedProducts = addedProducts.map(product =>
-          product.id === selectedProduct.id
-            ? { ...product, quantity: product.quantity + parseInt(quantity, 10) }
-            : product
-        );
-      } else {
-        updatedProducts = [...addedProducts, { ...selectedProduct, quantity: parseInt(quantity, 10) || 1 }];
-      }
-
-      setAddedProducts(updatedProducts);
-      setQuantity('');
-      setShowProductList(false); // Close product list after adding
-    }
-  };
-
-  const handleQuantityChange = (e) => {
-    const value = e.target.value;
-    if (value === '' || (parseInt(value, 10) > 0 && !isNaN(parseInt(value, 10)))) {
-      setQuantity(value);
-    }
   };
 
   const handlePaymentButtonClick = () => {
-    setPaymentDetails({
-      amountPaid: '',
-      change: 0,
-    });
     setShowPaymentModal(true);
-    setPaymentConfirmed(false);
-  };
-
-  const handleConfirmPayment = () => {
-    const amountPaid = parseFloat(paymentDetails.amountPaid) || 0;
-    const change = amountPaid - totalCost;
-    if (amountPaid >= totalCost) {
-      setPaymentDetails({ ...paymentDetails, change });
-      setPaymentConfirmed(true);
-    } else {
-      alert("Amount paid is less than the total cost.");
-    }
   };
 
   const handleCancelPayment = () => {
     setShowPaymentModal(false);
-  };
-
-  const handlePaymentAmountChange = (e) => {
-    setPaymentDetails({ ...paymentDetails, amountPaid: e.target.value });
-  };
-
-  const handleExitPayment = () => {
-    setShowPaymentModal(false);
-    setAddedProducts([]);
-    setPaymentDetails({
-      amountPaid: '',
-      change: 0,
-    });
   };
 
   return (
@@ -133,22 +55,22 @@ const Scanner = () => {
             <div className='flex w-full h-[32vw] justify-center items-center'>
               <div className='w-[90%] h-full bg-white rounded-2xl drop-shadow-xl'>
                 <div className='flex gap-[3vw] justify-between items-center text-white text-sm h-[4vw] w-full px-10 py-6 bg-darkp opacity-80 rounded-t-2xl'>
-                  <h1 className='w-[15%] text-center'>Quantity</h1>
-                  <h1 className='w-[15%] text-center'>Unit of Measurement</h1>
-                  <h1 className='w-[15%] text-center'>Product Name</h1>
-                  <h1 className='w-[15%]text-center'>Unit Price</h1>
-                  <h1 className='w-[15%] text-center'>Amount</h1>
+                  <h1 className='w-[16%] text-center'>Quantity</h1>
+                  <h1 className='w-[16%] text-center'>UoM</h1>
+                  <h1 className='w-[16%] text-center'>Product</h1>
+                  <h1 className='w-[16%] text-center'>Unit Price</h1>
+                  <h1 className='w-[16%] text-center'>Amount</h1>
+                  <h1 className='w-[16%] text-center'>Actions</h1>
                 </div>
-                <div ref={listRef} className='overflow-y-auto'>
-                  {addedProducts.map((product, index) => (
-                    <div key={index} className='flex gap-8 justify-between px-10 py-3 border-b border-gray-200'>
-                      <span className='w-[15%] text-sm text-center'>{product.quantity}</span>
-                      <span className='w-[15%] text-center text-sm'>{product.uom}</span>
-                      <span className='w-[15%] text-sm text-center'>{product.name}</span>
-                      <span className='w-[15%] text-center text-sm'>₱ {product.unitPrice.toFixed(2)}</span>
-                      <span className='w-[15%] text-center text-sm'>₱ {(product.unitPrice * product.quantity).toFixed(2)}</span>
-                    </div>
-                  ))}
+                <div className='overflow-y-auto'>
+                  <div className='flex gap-8 justify-between px-10 py-3 border-b border-gray-200'>
+                    <h1 className='w-[16%] text-center'>Quantity</h1>
+                    <h1 className='w-[16%] text-center'>UoM</h1>
+                    <h1 className='w-[16%] text-center'>Product</h1>
+                    <h1 className='w-[16%] text-center'>Unit Price</h1>
+                    <h1 className='w-[16%] text-center'>Amount</h1>
+                    <h1 className='w-[16%] text-center'>Actions</h1>
+                  </div>
                 </div>
               </div>
             </div>
@@ -156,11 +78,11 @@ const Scanner = () => {
             <div className='w-[90%] bg-darkp opacity-80 h-1/6 rounded-2xl px-10 flex flex-col justify-center gap-1 text-white drop-shadow-xl'>
               <div className='w-full flex justify-between'>
                 <h1>Cost before discount:</h1>
-                <h1>₱ {totalCost.toFixed(2)}</h1>
+                <h1>₱ RAWR</h1>
               </div>
               <div className='w-full flex justify-between'>
                 <h1 className='text-2xl'>Total Amount:</h1>
-                <h1 className='text-2xl'>₱ {totalCost.toFixed(2)}</h1>
+                <h1 className='text-2xl'>₱ rawr</h1>
               </div>
             </div>
           </div>
@@ -174,8 +96,6 @@ const Scanner = () => {
                 min='1'
                 className='h-4/6 w-full px-5 text-4xl text-darkp font-bold border-none outline-none rounded-b-2xl'
                 placeholder='enter quantity'
-                value={quantity}
-                onChange={handleQuantityChange}
               />
             </div>
             <div className='flex gap-2 w-full h-2/5 justify-between mt-[2vw]'>
@@ -196,25 +116,26 @@ const Scanner = () => {
               </div>
               <div className='flex flex-col gap-2 justify-between w-full'>
                 <button onClick={handleClear} className='h-full rounded-2xl bg-white drop-shadow-xl text-md hover:bg-red-400 hover:text-white button'>CLEAR</button>
-                <button className='h-full rounded-2xl bg-white drop-shadow-xl text-md hover:bg-green-400 hover:text-white button'>ENTER</button>
-                <button className='h-full rounded-2xl bg-white drop-shadow-xl text-2xl hover:bg-darkp2 hover:text-white button'>*</button>
                 <button onClick={() => handleNumberClick('0')} className='h-full rounded-2xl bg-white drop-shadow-xl text-2xl hover:bg-darkp2 hover:text-white button'>0</button>
               </div>
+            </div>
+            <div className='flex w-full'>
+              <input type='text' placeholder='barcode' className='w-full text-[1vw] outline-none py-5 border mt-8 rounded-l-lg shadow-2xl px-5'/>
+              <button className='mt-8 py-4 px-8 bg-darkp text-white text-[0.9vw] font-medium bg-opacity-80 rounded-r-lg shadow-2xl leading-5'>Add Product</button>
             </div>
             <div className='flex mt-6 justify-between'>
               <button
                 onClick={handleSearchProducts}
-                className='w-[24%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'
+                className='w-[33%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'
               >
                 <h1 className='text-[0.9vw] font-medium p-[8%]'>Search P.</h1>
               </button>
-              <button className='w-[24%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
+              <button className='w-[33%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
                 <h1 className='text-[0.9vw] font-medium p-[8%]'>Discount</h1>
               </button>
-              <button className='w-[24%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
-                <h1 className='text-[0.9vw] font-medium p-[8%]'>S. Charge</h1>
-              </button>
-              <button onClick={handlePaymentButtonClick} className='w-[24%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
+              <button 
+                onClick={handlePaymentButtonClick}
+                className='w-[33%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
                 <h1 className='text-[0.9vw] font-medium p-[8%]'>Payment</h1>
               </button>
             </div>
@@ -230,14 +151,10 @@ const Scanner = () => {
                 type="text"
                 className='px-4 py-2 text-darkp text-md font-light outline-none w-4/12 rounded-full border border-darkp placeholder:text-darkp2'
                 placeholder="search for products"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
               />
               <div className='flex gap-3'>
                 <button
-                  onClick={handleAddProduct}
                   className='text-darkp border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button'
-                  disabled={!selectedProduct}
                 >
                   Add
                 </button>
@@ -258,21 +175,6 @@ const Scanner = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* 
-                                    {sortedProducts.map(product => (
-                    <tr
-                      key={product.id}
-                      className={`cursor-pointer ${selectedProduct?.id === product.id ? 'bg-darkp2 text-white' : 'hover:bg-gray-100'}`}
-                      onClick={() => handleProductClick(product)}
-                    >
-                      <td className='py-2 px-4'>{product.itemCode}</td>
-                      <td className='py-2 px-4'>{product.name}</td>
-                      <td className='py-2 px-4'>{product.supplier}</td>
-                      <td className='py-2 px-4'>₱ {product.wholesalePrice.toFixed(2)}</td>
-                      <td className='py-2 px-4'>₱ {product.unitPrice.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                  */}
                 </tbody>
               </table>
             </div>
@@ -288,7 +190,7 @@ const Scanner = () => {
                 <div className='h-full flex flex-col gap-3'>
                   <div className='w-full h-full flex flex-col gap-5 justify-start items-start bg-white border-2 rounded-2xl opacity-70 px-10 py-5'>
                     <p className='text-3xl font-semibold tracking-tight'>Total Amount:</p>
-                    <p className='text-6xl font-semibold tracking-tighter'>₱ {totalCost.toFixed(2)}</p>
+                    <p className='text-6xl font-semibold tracking-tighter'>₱ rawr</p>
                   </div>
                   <div className='w-full flex flex-col gap-2 justify-start items-start bg-white border-2 rounded-2xl px-10 py-5'>
                     <p className='text-3xl font-semibold tracking-tight'>Amount Paid:</p>
@@ -296,8 +198,6 @@ const Scanner = () => {
                       <p>₱</p>
                       <input
                         type='number'
-                        value={paymentDetails.amountPaid}
-                        onChange={handlePaymentAmountChange}
                         className='w-full text-6xl leading-5 outline-none bg-transparent tracking-tight placeholder:tracking-tighter'
                         placeholder='enter amount'
                       />
@@ -306,33 +206,21 @@ const Scanner = () => {
                 </div>
                 <div className='flex flex-col gap-20 h-full w-full bg-white border-2 rounded-2xl px-10 py-5'>
                   <p className='text-3xl font-semibold tracking-tight'>Change:</p>
-                  <p className='text-9xl font-semibold tracking-tighter'> ₱ {paymentDetails.change.toFixed(2)}</p>
+                  <p className='text-9xl font-semibold tracking-tighter'> ₱ rawr</p>
                 </div>
               </div>
               <div className='flex gap-5 justify-end'>
-                {!paymentConfirmed ? (
-                  <>
-                    <button
-                      onClick={handleConfirmPayment}
-                      className='bg-darkp opacity-80 hover:opacity-100 button text-white text-lg tracking-tight px-4 py-2 rounded'
-                    >
-                      Proceed with Payment
-                    </button>
-                    <button
-                      onClick={handleCancelPayment}
-                      className='bg-darkp opacity-80 hover:opacity-100 button text-white text-lg tracking-tight px-4 py-2 rounded'
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={handleExitPayment}
-                    className='bg-darkp opacity-80 hover:opacity-100 button text-white text-lg tracking-tight px-4 py-2 rounded'
-                  >
-                    Exit
-                  </button>
-                )}
+                <button
+                  className='bg-darkp opacity-80 hover:opacity-100 button text-white text-lg tracking-tight px-4 py-2 rounded'
+                >
+                  Proceed with Payment
+                </button>
+                <button
+                  onClick={handleCancelPayment}
+                  className='bg-darkp opacity-80 hover:opacity-100 button text-white text-lg tracking-tight px-4 py-2 rounded'
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>

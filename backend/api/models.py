@@ -1,8 +1,10 @@
 from django.db import models
+from django.db.models import Sum
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 
-# Create your models here.
-
+# Product Model
 class Product(models.Model):
     # Category Field Choices
     CATEGORY_CHOICES = [
@@ -31,8 +33,8 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+# Stock Model
 class Stock(models.Model):
-
     productId = models.ForeignKey(Product, on_delete=models.CASCADE)
     backhouseStock = models.IntegerField()
     backUoM = models.CharField(default='', max_length=50)
@@ -59,26 +61,24 @@ class Stock(models.Model):
     def __str__(self):
         return self.productId.name
 
+# Supplier Model
 class Supplier(models.Model):
-
     supplierName = models.CharField(unique=True, max_length=100)
     cellphoneNumber = models.CharField(max_length=100)
     telephoneNumber = models.CharField(max_length=100)
     email = models.CharField(unique=True, max_length=100)
     pointPerson = models.CharField(unique=True, max_length=100)
 
-    def _str_(self):
+    def __str__(self):
         return self.supplierName
-    
-class StockRecord(models.Model):
+
+# DeliveryRecord Model
+class DeliveryRecord(models.Model):
     # Status Field Choices
     STATUS_CHOICES = [
-        ('PENDING', 'Pending'),
-        ('APPROVED', 'Approved'),
-        ('IN TRANSIT', 'In Transit'),
+        ('TO ARRIVE', 'To Arrive'),
         ('DELIVERED', 'Delivered'),
         ('CANCELLED', 'Cancelled'),
-        ('BACKORDER', 'Backorder'),
     ]
 
     supplierId = models.ForeignKey(Supplier, null=True, on_delete=models.CASCADE)
@@ -87,26 +87,140 @@ class StockRecord(models.Model):
     dateDelivered = models.DateField(null=True, blank=True)
     deliveryFee = models.IntegerField(null=True, blank=True)
     totalAmount = models.IntegerField(null=True, blank=True)
-    status = models.CharField(max_length=100, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TO ARRIVE')
+
+    def calculate_total_amount(self):
+        total_sum = DeliveryRecordItem.objects.filter(deliveryRecordID=self).aggregate(Sum('total'))['total__sum']
+        self.totalAmount = total_sum if total_sum is not None else 0
+
+    def update_stock_for_delivery(self):
+        # Update stock for each item in the delivery
+        for item in DeliveryRecordItem.objects.filter(deliveryRecordID=self):
+            stock_entry, created = Stock.objects.get_or_create(productId=item.productID)
+            stock_entry.backhouseStock += item.qty
+            stock_entry.save()
 
     def save(self, *args, **kwargs):
-        # Automatically set dateDelivered if status is changed to 'DELIVERED'
-        if self.status == 'DELIVERED' and self.dateDelivered is None:
-            self.dateDelivered = timezone.now().date()  # Set to current date
+        if self.pk:
+            self.calculate_total_amount()
+
+        # Automatically set dateDelivered if status is 'DELIVERED'
+        if self.status == 'DELIVERED':
+            if self.dateDelivered is None:
+                self.dateDelivered = timezone.now().date()
+
+            # Only update stock if the status is changed to "DELIVERED"
+            self.update_stock_for_delivery()
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.supplierId.supplierName
-    
-class StockRecordItem(models.Model):
+        return self.trackingNumber
 
-    stockRecordID = models.ForeignKey(StockRecord, on_delete=models.CASCADE)
-    productID = models.OneToOneField(Product, on_delete=models.CASCADE)
+# DeliveryRecordItem Model
+class DeliveryRecordItem(models.Model):
+    deliveryRecordID = models.ForeignKey(DeliveryRecord, on_delete=models.CASCADE)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.IntegerField()
-    qtyOrdered = models.IntegerField()
-    qtyDelivered = models.IntegerField()
-    total = models.IntegerField()
+    qty = models.IntegerField()
+    total = models.IntegerField(null=True)
 
+    def save(self, *args, **kwargs):
+        # Automatically calculate the total as price * qty before saving
+        self.total = self.price * self.qty
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         return self.productID.name
+
+# Signal functions to update totalAmount when DeliveryRecordItem changes
+@receiver(post_save, sender=DeliveryRecordItem)
+@receiver(post_delete, sender=DeliveryRecordItem)
+def update_delivery_record_total(sender, instance, **kwargs):
+    delivery_record = instance.deliveryRecordID
+    delivery_record.calculate_total_amount()
+    delivery_record.save()
+
+from django.db.models import Sum
+
+class Transaction(models.Model):
+    TERMINAL_CHOICES = [
+        ('ONE', 'One'),
+        ('TWO', 'Two'),
+        ('THREE', 'Three'),
+    ]
+
+    STATUS_CHOICES = [
+        ('COMPLETED', 'Completed'),
+        ('VOIDED', 'Voided'),
+        ('ON HOLD', 'On Hold'),
+    ]
+
+    transactionTime = models.DateTimeField(auto_now_add=True)
+    terminalIssued = models.CharField(max_length=10, choices=TERMINAL_CHOICES, default='One')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ON HOLD')
+    amountDue = models.IntegerField(null=True, blank=True)
+    discountApplicable = models.BooleanField()
+    finalAmount = models.IntegerField(null=True, blank=True)
+    amountPaid = models.IntegerField(null=True, blank=True)
+    customerChange = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Transaction {self.id}"
+
+    def calculate_amount_due(self):
+        # Calculate amountDue as the sum of productTotal from TransactionItem objects
+        total = TransactionItem.objects.filter(transactionID=self).aggregate(Sum('productTotal'))['productTotal__sum']
+        self.amountDue = total if total is not None else 0
+
+        # Calculate finalAmount based on discount condition
+        if self.discountApplicable:
+            self.finalAmount = int(self.amountDue * 0.85)  # Applying a 15% discount
+        else:
+            self.finalAmount = self.amountDue
+
+        # Save the updated values to the database
+        self.save()
+    
+class TransactionItem(models.Model):
+    transactionID = models.ForeignKey(Transaction, on_delete=models.CASCADE)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    price = models.IntegerField(null=True, blank=True)
+    productTotal = models.IntegerField(null=True, blank=True)
+    unitMeasurement = models.CharField(max_length=25, null=True, blank=True)
+
+    def fetch_product_price_and_display_uom(self):
+        try:
+            product_price = self.productID.unitPrice
+            stock_entry = Stock.objects.get(productId=self.productID)
+            display_uom = stock_entry.displayUoM
+            return {
+                "price": product_price,
+                "displayUoM": display_uom,
+            }
+        except ObjectDoesNotExist:
+            return {
+                "price": None,
+                "displayUoM": "UoM not found",
+            }
+
+    def save(self, *args, **kwargs):
+        product_data = self.fetch_product_price_and_display_uom()
+        self.price = product_data["price"] if product_data["price"] is not None else self.price
+        self.unitMeasurement = product_data["displayUoM"]
+        
+        # Calculate the productTotal
+        if self.price is not None and self.quantity is not None:
+            self.productTotal = self.price * self.quantity
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Transaction Item: {self.id}"
+    
+@receiver(post_save, sender=TransactionItem)
+@receiver(post_delete, sender=TransactionItem)
+def update_transaction_amount_due(sender, instance, **kwargs):
+    transaction = instance.transactionID
+    transaction.calculate_amount_due()

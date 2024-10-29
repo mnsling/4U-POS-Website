@@ -16,14 +16,24 @@ const Records = () => {
   const [records, setRecords] = useState([]);
   const [record, setRecord] = useState({
     id: '',
-    supplierId: '',
+    supplierId: 1,
     trackingNumber: '', 
     deliveryFee: 0,
     totalAmount: 0,
-    status: 'PENDING',
+    status: 'TO ARRIVE',
   });
 
-  const handleChange = (e) => {
+  const [items, setItems] = useState([]);
+  const [item, setItem] = useState({
+    id: 0,
+    deliveryRecordID: '',
+    productID: '', 
+    price: 0,
+    qty: 0,
+    total: 0,
+  });
+
+  const handleChangeRecord = (e) => {
     const { name, value } = e.target;
 
     setRecord(prevRecord => {
@@ -36,16 +46,35 @@ const Records = () => {
     });
   };
 
+  const handleChangeItem = (e) => {
+    const { name, value } = e.target;
+
+    setItem(prevItem => {
+      const updatedItem = {
+        ...prevItem,
+        [name]: value,
+      };
+      console.log('Updated item:', updatedItem);
+      return updatedItem;
+    });
+  };
+
   useEffect(() => {
     fetchSuppliers();
     fetchRecords();
     fetchProducts();
+    fetchItems();
     console.log(record);
   }, [record]);
 
   const getSupplierForRecord = (supplierId) => {
     const supplier = suppliers.find(s => s.id === supplierId);
     return supplier || { supplierName: 'Unknown Supplier' };
+  };
+
+  const getProductForRecord = (productId) => {
+    const product = products.find(p => p.id === productId);
+    return product || { productName: 'Unknown Product' };
   };
 
   const fetchSuppliers = () => {
@@ -60,7 +89,7 @@ const Records = () => {
   };
 
   const fetchRecords = () => {
-    axios.get('http://127.0.0.1:8000/stockRecord/')
+    axios.get('http://127.0.0.1:8000/deliveryRecord/')
       .then(response => {
         setRecords(response.data);
         console.log(response.data); // Log the updated product list
@@ -81,11 +110,22 @@ const Records = () => {
       });
   };
 
+  const fetchItems = () => {
+    axios.get('http://127.0.0.1:8000/deliveryRecordItem/')
+      .then(response => {
+        setItems(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     // Send POST request
-    axios.post('http://127.0.0.1:8000/stockRecord/', {
+    axios.post('http://127.0.0.1:8000/deliveryRecord/', {
       supplierId: record.supplierId,
       trackingNumber: record.trackingNumber, 
       deliveryFee: record.deliveryFee,
@@ -99,7 +139,7 @@ const Records = () => {
           trackingNumber: '', 
           deliveryFee: 0,
           totalAmount: 0,
-          status: 'PENDING',
+          status: 'TO ARRIVE',
         })
         fetchRecords();
         handleClosePrompt();
@@ -111,7 +151,7 @@ const Records = () => {
 
   const handleUpdate = () => {
     // Send POST request
-    axios.put(`http://127.0.0.1:8000/stockRecord/${record.id}/`, {
+    axios.put(`http://127.0.0.1:8000/deliveryRecord/${record.id}/`, {
       supplierId: record.supplierId,
       trackingNumber: record.trackingNumber, 
       deliveryFee: record.deliveryFee,
@@ -129,7 +169,7 @@ const Records = () => {
   };
 
   const handleDelete = () => {
-    axios.delete(`http://127.0.0.1:8000/stockRecord/${record.id}/`)
+    axios.delete(`http://127.0.0.1:8000/deliveryRecord/${record.id}/`)
       .then(response => {
         console.log('Record deleted:', response.data);
         fetchRecords();
@@ -140,10 +180,90 @@ const Records = () => {
       });
   };
 
+  const handleSubmitItem = (e) => {
+    e.preventDefault();
+
+    // Send POST request
+    axios.post('http://127.0.0.1:8000/deliveryRecordItem/', {
+      deliveryRecordID: record.id,
+      productID: item.productID, 
+      price: item.price,
+      qty: item.qty,
+      })
+      .then(response => {
+        console.log('Item created:', response.data);
+        setItem({
+          deliveryRecordID: '',
+          productID: '', 
+          price: 0,
+          qty: 0
+        })
+        fetchItems();
+        fetchRecords();
+        handleCloseAddPrompt();
+      })
+      .catch(error => {
+        console.error('Error creating item:', error.response.data);
+      });
+  };
+
+  const handleDeleteItem = (itemId) => {
+    axios.delete(`http://127.0.0.1:8000/deliveryRecordItem/${itemId}/`)
+      .then(response => {
+        console.log('Item deleted:', response.data);
+        fetchItems();
+      })
+      .catch(error => {
+        console.error('Error deleting item:', error.response ? error.response.data : error.message);
+      });
+  };
+
+  const [upItemId, setUpItemId] = useState([]);
+
+  const handleUpdatePassItem = (upItem) => {
+    setItem({
+      id: upItem.id,
+      deliveryRecordID: upItem.deliveryRecordID,
+      productID: upItem.productID, 
+      price: upItem.price,
+      qty: upItem.qty,
+    })
+    setUpItemId(upItem.id);
+    handleEdit3Click();
+    console.log(item);
+    console.log(upItemId);
+  };
+
+  const handleUpdateItem = () => {
+    // Send POST request
+    axios.put(`http://127.0.0.1:8000/deliveryRecordItem/${item.id}/`, {
+      deliveryRecordID: item.deliveryRecordID,
+      productID: item.productID, 
+      price: item.price,
+      qty: item.qty,
+    })
+      .then(response => {
+        console.log('Item updated:', response.data);
+        setItem({
+          deliveryRecordID: '',
+          productID: '', 
+          price: 0,
+          qty: 0,
+        })
+        setUpItemId();
+        fetchItems();
+        handleCloseEdit3Prompt();
+      })
+      .catch(error => {
+        console.error('Error updating item:', error);
+      });
+  };
+
   const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
   const [showFormPrompt, setShowFormPrompt] = useState(false);
   const [showAddPrompt, setShowAddPrompt] = useState(false);
   const [showEdit2Prompt, setShowEdit2Prompt] = useState(false);
+  const [showEdit3Prompt, setShowEdit3Prompt] = useState(false);
 
   const handleDetailsClick = (showRecord) => {
     setShowDetailsPrompt(true);
@@ -182,6 +302,14 @@ const Records = () => {
     setShowEdit2Prompt(false);
   };
 
+  const handleEdit3Click = () => {
+    setShowEdit3Prompt(true);
+  };
+
+  const handleCloseEdit3Prompt = () => {
+    setShowEdit3Prompt(false);
+  };
+
   const handleClosePrompt = () => {
     setShowDetailsPrompt(false);
     setShowFormPrompt(false);
@@ -193,17 +321,17 @@ const Records = () => {
       dateDelivered: null,
       deliveryFee: 0,
       totalAmount: 0,
-      status: 'PENDING',
+      status: 'TO ARRIVE',
     })
   };
 
-  const [activeButton, setActiveButton] = useState('PENDING'); // Set the initial active button
+  const [activeButton, setActiveButton] = useState('TO ARRIVE'); // Set the initial active button
 
   const handleButtonClick = (newStatus) => {
       setActiveButton(newStatus);
       
       // Send the status update to the server using Axios
-      axios.put(`http://127.0.0.1:8000/stockRecord/${record.id}/`, {
+      axios.put(`http://127.0.0.1:8000/deliveryRecord/${record.id}/`, {
         status: newStatus,
       })
         .then(response => {
@@ -221,7 +349,7 @@ const Records = () => {
       <Sidebar />
       <div className='w-[83.5vw] h-screen flex flex-col items-center z-50'>
         <div className='w-full h-[10vh] bg-white flex items-center justify-between px-[2vw] drop-shadow-xl'>
-          <h1 className='text-[1.5vw] text-darkp font-medium tracking-tighter z-10'>Stock Records</h1>
+          <h1 className='text-[1.5vw] text-darkp font-medium tracking-tighter z-10'>Delivery Records</h1>
         </div>
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-between'>
@@ -235,7 +363,7 @@ const Records = () => {
           </div>
           <div className='w-full h-[75vh] rounded-2xl flex flex-col drop-shadow'>
             <div className='h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center'>
-              <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Stock Record #</h1>
+              <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Delivery Record #</h1>
               <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Tracking #</h1>
               <h1 className='w-[12%] text-[0.7vw] text-center'>Supplier Name</h1>
               <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Order Date</h1>
@@ -268,11 +396,11 @@ const Records = () => {
               </div>
             </div>
           </div>
-          {/* Prompt (Modal) */}
+          {/* Add Delivery Record Modal */}
           {showFormPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
               <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
-                <h2 className='text-black text-[1.3vw] font-black'>Add Stock Record</h2>
+                <h2 className='text-black text-[1.3vw] font-black'>Add Delivery Record</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex gap-5'>
                   <div className='w-full flex flex-col gap-5'>
@@ -281,7 +409,7 @@ const Records = () => {
                       <select
                         name="supplierId"
                         value={record.supplierId}
-                        onChange={handleChange}
+                        onChange={handleChangeRecord}
                         className={`className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' `}
                         placeholder="enter supplier*"
                       >
@@ -296,23 +424,20 @@ const Records = () => {
                     </div>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Tracking #</label>
-                      <input name="trackingNumber" value={record.trackingNumber} onChange={handleChange} type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter tracking #' />
+                      <input name="trackingNumber" value={record.trackingNumber} onChange={handleChangeRecord} type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter tracking #' />
                     </div>
                   </div>
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Delivery Fee</label>
-                      <input name="deliveryFee" value={record.deliveryFee} onChange={handleChange} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter fee amount' />
+                      <input name="deliveryFee" value={record.deliveryFee} onChange={handleChangeRecord} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter fee amount' />
                     </div>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Status</label>
-                      <select name='status' value={record.status} onChange={handleChange} className='w-full border border-darkp rounded-md px-5 py-2'>
-                        <option value='PENDING'>Pending</option>
-                        <option value='APPROVED'>Approved</option>
-                        <option value='IN TRANSIT'>In Transit</option>
+                      <select name='status' value={record.status} onChange={handleChangeRecord} className='w-full border border-darkp rounded-md px-5 py-2'>
+                        <option value='TO ARRIVE'>To Arrive</option>
                         <option value='DELIVERED'>Delivered</option>
                         <option value='CANCELLED'>Cancelled</option>
-                        <option value='BACKORDER'>Backorder</option>
                       </select>
                     </div>
                   </div>
@@ -334,7 +459,7 @@ const Records = () => {
               </div>
             </div>
           )}
-          {/* Prompt (Modal) */}
+          {/* Delivery Record Modal */}
           {showDetailsPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex'>
               <div className='bg-white w-full h-full p-[2vw] flex flex-col items-start gap-5'>
@@ -342,7 +467,7 @@ const Records = () => {
                   <div className='w-full flex justify-start'>
                     <div className='text-darkp w-full flex flex-col gap-5'>
                       <div className='flex gap-10 items-end'>
-                        <h1 className='text-[3vw] font-bold tracking-tighter'>STOCK RECORD #{record.id}</h1>
+                        <h1 className='text-[3vw] font-bold tracking-tighter'>DELIVERY RECORD #{record.id}</h1>
                         <div className='flex gap-3 h-fit justify-end items-end pb-5'>
                           <button className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button' onClick={handleEdit2Click}>Edit</button>
                           <button className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'onClick={handleDelete}>Delete</button>
@@ -390,42 +515,51 @@ const Records = () => {
                     <button onClick={handleAddClick} className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Add Item</button>
                   </div>
                   <div className='w-full h-[50vh] flex flex-col drop-shadow'>
-                    <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
-                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Product</h1>
-                      <h1 className='w-[8vw] text-[0.7vw] text-center'>Price</h1>
-                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Quantity Ordered</h1>
-                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Quantity Delivered</h1>
-                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Total</h1>
-                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Actions</h1>
+                    <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center'>
+                      <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Product</h1>
+                      <h1 className='w-[16%] text-[0.7vw] text-center'>Price</h1>
+                      <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Quantity</h1>
+                      <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Total</h1>
+                      <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Actions</h1>
                     </div>
                     <div className='w-full h-full bg-white border-x rounded-b-2xl border-b border-darkp overflow-auto'>
-                      <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>Ice Candy</h1>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>5.00</h1>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>1000.00</h1>
-                        <div className='w-[8%] flex justify-center gap-5'>
-                          <img
-                            src={edit}
-                            alt='edit'
-                            className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                            onClick={() => handleUpdatePass(prod)}
-                          />
-                          <img
-                            src={del}
-                            alt='delete'
-                            className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                            onClick={() => handleDelete(prod.id)}
-                          />
-                        </div>
+                      <div className='flex flex-col h-[9%] items-center justify-between'>
+                      {items
+                        .filter(item => item.deliveryRecordID === record.id)
+                        .map(item => {
+                        const product = getProductForRecord(item.productID);
+                        return (
+                          <div key={item.id} className='w-full text-darkp border-b border-darkp text-center flex items-center justify-between py-2'>
+                            <h1 className='w-[16%] text-[0.7vw] text-center'>{product.name}</h1>
+                            <h1 className='w-[16%] text-[0.7vw] text-center'>{item.price}</h1>
+                            <h1 className='w-[16%] text-[0.7vw] text-center'>{item.qty}</h1>
+                            <h1 className='w-[16%] text-[0.7vw] text-center'>{item.total}</h1>
+                            <h1 className='w-[16%] flex gap-[1vw] justify-center'>
+                              <button onClick={() => handleUpdatePassItem(item)}>
+                                <img
+                                  src={edit}
+                                  alt='edit'
+                                  className='w-[0.8vw] h-[0.8vw] cursor-pointer'
+                                />
+                              </button>
+                              <button onClick={() => handleDeleteItem(item.id)}>
+                                <img
+                                  src={del}
+                                  alt='delete'
+                                  className='w-[0.8vw] h-[0.8vw] cursor-pointer'
+                                />
+                              </button>
+                            </h1>
+                          </div>
+                        );
+                      })}
                       </div>
                     </div>
                   </div>
                   <div className='mt-3'>
                     <h1 className='text-[1vw] text-darkp font-bold tracking-tighter mb-2'>Status Bar:</h1>
                     <div className='w-min h-[3.5vw] rounded-2xl border border-darkp flex justify-between gap-5 font-medium tracking-tighter text-[.7vw] text-darkp px-2 py-6'>
-                      {['PENDING', 'APPROVED', 'IN TRANSIT', 'DELIVERED', 'CANCELLED', 'BACKORDER'].map((status, index) => (
+                      {['TO ARRIVE', 'DELIVERED', 'CANCELLED'].map((status, index) => (
                         <div key={index} className='flex gap-2 w-full h-full items-center'>
                           <button
                             onClick={() => handleButtonClick(status)}
@@ -434,7 +568,7 @@ const Records = () => {
                           >
                             {status}
                           </button>
-                          {index < 5 && <img src={right} className='w-[1.2vw]' />}
+                          {index < 2 && <img src={right} className='w-[1.2vw]' />}
                         </div>
                       ))}
                     </div>
@@ -443,20 +577,21 @@ const Records = () => {
               </div>
             </div>
           )}
-          {/* Prompt (Modal) */}
+          {/* Add Item Modal */}
           {showAddPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-[20vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
-                <h2 className='text-black text-[1.3vw] font-black'>Add Items</h2>
+              <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+                <h2 className='text-black text-[1.3vw] font-black'>Add Item</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex gap-5'>
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Product</label>
+                      <label className='text-[0.7vw]'>Product Name</label>
                       <select
-                        name="name"
-                        onChange={handleChange}
-                        className={`className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' `}
+                        name="productID"
+                        value={item.productID}
+                        onChange={handleChangeItem}
+                        className={`className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]'' `}
                         placeholder="enter product*"
                       >
                         {products.map(product => {
@@ -469,15 +604,21 @@ const Records = () => {
                       </select>
                     </div>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Quantity Ordered</label>
-                      <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                      <label className='text-[0.7vw]'>Price</label>
+                      <input type='number' name='price' value={item.price} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter price' />
+                    </div>
+                  </div>
+                  <div className='w-full flex flex-col gap-5'>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Quantity</label>
+                      <input type='number' name='qty' value={item.qty} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                     </div>
                   </div>
                 </div>
                 <div className='flex gap-4'>
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
-                    onClick={handleCloseAddPrompt}
+                    onClick={handleSubmitItem}
                   >
                     Confirm
                   </button>
@@ -491,7 +632,7 @@ const Records = () => {
               </div>
             </div>
           )}
-          {/* Prompt (Modal) */}
+          {/* Edit Delivery Record Modal */}
           {showEdit2Prompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
               <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
@@ -501,14 +642,14 @@ const Records = () => {
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Tracking #</label>
-                      <input name='trackingNumber' onChange={handleChange} value={record.trackingNumber} type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter tracking #' />
+                      <input name='trackingNumber' onChange={handleChangeRecord} value={record.trackingNumber} type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter tracking #' />
                     </div>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Supplier Name</label>
                       <select
                         name="supplierId"
                         value={record.supplierId}
-                        onChange={handleChange}
+                        onChange={handleChangeRecord}
                         className={`w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' `}
                         placeholder="enter supplier*"
                       >
@@ -525,11 +666,11 @@ const Records = () => {
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Total Amount</label>
-                      <input name='totalAmount' onChange={handleChange} value={record.totalAmount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
+                      <input name='totalAmount' onChange={handleChangeRecord} value={record.totalAmount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
                     </div>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Delivery Fee</label>
-                      <input name='deliveryFee' onChange={handleChange} value={record.deliveryFee} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
+                      <input name='deliveryFee' onChange={handleChangeRecord} value={record.deliveryFee} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
                     </div>
                   </div>
                 </div>
@@ -543,6 +684,61 @@ const Records = () => {
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
                     onClick={handleCloseEdit2Prompt}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Edit Item Modal */}
+          {showEdit3Prompt && (
+            <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
+              <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+                <h2 className='text-black text-[1.3vw] font-black'>Edit Item</h2>
+                {/* Input for adding stock */}
+                <div className='w-full flex gap-5'>
+                  <div className='w-full flex flex-col gap-5'>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Product Name</label>
+                      <select
+                        name="productID"
+                        value={item.productID}
+                        onChange={handleChangeItem}
+                        className={`className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]'' `}
+                        placeholder="enter product*"
+                      >
+                        {products.map(product => {
+                          return (
+                            <option key={product.id} value={product.id}>
+                              {product.name}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Price</label>
+                      <input type='number' name='price' value={item.price} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter price' />
+                    </div>
+                  </div>
+                  <div className='w-full flex flex-col gap-5'>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Quantity Ordered</label>
+                      <input type='number' name='qty' value={item.qty} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter price' />
+                    </div>
+                  </div>
+                </div>
+                <div className='flex gap-4 mt-10'>
+                  <button
+                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                    onClick={handleUpdateItem}
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    onClick={handleCloseEdit3Prompt}
                   >
                     Cancel
                   </button>

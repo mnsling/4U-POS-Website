@@ -23,14 +23,26 @@ class SupplierSerializer(serializers.ModelSerializer):
         model = Supplier
         fields = ('id', 'supplierName', 'cellphoneNumber', 'telephoneNumber', 'email', 'pointPerson')
 
-class StockRecordSerializer(serializers.ModelSerializer):
+class DeliveryRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = StockRecord
+        model = DeliveryRecord
         fields = ('id', 'supplierId', 'trackingNumber', 'dateOrdered', 'dateDelivered', 'deliveryFee', 'totalAmount', 'status')
 
-class StockRecordItemSerializer(serializers.ModelSerializer):
+class DeliveryRecordItemSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = StockRecordItem
-        fields =('stockRecordID', 'productID', 'price', 'qtyOrdered', 'qtyDelivered', 'total')
+        model = DeliveryRecordItem
+        fields =('id', 'deliveryRecordID', 'productID', 'price', 'qty', 'total')
+
+class TransactionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Transaction
+        fields =('id', 'transactionTime', 'terminalIssued', 'amountDue', 'discountApplicable', 'finalAmount', 'amountPaid', 'customerChange')
+
+class TransactionItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TransactionItem
+        fields =('id', 'transactionID', 'productID', 'quantity', 'price', 'productTotal', 'unitMeasurement')    
