@@ -1,29 +1,126 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Sidebar from '../components/sidebar';
 import bg from '../assets/bg.jpg';
+import del from '../assets/delete.png'
+import axios from 'axios';
 
 const Scanner = () => {
 
-  const [transaction, setTransaction] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [stocks, setStocks] = useState([]);
+  
+  const [transaction, setTransaction] = useState({
+    terminalIssued: 'ONE',
+    status: 'ON HOLD',
+    discountApplicable: false,
+  });
+
   const [transactionItems, setTransactionItems] = useState([]);
   const [transactionItem, setTransactionItem] = useState({
     id: '',
-    supplierId: 1,
-    trackingNumber: '', 
-    deliveryFee: 0,
-    totalAmount: 0,
-    status: 'TO ARRIVE',
+    transactionID: '',
+    productID: '', 
+    quantity: 0,
+    price: 0,
   });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setTransactionItem(prevTransactionItem => {
+      const updatedTransactionItem = {
+        ...prevTransactionItem,
+        [name]: value,
+      };
+      // Log updated product here
+      console.log('Updated Transaction Item:', updatedTransactionItem);
+      return updatedTransactionItem;
+    });
+  };
+
+  const fetchProducts = () => {
+    axios.get('http://127.0.0.1:8000/product/')
+      .then(response => {
+        setProducts(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  const fetchStocks = () => {
+    axios.get('http://127.0.0.1:8000/stock/')
+      .then(response => {
+        setStocks(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  useEffect(() => {``
+    fetchProducts();
+    fetchStocks();
+  }, []);
+  
+  const handleAddProduct = () => {
+    if (transactionItem.productID && transactionItem.quantity > 0) {
+      setTransactionItems((prevItems) => [...prevItems, transactionItem]);
+      console.log('Added Transaction Item:', transactionItem);
+      setTransactionItem({
+        id: '',
+        transactionID: '',
+        productID: '', 
+        quantity: 0,
+        price: 0,
+      });
+      console.log(transactionItems)
+    } else {
+      console.warn('Please select a product and enter a valid quantity before adding.');
+    }
+  };
+
+  // Inside the component:
+  const totalAmountGlobal = useMemo(() => {
+    return transactionItems.reduce((total, item) => {
+      const product = products.find((p) => String(p.id) === String(item.productID));
+      const unitPrice = product ? product.unitPrice : 0;
+      return total + item.quantity * unitPrice;
+    }, 0);
+  }, [transactionItems, products]);
+
+  const finalAmountGlobal = useMemo(() => {
+    if (transaction.discountApplicable) {
+      return totalAmountGlobal * 0.85; // Applying 15% discount
+    }
+    return totalAmountGlobal; // No discount
+  }, [totalAmountGlobal, transaction.discountApplicable]);
+
+  const toggleDiscount = () => {
+    setTransaction((prevTransaction) => ({
+      ...prevTransaction,
+      discountApplicable: !prevTransaction.discountApplicable,
+    }));
+  };  
 
   const [showProductList, setShowProductList] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const handleNumberClick = (number) => {
-    setQuantity(prev => (parseInt(prev + number) > 0 ? prev + number : ''));
+    setTransactionItem((prevItem) => ({
+      ...prevItem,
+      quantity: Number(`${prevItem.quantity}${number}`)
+    }));
   };
-
+  
   const handleClear = () => {
-
+    // Reset the quantity to 0
+    setTransactionItem((prevItem) => ({
+      ...prevItem,
+      quantity: 0
+    }));
   };
 
   const handleSearchProducts = () => {
@@ -54,7 +151,7 @@ const Scanner = () => {
           <div className='flex flex-col w-[65%] h-full items-center'>
             <div className='flex w-full h-[32vw] justify-center items-center'>
               <div className='w-[90%] h-full bg-white rounded-2xl drop-shadow-xl'>
-                <div className='flex gap-[3vw] justify-between items-center text-white text-sm h-[4vw] w-full px-10 py-6 bg-darkp opacity-80 rounded-t-2xl'>
+                <div className='flex gap-8 justify-between items-center text-white text-sm h-[4vw] w-full px-10 py-6 bg-darkp opacity-80 rounded-t-2xl'>
                   <h1 className='w-[16%] text-center'>Quantity</h1>
                   <h1 className='w-[16%] text-center'>UoM</h1>
                   <h1 className='w-[16%] text-center'>Product</h1>
@@ -63,14 +160,38 @@ const Scanner = () => {
                   <h1 className='w-[16%] text-center'>Actions</h1>
                 </div>
                 <div className='overflow-y-auto'>
-                  <div className='flex gap-8 justify-between px-10 py-3 border-b border-gray-200'>
-                    <h1 className='w-[16%] text-center'>Quantity</h1>
-                    <h1 className='w-[16%] text-center'>UoM</h1>
-                    <h1 className='w-[16%] text-center'>Product</h1>
-                    <h1 className='w-[16%] text-center'>Unit Price</h1>
-                    <h1 className='w-[16%] text-center'>Amount</h1>
-                    <h1 className='w-[16%] text-center'>Actions</h1>
-                  </div>
+                {transactionItems.map((item, index) => {
+                  const product = products.find((p) => String(p.id) === String(item.productID));
+
+                  if (product) {
+                    console.log('Found Product:', product); // Log product details to verify
+                  } else {
+                    console.warn(`Product with ID ${item.productID} not found`);
+                  }
+
+                  const stock = stocks.find((s) => String(s.productId) === String(item.productID));
+                  if (stock) {
+                    console.log('Found Stock:', stock); // Log product details to verify
+                  } else {
+                    console.warn(`Stock with ID ${item.productID} not found`);
+                  }
+
+                  const productName = product ? product.name : 'N/A';
+                  const unitPrice = product ? product.unitPrice : 0;
+                  const unitMeasurement = stock ? stock.displayUoM : 'N/A';
+
+                  return (
+                    <div key={index} className='flex gap-8 justify-between px-10 py-3 border-b border-gray-200'>
+                      <h1 className='w-[16%] text-center'>{item.quantity}</h1>
+                      <h1 className='w-[16%] text-center'>{unitMeasurement}</h1>
+                      <h1 className='w-[16%] text-center'>{productName}</h1>
+                      <h1 className='w-[16%] text-center'>₱ {unitPrice.toFixed(2)}</h1>
+                      <h1 className='w-[16%] text-center'>₱ {(unitPrice * item.quantity).toFixed(2)}</h1>
+                      <h1 className='w-[16%] text-center'>
+                        <button><img src={del} alt="Delete" className='w-[1.5vw]' /></button>
+                      </h1>
+                    </div>
+                  )})}
                 </div>
               </div>
             </div>
@@ -78,11 +199,11 @@ const Scanner = () => {
             <div className='w-[90%] bg-darkp opacity-80 h-1/6 rounded-2xl px-10 flex flex-col justify-center gap-1 text-white drop-shadow-xl'>
               <div className='w-full flex justify-between'>
                 <h1>Cost before discount:</h1>
-                <h1>₱ RAWR</h1>
+                <h1>₱ {totalAmountGlobal}</h1>
               </div>
               <div className='w-full flex justify-between'>
                 <h1 className='text-2xl'>Total Amount:</h1>
-                <h1 className='text-2xl'>₱ rawr</h1>
+                <h1 className='text-2xl'>₱ {finalAmountGlobal}</h1>
               </div>
             </div>
           </div>
@@ -93,7 +214,9 @@ const Scanner = () => {
               </div>
               <input
                 type='number'
-                min='1'
+                name='quantity'
+                value={transactionItem.quantity}
+                onChange={handleChange}
                 className='h-4/6 w-full px-5 text-4xl text-darkp font-bold border-none outline-none rounded-b-2xl'
                 placeholder='enter quantity'
               />
@@ -120,8 +243,23 @@ const Scanner = () => {
               </div>
             </div>
             <div className='flex w-full'>
-              <input type='text' placeholder='barcode' className='w-full text-[1vw] outline-none py-5 border mt-8 rounded-l-lg shadow-2xl px-5'/>
-              <button className='mt-8 py-4 px-8 bg-darkp text-white text-[0.9vw] font-medium bg-opacity-80 rounded-r-lg shadow-2xl leading-5'>Add Product</button>
+              <select
+                name="productID"
+                value={transactionItem.productID}
+                onChange={handleChange}
+                placeholder='barcode'
+                className={`w-full text-[1vw] outline-none py-5 border mt-8 rounded-l-lg shadow-2xl px-5g`}
+              >
+                <option value=''></option>
+                {products.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.barcodeNo}
+                  </option>
+                ))}
+              </select>
+              <button onClick={handleAddProduct} className='mt-8 py-4 px-8 bg-darkp text-white text-[0.9vw] font-medium bg-opacity-80 rounded-r-lg shadow-2xl leading-5'>
+                Add Product
+              </button>
             </div>
             <div className='flex mt-6 justify-between'>
               <button
@@ -130,8 +268,10 @@ const Scanner = () => {
               >
                 <h1 className='text-[0.9vw] font-medium p-[8%]'>Search P.</h1>
               </button>
-              <button className='w-[33%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
-                <h1 className='text-[0.9vw] font-medium p-[8%]'>Discount</h1>
+              <button onClick={toggleDiscount} className='w-[33%] h-[3.5vw] bg-darkp opacity-80 text-white border-2 rounded-2xl drop-shadow-xl hover:opacity-100 button flex justify-center items-center'>
+                <h1 className='text-[0.9vw] font-medium p-[8%]'>
+                  {transaction.discountApplicable ? 'Remove Discount' : 'Apply Discount'}
+                </h1>
               </button>
               <button 
                 onClick={handlePaymentButtonClick}

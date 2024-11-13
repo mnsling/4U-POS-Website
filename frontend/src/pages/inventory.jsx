@@ -8,10 +8,12 @@ import axios from 'axios'
 const Inventory = () => {
 
   const[stocks, setStocks] = useState([]);
+  const[suppliers, setSuppliers] = useState([]);
 
   const [products, setProducts] = useState([]);
   const [product, setProduct] = useState({
     name: '',
+    supplier: 1,
     barcodeNo: '',
     category: '',
     unitPrice: '',
@@ -58,12 +60,24 @@ const Inventory = () => {
       });
   };
 
+  const fetchSuppliers = () => {
+    axios.get('http://127.0.0.1:8000/supplier/')
+      .then(response => {
+        setSuppliers(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     // Send POST request
     axios.post('http://127.0.0.1:8000/product/', {
       name: product.name,
+      supplier: product.supplier,
       barcodeNo: product.barcodeNo,
       category: product.category,
       unitPrice: parseFloat(product.unitPrice),
@@ -75,6 +89,7 @@ const Inventory = () => {
         console.log('Product created:', response.data);
         setProduct({
           name: '',
+          supplier: '',
           barcodeNo: '',
           category: '',
           unitPrice: '',
@@ -107,6 +122,7 @@ const Inventory = () => {
   const handleUpdatePass = (upProduct) => {
     setProduct({
       name: upProduct.name,
+      supplier: upProduct.supplier,
       barcodeNo: upProduct.barcodeNo,
       category: upProduct.category,
       unitPrice: upProduct.unitPrice,
@@ -124,6 +140,7 @@ const Inventory = () => {
     // Send POST request
     axios.put(`http://127.0.0.1:8000/product/${upProductId}/`, {
       name: product.name,
+      supplier: product.supplier,
       barcodeNo: product.barcodeNo,
       category: product.category,
       unitPrice: parseFloat(product.unitPrice),
@@ -135,6 +152,7 @@ const Inventory = () => {
         console.log('Product created:', response.data);
         setProduct({
           name: '',
+          supplier: '',
           barcodeNo: '',
           category: '',
           unitPrice: '',
@@ -155,6 +173,7 @@ const Inventory = () => {
   useEffect(() => {``
     fetchProducts();
     fetchStocks();
+    fetchSuppliers();
   }, []);
 
   const [showPrompt, setShowPrompt] = useState(false);
@@ -333,14 +352,25 @@ const Inventory = () => {
                     placeholder="enter reorder level*"
                   />
                 </div>
-                <div className='w-full flex items-end justify-between'>
-                  <button onClick={handleAddStockClick} className='w-[48%] px-[1vw] py-[1vh] bg-white opacity-[80%] text-[0.7vw] border border-black rounded-xl text-black hover:opacity-100 button'>
-                    Add Backhouse Stock
-                  </button>
-                  <button onClick={handleConvertClick} className='w-[48%] px-[1vw] py-[1vh] bg-white opacity-[80%] text-[0.7vw] border border-black rounded-xl text-black hover:opacity-100 button'>
-                    Convert Backhouse Stock
-                  </button>
+                <div className='flex flex-col gap-[0.3vh]'>
+                  <label className='text-[0.7vw]'>Supplier Name</label>
+                    <select
+                      name="supplier"
+                      value={product.supplier}
+                      onChange={handleChange}
+                      className={`bg-white px-[1vw] py-[1vh] text-[1vw] border outline-none text-xs rounded-lg`}
+                      placeholder="enter supplier*"
+                    >
+                      {suppliers.map(supplier => {
+                        return (
+                          <option key={supplier.id} value={supplier.id}>
+                            {supplier.supplierName}
+                          </option>
+                        );
+                      })}
+                    </select>
                 </div>
+                
                 <div className='w-full flex items-end justify-end'>
                 {showConfirmButton ? (
                   <button
@@ -361,76 +391,6 @@ const Inventory = () => {
               </div>
             </div>
           </div>
-          {/* Prompt (Modal) */}
-          {showPrompt && (
-            <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-3/12 p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
-                <h2 className='text-black text-lg font-medium'>Add Backhouse Stock</h2>
-                {/* Input for adding stock */}
-                <div className='w-full flex flex-col gap-2'>
-                  <div className='w-full flex flex-col justify-start'>
-                    <label className='text-sm'>Product</label>
-                    <select className='w-full border border-darkp rounded-md px-5 py-1'>
-                      <option>1.</option>
-                    </select>
-                  </div>
-                  <div className='w-full flex flex-col justify-start'>
-                    <label className='text-sm'>Quantity</label>
-                    <input type='text' className='w-full border border-darkp rounded-md px-5 py-1' />
-                  </div>
-                </div>
-                <div className='flex gap-4'>
-                  <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500'
-                    onClick={handleClosePrompt}
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    className='px-[1vw] py-[1vh] bg-gray-300 text-darkp rounded-lg hover:bg-gray-400'
-                    onClick={handleClosePrompt}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {/* Prompt (Modal) */}
-          {showPrompt && (
-            <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-3/12 p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
-                <h2 className='text-black text-lg font-medium'>Convert to Backhouse Stock</h2>
-                {/* Input for adding stock */}
-                <div className='w-full flex flex-col gap-2'>
-                  <div className='w-full flex flex-col justify-start'>
-                    <label className='text-sm'>Product</label>
-                    <select className='w-full border border-darkp rounded-md px-5 py-1'>
-                      <option>1.</option>
-                    </select>
-                  </div>
-                  <div className='w-full flex flex-col justify-start'>
-                    <label className='text-sm'>Quantity</label>
-                    <input type='text' className='w-full border border-darkp rounded-md px-5 py-1' />
-                  </div>
-                </div>
-                <div className='flex gap-4'>
-                  <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500'
-                    onClick={handleClosePrompt}
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    className='px-[1vw] py-[1vh] bg-gray-300 text-darkp rounded-lg hover:bg-gray-400'
-                    onClick={handleClosePrompt}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

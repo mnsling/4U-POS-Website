@@ -211,6 +211,47 @@ class DeliveryRecordItemViewset(viewsets.ViewSet):
         stockRecordItem = self.queryset.get(pk=pk)
         stockRecordItem.delete()
         return Response(status=204)
+    
+class StockItemViewset(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = StockItem.objects.all()
+    serializer_class = StockItemSerializer
+
+    def get_queryset(self):
+        """Return a fresh queryset each time."""
+        return StockItem.objects.all()
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
+
+    def retrieve(self, request, pk=None):
+        stock = self.queryset.get(pk=pk)
+        serializer = self.serializer_class(stock)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        stock = self.queryset.get(pk=pk)
+        serializer = self.serializer_class(stock, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
+
+    def destroy(self, request, pk=None):
+        stock = self.queryset.get(pk=pk)
+        stock.delete()
+        return Response(status=204)
 
 class TransactionViewset(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]

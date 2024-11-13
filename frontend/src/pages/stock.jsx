@@ -231,13 +231,12 @@ const stock = () => {
           </div>
           <div className='w-full h-[60vh] rounded-2xl flex flex-col drop-shadow'>
             <div className='h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
-              <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Product</h1>
-              <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Backhouse Stock</h1>
-              <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Backhouse UoM</h1>
-              <h1 className='w-[14%] text-[0.7vw] text-center'>Display Stock</h1>
-              <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Display UoM</h1>
-              <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Conversion Rate</h1>
-              <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Actions</h1>
+              <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Product</h1>
+              <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Backhouse Stock</h1>
+              <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Backhouse UoM</h1>
+              <h1 className='w-[16%] text-[0.7vw] text-center'>Display Stock</h1>
+              <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Display UoM</h1>
+              <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
               <div className='h-[9%] flex flex-col items-center justify-between'>
@@ -245,13 +244,12 @@ const stock = () => {
                   const product = getProductForStock(stock.id);
                   return (
                     <div key={stock.id} className='w-full border-b border-darkp text-darkp text-center flex items-center justify-between px-10 py-2'>
-                      <h1 className='w-[14%] text-[0.7vw] text-center'>{product.name}</h1>
-                      <h1 className='w-[14%] text-[0.7vw] text-center'>{stock.backhouseStock}</h1>
-                      <h1 className='w-[14%] text-[0.7vw] text-center'>{stock.backUoM}</h1>
-                      <h1 className='w-[14%] text-[0.7vw] text-center'>{stock.displayStock}</h1>
-                      <h1 className='w-[14%] text-[0.7vw] text-center'>{stock.displayUoM}</h1>
-                      <h1 className='w-[14%] text-[0.7vw] text-center'>{stock.conversionRate}</h1>
-                      <h1 className='w-[14%] flex gap-[1vw] justify-center'>
+                      <h1 className='w-[16%] text-[0.7vw] text-center'>{product.name}</h1>
+                      <h1 className='w-[16%] text-[0.7vw] text-center'>{stock.backhouseStock}</h1>
+                      <h1 className='w-[16%] text-[0.7vw] text-center'>{stock.backUoM}</h1>
+                      <h1 className='w-[16%] text-[0.7vw] text-center'>{stock.displayStock}</h1>
+                      <h1 className='w-[16%] text-[0.7vw] text-center'>{stock.displayUoM}</h1>
+                      <h1 className='w-[16%] flex gap-[1vw] justify-center'>
                         <button onClick={() => handleUpdatePass(stock)}><img src={edit} alt="Edit" className='w-[1.5vw]' /></button>
                         <button onClick={() => handleDelete(stock.id)}><img src={del} alt="Delete" className='w-[1.5vw]' /></button>
                         <button onClick={() => handleConvertClick(stock.id)}><img src={convert} alt="Convert" className='w-[1.5vw]' /></button>

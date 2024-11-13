@@ -3,9 +3,6 @@ import bg from '../assets/bg.jpg'
 import Sidebar from '../components/sidebar'
 import info from '../assets/info.png'
 import exit from '../assets/reject.png'
-import edit from '../assets/edit.png'
-import del from '../assets/delete.png'
-import right from '../assets/right-chevron.png'
 import axios from 'axios'
 
 
@@ -13,7 +10,7 @@ const Transaction = () => {
 
   const [transactions, setTransactions] = useState([]);
   const [transactionItems, setTransactionItems] = useState([]);
-  const [products, setProduct] = useState([]);
+  const [products, setProducts] = useState([]);
 
   const fetchTransactions = () => {
     axios.get('http://127.0.0.1:8000/transaction/')
@@ -200,15 +197,23 @@ const Transaction = () => {
                       {transactionItems
                         .filter(item => item.transactionID === transactionView.id)
                         .map(item => {
-                        return (
-                          <div key={item.id} className='w-full border-b border-darkp text-darkp text-center flex items-center justify-between px-10 py-2'>
-                            <h1 className='w-[19%] text-[0.7vw] leading-tight text-center'>Product</h1>
-                            <h1 className='w-[19%] text-[0.7vw] text-center'>{item.quantity}</h1>
-                            <h1 className='w-[19%] text-[0.7vw] text-center'>{item.unitMeasurement}</h1>
-                            <h1 className='w-[19%] text-[0.7vw] text-center'>{item.price}</h1>
-                            <h1 className='w-[19%] text-[0.7vw] text-center'>{item.productTotal}</h1>
-                          </div>
-                        );
+                          const product = products.find((p) => String(p.id) === String(item.productID));
+
+                          if (product) {
+                            console.log('Found Product:', product); // Log product details to verify
+                          } else {
+                            console.warn(`Product with ID ${item.productID} not found`);
+                          }
+
+                          return (
+                            <div key={item.id} className='w-full border-b border-darkp text-darkp text-center flex items-center justify-between px-10 py-2'>
+                              <h1 className='w-[19%] text-[0.7vw] leading-tight text-center'>{product ? product.name : 'Unknown Product'}</h1>
+                              <h1 className='w-[19%] text-[0.7vw] text-center'>{item.quantity}</h1>
+                              <h1 className='w-[19%] text-[0.7vw] text-center'>{item.unitMeasurement}</h1>
+                              <h1 className='w-[19%] text-[0.7vw] text-center'>{item.price}</h1>
+                              <h1 className='w-[19%] text-[0.7vw] text-center'>{item.productTotal}</h1>
+                            </div>
+                          );
                       })}
                     </div>
                   </div>

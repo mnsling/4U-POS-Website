@@ -17,20 +17,21 @@ const Records = () => {
   const [record, setRecord] = useState({
     id: '',
     supplierId: 1,
-    trackingNumber: '', 
+    referenceNumber: '', 
     deliveryFee: 0,
     totalAmount: 0,
-    status: 'TO ARRIVE',
+    status: 'VALIDATING',
   });
 
   const [items, setItems] = useState([]);
   const [item, setItem] = useState({
     id: 0,
     deliveryRecordID: '',
-    productID: '', 
+    productID: 1, 
     price: 0,
     qty: 0,
     total: 0,
+    expiryDate: ''
   });
 
   const handleChangeRecord = (e) => {
@@ -81,7 +82,6 @@ const Records = () => {
     axios.get('http://127.0.0.1:8000/supplier/')
       .then(response => {
         setSuppliers(response.data);
-        console.log(response.data); // Log the updated product list
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -92,7 +92,6 @@ const Records = () => {
     axios.get('http://127.0.0.1:8000/deliveryRecord/')
       .then(response => {
         setRecords(response.data);
-        console.log(response.data); // Log the updated product list
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -103,7 +102,6 @@ const Records = () => {
     axios.get('http://127.0.0.1:8000/product/')
       .then(response => {
         setProducts(response.data);
-        console.log(response.data); // Log the updated product list
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -114,7 +112,6 @@ const Records = () => {
     axios.get('http://127.0.0.1:8000/deliveryRecordItem/')
       .then(response => {
         setItems(response.data);
-        console.log(response.data); // Log the updated product list
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -127,7 +124,7 @@ const Records = () => {
     // Send POST request
     axios.post('http://127.0.0.1:8000/deliveryRecord/', {
       supplierId: record.supplierId,
-      trackingNumber: record.trackingNumber, 
+      referenceNumber: record.referenceNumber, 
       deliveryFee: record.deliveryFee,
       totalAmount: 0,
       status: record.status,
@@ -136,10 +133,10 @@ const Records = () => {
         console.log('Record created:', response.data);
         setRecord({
           supplierId: '',
-          trackingNumber: '', 
+          referenceNumber: '', 
           deliveryFee: 0,
           totalAmount: 0,
-          status: 'TO ARRIVE',
+          status: 'VALIDATING',
         })
         fetchRecords();
         handleClosePrompt();
@@ -153,7 +150,7 @@ const Records = () => {
     // Send POST request
     axios.put(`http://127.0.0.1:8000/deliveryRecord/${record.id}/`, {
       supplierId: record.supplierId,
-      trackingNumber: record.trackingNumber, 
+      referenceNumber: record.referenceNumber, 
       deliveryFee: record.deliveryFee,
       totalAmount: record.totalAmount,
       status: record.status,
@@ -183,12 +180,16 @@ const Records = () => {
   const handleSubmitItem = (e) => {
     e.preventDefault();
 
+    // Set expiryDate to null if it's empty
+    const expiryDateToPost = item.expiryDate ? item.expiryDate : null;
+
     // Send POST request
     axios.post('http://127.0.0.1:8000/deliveryRecordItem/', {
       deliveryRecordID: record.id,
       productID: item.productID, 
       price: item.price,
       qty: item.qty,
+      expiryDate: expiryDateToPost,
       })
       .then(response => {
         console.log('Item created:', response.data);
@@ -196,7 +197,8 @@ const Records = () => {
           deliveryRecordID: '',
           productID: '', 
           price: 0,
-          qty: 0
+          qty: 0,
+          expiryDate: '',
         })
         fetchItems();
         fetchRecords();
@@ -227,6 +229,7 @@ const Records = () => {
       productID: upItem.productID, 
       price: upItem.price,
       qty: upItem.qty,
+      expiryDate: upItem.expiryDate,
     })
     setUpItemId(upItem.id);
     handleEdit3Click();
@@ -241,6 +244,7 @@ const Records = () => {
       productID: item.productID, 
       price: item.price,
       qty: item.qty,
+      expiryDate: item.expiryDate,
     })
       .then(response => {
         console.log('Item updated:', response.data);
@@ -249,6 +253,7 @@ const Records = () => {
           productID: '', 
           price: 0,
           qty: 0,
+          expiryDate: '',
         })
         setUpItemId();
         fetchItems();
@@ -270,8 +275,7 @@ const Records = () => {
     setRecord({
       id: showRecord.id,
       supplierId: showRecord.supplierId,
-      trackingNumber: showRecord.trackingNumber, 
-      dateOrdered: showRecord.dateOrdered,
+      referenceNumber: showRecord.referenceNumber, 
       dateDelivered: showRecord.dateDelivered,
       deliveryFee: showRecord.deliveryFee,
       totalAmount: showRecord.totalAmount,
@@ -316,16 +320,15 @@ const Records = () => {
     setRecord({
       id: '',
       supplierId: '',
-      trackingNumber: '', 
-      dateOrdered: null,
+      referenceNumber: '', 
       dateDelivered: null,
       deliveryFee: 0,
       totalAmount: 0,
-      status: 'TO ARRIVE',
+      status: 'VALIDATING',
     })
   };
 
-  const [activeButton, setActiveButton] = useState('TO ARRIVE'); // Set the initial active button
+  const [activeButton, setActiveButton] = useState('VALIDATING'); // Set the initial active button
 
   const handleButtonClick = (newStatus) => {
       setActiveButton(newStatus);
@@ -354,7 +357,7 @@ const Records = () => {
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-between'>
             <div className='w-[15.5vw] flex justify-between gap-5'>
-              <select className='py-2 px-4 w-[8vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
+              <select className='py-2 px-4 w-[8.5vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
                 <option>Select Supplier</option>
               </select>
               <input type='date' className='py-2 px-4 w-[8vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
@@ -363,10 +366,8 @@ const Records = () => {
           </div>
           <div className='w-full h-[75vh] rounded-2xl flex flex-col drop-shadow'>
             <div className='h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center'>
-              <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Delivery Record #</h1>
-              <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Tracking #</h1>
+              <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Reference #</h1>
               <h1 className='w-[12%] text-[0.7vw] text-center'>Supplier Name</h1>
-              <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Order Date</h1>
               <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Date Delivered</h1>
               <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Status</h1>
               <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Delivery Fee</h1>
@@ -379,10 +380,8 @@ const Records = () => {
                   const supplier = getSupplierForRecord(record.supplierId);
                   return (
                     <div key={record.id} className='w-full border-b border-darkp text-darkp text-center flex items-center justify-between py-2'>
-                      <h1 className='w-[12%] text-[0.7vw] text-center'>{record.id}</h1>
-                      <h1 className='w-[12%] text-[0.7vw] text-center'>{record.trackingNumber}</h1>
+                      <h1 className='w-[12%] text-[0.7vw] text-center'>{record.referenceNumber}</h1>
                       <h1 className='w-[12%] text-[0.7vw] text-center'>{supplier.supplierName}</h1>
-                      <h1 className='w-[12%] text-[0.7vw] text-center'>{record.dateOrdered}</h1>
                       <h1 className='w-[12%] text-[0.7vw] text-center'>{record.dateDelivered}</h1>
                       <h1 className='w-[12%] text-[0.7vw] text-center'>{record.status}</h1>
                       <h1 className='w-[12%] text-[0.7vw] text-center'>{record.deliveryFee}</h1>
@@ -423,22 +422,14 @@ const Records = () => {
                       </select>
                     </div>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Tracking #</label>
-                      <input name="trackingNumber" value={record.trackingNumber} onChange={handleChangeRecord} type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter tracking #' />
+                      <label className='text-[0.7vw]'>Reference #</label>
+                      <input name="referenceNumber" value={record.referenceNumber} onChange={handleChangeRecord} type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter reference #' />
                     </div>
                   </div>
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Delivery Fee</label>
                       <input name="deliveryFee" value={record.deliveryFee} onChange={handleChangeRecord} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter fee amount' />
-                    </div>
-                    <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Status</label>
-                      <select name='status' value={record.status} onChange={handleChangeRecord} className='w-full border border-darkp rounded-md px-5 py-2'>
-                        <option value='TO ARRIVE'>To Arrive</option>
-                        <option value='DELIVERED'>Delivered</option>
-                        <option value='CANCELLED'>Cancelled</option>
-                      </select>
                     </div>
                   </div>
                 </div>
@@ -467,7 +458,7 @@ const Records = () => {
                   <div className='w-full flex justify-start'>
                     <div className='text-darkp w-full flex flex-col gap-5'>
                       <div className='flex gap-10 items-end'>
-                        <h1 className='text-[3vw] font-bold tracking-tighter'>DELIVERY RECORD #{record.id}</h1>
+                        <h1 className='text-[3vw] font-bold tracking-tighter'>REFERENCE # {record.referenceNumber}</h1>
                         <div className='flex gap-3 h-fit justify-end items-end pb-5'>
                           <button className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button' onClick={handleEdit2Click}>Edit</button>
                           <button className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'onClick={handleDelete}>Delete</button>
@@ -476,22 +467,12 @@ const Records = () => {
                       <div className='w-full flex gap-10'>
                         <div className='w-[20vw] flex flex-col gap-2'>
                           <div className='flex justify-between border-b border-darkp px-2 py-1'>
-                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Tracking #:</h1>
-                            <h1 className='text-[0.8vw] tracking-tighter'>{record.trackingNumber}</h1>
+                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Date Delivered:</h1>
+                            <h1 className='text-[0.8vw] tracking-tighter'>{record.dateDelivered}</h1>
                           </div>
                           <div className='flex justify-between border-b border-darkp px-2 py-1'>
                             <h1 className='text-[0.8vw] font-bold tracking-tighter'>Supplier Name:</h1>
                             <h1 className='text-[0.8vw] tracking-tighter'>{getSupplierForRecord(record.supplierId).supplierName}</h1>
-                          </div>
-                        </div>
-                        <div className='w-[20vw] flex flex-col gap-2'>
-                          <div className='flex justify-between border-b border-darkp px-2 py-1'>
-                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Order Date:</h1>
-                            <h1 className='text-[0.8vw] tracking-tighter'>{record.dateOrdered}</h1>
-                          </div>
-                          <div className='flex justify-between border-b border-darkp px-2 py-1'>
-                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Date Delivered:</h1>
-                            <h1 className='text-[0.8vw] tracking-tighter'>{record.dateDelivered}</h1>
                           </div>
                         </div>
                         <div className='w-[20vw] flex flex-col gap-2'>
@@ -501,7 +482,7 @@ const Records = () => {
                           </div>
                           <div className='flex justify-between border-b border-darkp px-2 py-1'>
                             <h1 className='text-[0.8vw] font-bold tracking-tighter'>Total Amount:</h1>
-                            <h1 className='text-[0.8vw] tracking-tighter'>{record.totalAmount}</h1>
+                            <h1 className='text-[0.8vw] tracking-tighter'>{(Number(record.totalAmount) + Number(record.deliveryFee)).toFixed(2)}</h1>
                           </div>
                         </div>
                       </div>
@@ -516,11 +497,12 @@ const Records = () => {
                   </div>
                   <div className='w-full h-[50vh] flex flex-col drop-shadow'>
                     <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center'>
-                      <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Product</h1>
-                      <h1 className='w-[16%] text-[0.7vw] text-center'>Price</h1>
-                      <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Quantity</h1>
-                      <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Total</h1>
-                      <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Actions</h1>
+                      <h1 className='w-[45%] text-[0.7vw] leading-tight text-center'>Product</h1>
+                      <h1 className='w-[10%] text-[0.7vw] text-center'>Price</h1>
+                      <h1 className='w-[10%] text-[0.7vw] leading-tight text-center'>Quantity</h1>
+                      <h1 className='w-[10%] text-[0.7vw] leading-tight text-center'>Total</h1>
+                      <h1 className='w-[10%] text-[0.7vw] leading-tight text-center'>Expiry Date</h1>
+                      <h1 className='w-[10%] text-[0.7vw] leading-tight text-center'>Actions</h1>
                     </div>
                     <div className='w-full h-full bg-white border-x rounded-b-2xl border-b border-darkp overflow-auto'>
                       <div className='flex flex-col h-[9%] items-center justify-between'>
@@ -530,11 +512,12 @@ const Records = () => {
                         const product = getProductForRecord(item.productID);
                         return (
                           <div key={item.id} className='w-full text-darkp border-b border-darkp text-center flex items-center justify-between py-2'>
-                            <h1 className='w-[16%] text-[0.7vw] text-center'>{product.name}</h1>
-                            <h1 className='w-[16%] text-[0.7vw] text-center'>{item.price}</h1>
-                            <h1 className='w-[16%] text-[0.7vw] text-center'>{item.qty}</h1>
-                            <h1 className='w-[16%] text-[0.7vw] text-center'>{item.total}</h1>
-                            <h1 className='w-[16%] flex gap-[1vw] justify-center'>
+                            <h1 className='w-[45%] text-[0.7vw] text-center'>{product.name}</h1>
+                            <h1 className='w-[10%] text-[0.7vw] text-center'>{item.price}</h1>
+                            <h1 className='w-[10%] text-[0.7vw] text-center'>{item.qty}</h1>
+                            <h1 className='w-[10%] text-[0.7vw] text-center'>{item.total}</h1>
+                            <h1 className='w-[10%] text-[0.7vw] leading-tight text-center'>{item.expiryDate ? item.expiryDate : 'N/A'}</h1>
+                            <h1 className='w-[10%] flex gap-[1vw] justify-center'>
                               <button onClick={() => handleUpdatePassItem(item)}>
                                 <img
                                   src={edit}
@@ -559,7 +542,7 @@ const Records = () => {
                   <div className='mt-3'>
                     <h1 className='text-[1vw] text-darkp font-bold tracking-tighter mb-2'>Status Bar:</h1>
                     <div className='w-min h-[3.5vw] rounded-2xl border border-darkp flex justify-between gap-5 font-medium tracking-tighter text-[.7vw] text-darkp px-2 py-6'>
-                      {['TO ARRIVE', 'DELIVERED', 'CANCELLED'].map((status, index) => (
+                      {['VALIDATING', 'DELIVERED'].map((status, index) => (
                         <div key={index} className='flex gap-2 w-full h-full items-center'>
                           <button
                             onClick={() => handleButtonClick(status)}
@@ -568,7 +551,7 @@ const Records = () => {
                           >
                             {status}
                           </button>
-                          {index < 2 && <img src={right} className='w-[1.2vw]' />}
+                          {index < 1 && <img src={right} className='w-[1.2vw]' />}
                         </div>
                       ))}
                     </div>
@@ -584,7 +567,7 @@ const Records = () => {
                 <h2 className='text-black text-[1.3vw] font-black'>Add Item</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex gap-5'>
-                  <div className='w-full flex flex-col gap-5'>
+                  <div className='w-[50%] flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Product Name</label>
                       <select
@@ -608,10 +591,14 @@ const Records = () => {
                       <input type='number' name='price' value={item.price} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter price' />
                     </div>
                   </div>
-                  <div className='w-full flex flex-col gap-5'>
+                  <div className='w-[50%] flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Quantity</label>
                       <input type='number' name='qty' value={item.qty} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    </div>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Expiry Date</label>
+                      <input type='date' name='expiryDate' value={item.expiryDate} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                     </div>
                   </div>
                 </div>
@@ -641,8 +628,8 @@ const Records = () => {
                 <div className='w-full flex gap-5'>
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Tracking #</label>
-                      <input name='trackingNumber' onChange={handleChangeRecord} value={record.trackingNumber} type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter tracking #' />
+                      <label className='text-[0.7vw]'>Reference #</label>
+                      <input name='referenceNumber' onChange={handleChangeRecord} value={record.referenceNumber} type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter reference #' />
                     </div>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Supplier Name</label>
@@ -664,10 +651,6 @@ const Records = () => {
                     </div>
                   </div>
                   <div className='w-full flex flex-col gap-5'>
-                    <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Total Amount</label>
-                      <input name='totalAmount' onChange={handleChangeRecord} value={record.totalAmount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
-                    </div>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Delivery Fee</label>
                       <input name='deliveryFee' onChange={handleChangeRecord} value={record.deliveryFee} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
@@ -698,7 +681,7 @@ const Records = () => {
                 <h2 className='text-black text-[1.3vw] font-black'>Edit Item</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex gap-5'>
-                  <div className='w-full flex flex-col gap-5'>
+                  <div className='w-[50%] flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Product Name</label>
                       <select
@@ -722,14 +705,18 @@ const Records = () => {
                       <input type='number' name='price' value={item.price} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter price' />
                     </div>
                   </div>
-                  <div className='w-full flex flex-col gap-5'>
+                  <div className='w-[50%] flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Quantity Ordered</label>
                       <input type='number' name='qty' value={item.qty} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter price' />
                     </div>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Expiry Date</label>
+                      <input type='date' name='expiryDate' value={item.expiryDate} onChange={handleChangeItem} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    </div>
                   </div>
                 </div>
-                <div className='flex gap-4 mt-10'>
+                <div className='flex gap-4'>
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
                     onClick={handleUpdateItem}
