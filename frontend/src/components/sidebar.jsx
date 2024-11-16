@@ -8,6 +8,7 @@ import returnp from '../assets/product-return.png';
 import stock from '../assets/now-in-stock.png';
 import bar from '../assets/bar-chart.png';
 import right from '../assets/arrow-right.png';
+import sup from '../assets/parcel.png'
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -94,14 +95,17 @@ const Sidebar = () => {
               <button onClick={handleStock} className='text-white flex gap-4 px-6 items-start py-3 border-b border-white hover:bg-darkp2 button'>
                 <h1 className='text-[0.8vw]'>Product Stock</h1>
               </button>
-              <button onClick={handleSupplier} className='text-white flex gap-4 px-6 items-start py-3 border-b border-white hover:bg-darkp2 button'>
-                <h1 className='text-[0.8vw]'>Suppliers</h1>
-              </button>
               <button onClick={handleStockRecords} className='text-white flex gap-4 px-6 items-start py-3 border-white hover:bg-darkp2 button'>
                 <h1 className='text-[0.8vw]'>Stock Records</h1>
               </button>
             </div>
           )}
+          <button onClick={handleSupplier} className='flex gap-4 items-center px-6 py-3 border-b border-white hover:bg-darkp2 button'>
+            <img src={sup} className='w-[1vw]' />
+            <div className='w-full text-white flex justify-between items-center'>
+              <h1 className='text-[0.8vw]'>Suppliers</h1>
+            </div>
+          </button>
           <button onClick={handleReport} className='flex gap-4 items-center px-6 py-3 border-b border-white hover:bg-darkp2 button'>
             <img src={bar} className='w-[1vw]' />
             <div className='w-full text-white flex justify-between items-center'>
