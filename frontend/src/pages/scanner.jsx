@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Sidebar from '../components/sidebar';
 import bg from '../assets/bg.jpg';
-import del from '../assets/delete.png'
+import del from '../assets/delete.png';
+import edit from '../assets/edit.png';
 import axios from 'axios';
 
 const Scanner = () => {
@@ -12,14 +13,18 @@ const Scanner = () => {
   const [transaction, setTransaction] = useState({
     terminalIssued: 'ONE',
     status: 'ON HOLD',
+    amountDue: 0,
     discountApplicable: false,
+    finalAmount: 0,
+    amountPaid: 0,
+    customerChange: 0,
   });
 
   const [transactionItems, setTransactionItems] = useState([]);
   const [transactionItem, setTransactionItem] = useState({
     id: '',
     transactionID: '',
-    productID: '', 
+    productID: '',
     quantity: 0,
     price: 0,
   });
@@ -38,11 +43,23 @@ const Scanner = () => {
     });
   };
 
+  const handleChangeTransaction = (e) => {
+    const { name, value } = e.target;
+  
+    setTransaction((prevTransaction) => {
+      const updatedTransaction = {
+        ...prevTransaction,
+        [name]: value,
+      };
+      
+      return updatedTransaction;
+    });
+  };
+  
   const fetchProducts = () => {
     axios.get('http://127.0.0.1:8000/product/')
       .then(response => {
         setProducts(response.data);
-        console.log(response.data); // Log the updated product list
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -53,7 +70,6 @@ const Scanner = () => {
     axios.get('http://127.0.0.1:8000/stock/')
       .then(response => {
         setStocks(response.data);
-        console.log(response.data); // Log the updated product list
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -82,21 +98,134 @@ const Scanner = () => {
     }
   };
 
-  // Inside the component:
+  const handleDeleteProduct = (productID) => {
+    setTransactionItems(prevItems => 
+      prevItems.filter(item => item.productID !== productID)
+    );
+    console.log(`Deleted product with ID: ${productID}`);
+  };
+
+  const [newQuantity, setNewQuantity] = useState({
+    qty: 0,
+    productId: 0,
+  });
+
+  const handleEditQuantity = () => {
+    console.log(newQuantity);
+
+    const productID = newQuantity.productId;
+
+    setTransactionItems(prevItems =>
+      prevItems.map(item => 
+        item.productID === productID ? { ...item, quantity: newQuantity.qty } : item
+      )
+    );
+
+    console.log(`Updated quantity for product ID: ${productID} to ${newQuantity.qty}`);
+  };
+
+  const handleQuantityChange = (e) => {
+    const { name, value } = e.target;
+
+    setNewQuantity(prevQuantity => {
+      const updatedQuantity = {
+        ...prevQuantity,
+        [name]: value,
+      };
+      // Log updated product here
+      console.log('Updated Quantity:', updatedQuantity);
+      return updatedQuantity;
+    });
+  };
+
+  const postTransaction = () => {
+    // Step 1: First, create the transaction to get the transactionID
+    axios.post('http://127.0.0.1:8000/transaction/', {
+      terminalIssued: 'ONE',
+      status: 'COMPLETED',
+      amountDue: totalAmountGlobal,
+      discountApplicable: transaction.discountApplicable,
+      finalAmount: finalAmountGlobal,
+      amountPaid: transaction.amountPaid,
+      customerChange: customerChange,
+    })
+    .then((transactionResponse) => {
+
+      setTransaction({
+        terminalIssued: 'ONE',
+        status: 'ON HOLD',
+        amountDue: 0,
+        discountApplicable: false,
+        finalAmount: 0,
+        amountPaid: 0,
+        customerChange: 0,
+      })
+
+      const transactionID = transactionResponse.data.id;
+  
+      const postRequests = transactionItems.map(item => {
+
+        const product = products.find((p) => String(p.id) === String(item.productID));
+        const price = product.unitPrice;
+
+        console.log(product);
+
+        const stock = stocks.find((s) => String(s.productId) === String(item.productID));
+        const unitMeasurement = stock.unitMeasurement;
+
+        console.log(stock);
+
+        return axios.post('http://127.0.0.1:8000/transactionItem/', {
+          transactionID: transactionID,
+          productID: item.productID,
+          quantity: item.quantity,
+          price: price,
+          productTotal: item.productTotal,
+          unitMeasurement: unitMeasurement,
+        });
+      });
+  
+      Promise.all(postRequests)
+        .then((responses) => {
+          responses.forEach(response => {
+            console.log('Transaction item added:', response.data);
+          });
+        })
+        .catch((error) => {
+          console.error('Error posting transaction items:', error.response.data);
+        });
+    })
+    .catch((error) => {
+      // Handle error creating the transaction
+      console.error('Error creating transaction:', error.response?.data || error.message);
+    });
+
+    clearTransactionItems();
+    handleCancelPayment();
+  };
+
+  // Function to clear transactionItems array
+  const clearTransactionItems = () => {
+    setTransactionItems([]); // Reset the transactionItems to an empty array
+  };
+  
   const totalAmountGlobal = useMemo(() => {
     return transactionItems.reduce((total, item) => {
       const product = products.find((p) => String(p.id) === String(item.productID));
       const unitPrice = product ? product.unitPrice : 0;
       return total + item.quantity * unitPrice;
-    }, 0);
+    }, 0).toFixed(2); // Limiting to 2 decimal places
   }, [transactionItems, products]);
-
+  
   const finalAmountGlobal = useMemo(() => {
-    if (transaction.discountApplicable) {
-      return totalAmountGlobal * 0.85; // Applying 15% discount
-    }
-    return totalAmountGlobal; // No discount
-  }, [totalAmountGlobal, transaction.discountApplicable]);
+    const amount = transaction.discountApplicable ? totalAmountGlobal * 0.85 : totalAmountGlobal;
+    return parseFloat(amount).toFixed(2); // Limiting to 2 decimal places and converting back to number
+  }, [totalAmountGlobal, transaction.discountApplicable]);  
+
+  const customerChange = useMemo(() => {
+    const change = transaction.amountPaid - finalAmountGlobal;
+    return change.toFixed(2); // You can also add a condition here to ensure change is not negative
+  }, [transaction.amountPaid, finalAmountGlobal]);
 
   const toggleDiscount = () => {
     setTransaction((prevTransaction) => ({
@@ -107,6 +236,7 @@ const Scanner = () => {
 
   const [showProductList, setShowProductList] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const handleNumberClick = (number) => {
     setTransactionItem((prevItem) => ({
@@ -138,6 +268,21 @@ const Scanner = () => {
   const handleCancelPayment = () => {
     setShowPaymentModal(false);
   };
+  
+  const handleEditButtonClick = (id) => {
+    console.log("Editing product with ID:", id);
+    setNewQuantity({
+      productId: id,
+    });
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setNewQuantity({
+      productId: 0,
+    });
+    setShowEditModal(false);
+  };
 
   return (
     <div className='w-screen h-full bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
@@ -150,8 +295,8 @@ const Scanner = () => {
         <div className='w-full h-[85%] flex'>
           <div className='flex flex-col w-[65%] h-full items-center'>
             <div className='flex w-full h-[32vw] justify-center items-center'>
-              <div className='w-[90%] h-full bg-white rounded-2xl drop-shadow-xl'>
-                <div className='flex gap-8 justify-between items-center text-white text-sm h-[4vw] w-full px-10 py-6 bg-darkp opacity-80 rounded-t-2xl'>
+              <div className='w-[90%] overflow-hidden h-full bg-white rounded-2xl drop-shadow-xl'>
+                <div className='flex gap-8 justify-between items-center text-white text-[1vw] h-[4vw] w-full px-10 py-6 bg-darkp opacity-80 rounded-t-2xl'>
                   <h1 className='w-[16%] text-center'>Quantity</h1>
                   <h1 className='w-[16%] text-center'>UoM</h1>
                   <h1 className='w-[16%] text-center'>Product</h1>
@@ -159,40 +304,31 @@ const Scanner = () => {
                   <h1 className='w-[16%] text-center'>Amount</h1>
                   <h1 className='w-[16%] text-center'>Actions</h1>
                 </div>
-                <div className='overflow-y-auto'>
-                {transactionItems.map((item, index) => {
-                  const product = products.find((p) => String(p.id) === String(item.productID));
+                <div className='w-full h-[88%] flex flex-col'>
+                  <div className='w-full h-full bg-white rounded-b-2xl overflow-auto hide-scrollbar'>
+                      {transactionItems.map((item, index) => {
+                        const product = products.find((p) => String(p.id) === String(item.productID));
+                        const stock = stocks.find((s) => String(s.productId) === String(item.productID));
+                        const productName = product ? product.name : 'N/A';
+                        const unitPrice = product ? product.unitPrice : 0;
+                        const unitMeasurement = stock ? stock.displayUoM : 'N/A';
 
-                  if (product) {
-                    console.log('Found Product:', product); // Log product details to verify
-                  } else {
-                    console.warn(`Product with ID ${item.productID} not found`);
-                  }
-
-                  const stock = stocks.find((s) => String(s.productId) === String(item.productID));
-                  if (stock) {
-                    console.log('Found Stock:', stock); // Log product details to verify
-                  } else {
-                    console.warn(`Stock with ID ${item.productID} not found`);
-                  }
-
-                  const productName = product ? product.name : 'N/A';
-                  const unitPrice = product ? product.unitPrice : 0;
-                  const unitMeasurement = stock ? stock.displayUoM : 'N/A';
-
-                  return (
-                    <div key={index} className='flex gap-8 justify-between px-10 py-3 border-b border-gray-200'>
-                      <h1 className='w-[16%] text-center'>{item.quantity}</h1>
-                      <h1 className='w-[16%] text-center'>{unitMeasurement}</h1>
-                      <h1 className='w-[16%] text-center'>{productName}</h1>
-                      <h1 className='w-[16%] text-center'>₱ {unitPrice.toFixed(2)}</h1>
-                      <h1 className='w-[16%] text-center'>₱ {(unitPrice * item.quantity).toFixed(2)}</h1>
-                      <h1 className='w-[16%] text-center'>
-                        <button><img src={del} alt="Delete" className='w-[1.5vw]' /></button>
-                      </h1>
+                        return (
+                          <div key={index} className='flex gap-8 text-[1vw] items-center justify-between px-10 py-3 border-b border-gray-200'>
+                            <h1 className='w-[16%] text-center'>{item.quantity}</h1>
+                            <h1 className='w-[16%] text-center'>{unitMeasurement}</h1>
+                            <h1 className='w-[16%] text-center'>{productName}</h1>
+                            <h1 className='w-[16%] text-center'>₱ {unitPrice}</h1>
+                            <h1 className='w-[16%] text-center'>₱ {(unitPrice * item.quantity).toFixed(2)}</h1>
+                            <div className='flex justify-center gap-2 w-[16%] text-center'>
+                              <button onClick={() => handleEditButtonClick(item.productID)}><img src={edit} alt="Edit" className='w-[1vw]' /></button>
+                              <button onClick={() => handleDeleteProduct(item.productID)}><img src={del} alt="Delete" className='w-[1vw]' /></button>
+                            </div>
+                          </div>
+                        )})}
                     </div>
-                  )})}
                 </div>
+                  
               </div>
             </div>
             <div className='w-full h-[2vw]'/>
@@ -330,13 +466,16 @@ const Scanner = () => {
                 <div className='h-full flex flex-col gap-3'>
                   <div className='w-full h-full flex flex-col gap-5 justify-start items-start bg-white border-2 rounded-2xl opacity-70 px-10 py-5'>
                     <p className='text-3xl font-semibold tracking-tight'>Total Amount:</p>
-                    <p className='text-6xl font-semibold tracking-tighter'>₱ rawr</p>
+                    <p className='text-6xl font-semibold tracking-tighter'>₱ {finalAmountGlobal}</p>
                   </div>
                   <div className='w-full flex flex-col gap-2 justify-start items-start bg-white border-2 rounded-2xl px-10 py-5'>
                     <p className='text-3xl font-semibold tracking-tight'>Amount Paid:</p>
                     <div className='flex gap-2 text-6xl font-semibold items-center justify-start'>
                       <p>₱</p>
                       <input
+                        name='amountPaid'
+                        value={transaction.amountPaid}
+                        onChange={handleChangeTransaction}
                         type='number'
                         className='w-full text-6xl leading-5 outline-none bg-transparent tracking-tight placeholder:tracking-tighter'
                         placeholder='enter amount'
@@ -346,11 +485,12 @@ const Scanner = () => {
                 </div>
                 <div className='flex flex-col gap-20 h-full w-full bg-white border-2 rounded-2xl px-10 py-5'>
                   <p className='text-3xl font-semibold tracking-tight'>Change:</p>
-                  <p className='text-9xl font-semibold tracking-tighter'> ₱ rawr</p>
+                  <p className='text-3xl font-semibold tracking-tight'>P {customerChange}</p>
                 </div>
               </div>
               <div className='flex gap-5 justify-end'>
                 <button
+                onClick={postTransaction}
                   className='bg-darkp opacity-80 hover:opacity-100 button text-white text-lg tracking-tight px-4 py-2 rounded'
                 >
                   Proceed with Payment
@@ -362,6 +502,36 @@ const Scanner = () => {
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showEditModal && (
+        <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
+          <div className='bg-white w-min h-min p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+            <h2 className='text-black text-[1.3vw] font-black'>Edit Product:</h2>
+            {/* Input for adding stock */}
+            <div className='w-full flex gap-5'>
+              <div className='w-full flex flex-col gap-5'>
+                <div className='w-full flex flex-col justify-start gap-1'>
+                  <label className='text-[0.7vw]'>Product Quantity</label>
+                  <input name='qty' value={newQuantity.qty} onChange={handleQuantityChange} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                </div>
+              </div>
+            </div>
+            <div className='flex gap-4'>
+              <button
+                className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                onClick={() => handleEditQuantity()} 
+              >
+                Confirm
+              </button>
+              <button
+                className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                onClick={handleCloseEditModal}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

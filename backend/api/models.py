@@ -46,7 +46,7 @@ class Product(models.Model):
     
 # Stock Model
 class Stock(models.Model):
-    productId = models.ForeignKey(Product, default=0, on_delete=models.CASCADE)
+    productId = models.OneToOneField(Product, default=0, on_delete=models.CASCADE)
     backhouseStock = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     backUoM = models.CharField(default='', max_length=50)
     displayStock = models.IntegerField(default=0)
@@ -149,16 +149,16 @@ def update_delivery_record_total(sender, instance, **kwargs):
     delivery_record.save()
 
 class StockItem(models.Model):
-    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
-    stockID = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    productID = models.ForeignKey(Product, null=True, on_delete=models.CASCADE)
+    stockID = models.ForeignKey(Stock, null=True, on_delete=models.CASCADE)
     referenceNumber = models.CharField(null=True, max_length=100)
-    closedStock = models.IntegerField()
-    openStock = models.IntegerField()
-    toDisplayStock = models.IntegerField()
-    displayedStock = models.IntegerField()
-    damagedStock = models.IntegerField()
-    stockedOutQty = models.IntegerField()
-    stockOutDescription = models.TextField()
+    closedStock = models.IntegerField(null=True)
+    openStock = models.IntegerField(null=True)
+    toDisplayStock = models.IntegerField(null=True)
+    displayedStock = models.IntegerField(null=True)
+    damagedStock = models.IntegerField(null=True)
+    stockedOutQty = models.IntegerField(null=True)
+    stockOutDescription = models.TextField(null=True)
     expiryDate = models.DateField(null=True)
 
     def __str__(self):

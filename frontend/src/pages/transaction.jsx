@@ -53,8 +53,9 @@ const Transaction = () => {
 
   const[transactionView, setTransactionView] = useState([]);
 
-  // Calculate the total amount of transactions
-  const transactionTotal = transactions.reduce((total, transaction) => total + transaction.finalAmount, 0);
+  const transactionTotal = parseFloat(transactions.reduce((total, transaction) => {
+    return total + parseFloat(transaction.finalAmount || 0); // Ensure the value is treated as a number
+  }, 0).toFixed(2)); // Limit the total to 2 decimal places and convert it back to a number  
 
   const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
 

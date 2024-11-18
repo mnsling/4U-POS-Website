@@ -39,7 +39,7 @@ class StockItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockItem
-        fields =('id', 'productID', 'stockID', 'closedStock', 'openStock', 'toDisplayStock', 'displayedStock', 'damagedStock', 'stockedOutQty', 'stockOutDescription', 'expiryDate')
+        fields =('id', 'productID', 'stockID', 'referenceNumber', 'closedStock', 'openStock', 'toDisplayStock', 'displayedStock', 'damagedStock', 'stockedOutQty', 'stockOutDescription', 'expiryDate')
 
 class TransactionSerializer(serializers.ModelSerializer):
 

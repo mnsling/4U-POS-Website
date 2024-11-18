@@ -8,22 +8,28 @@ import Inventory from './pages/inventory'
 import Return from './pages/returns'
 import Stock from './pages/stock'
 import Report from './pages/reports'
-import Suppliers from './pages/suppliers'
 import Records from './pages/records'
+import Suppliers from './pages/suppliers'
+import Open from './pages/openstock'
+import Move from './pages/movestock'
+import Out from './pages/stockout'
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Scanner />} />
+      <Route path="/logout" element={<Login />} />
       <Route path="/scanner" element={<Scanner />} />
       <Route path="/transaction" element={<Transaction />} />
-      <Route path="/inventory" element={<Inventory />} />
+      <Route path="/" element={<Inventory />} />
       <Route path="/return" element={<Return />} />
-      <Route path="/suppliers" element={<Suppliers />} />
       <Route path="/stock" element={<Stock />} />
+      <Route path="/suppliers" element={<Suppliers />} />
       <Route path="/records" element={<Records />} />
       <Route path="/report" element={<Report />} />
+      <Route path="/open" element={<Open />} />
+      <Route path="/move" element={<Move />} />
+      <Route path="/out" element={<Out />} />
     </Routes>
   </BrowserRouter>
 );
