@@ -1,0 +1,14 @@
+For Frontend:
+
+- cd frontend
+- npm install
+- npm install axios
+
+to run: npm run dev
+
+------------------------------------------------------------------
+For Backend:
+
+- cd backend
+- python -m pip install Django
+- pip install djangorestframework
