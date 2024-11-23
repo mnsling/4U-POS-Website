@@ -5,6 +5,7 @@ import open from '../assets/unboxing.png'
 import exit from '../assets/reject.png'
 import edit from '../assets/edit.png'
 import del from '../assets/delete.png'
+import right from '../assets/right-chevron.png'
 
 const stockout = () => {
 
@@ -43,6 +44,12 @@ const stockout = () => {
 
   const handleClosePrompt = () => {
     setShowDetailsPrompt(false);
+  };
+
+  const [activeButton, setActiveButton] = useState('DRAFT'); // Set the initial active button
+
+  const handleButtonClick = (status) => {
+    setActiveButton(status); // Update the active button state
   };
 
   return (
@@ -115,7 +122,7 @@ const stockout = () => {
                   <div className='w-full flex justify-end items-end mb-2'>
                     <button onClick={handleAddClick} className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Add Product</button>
                   </div>
-                  <div className='w-full h-[68vh] flex flex-col drop-shadow'>
+                  <div className='w-full h-[50vh] flex flex-col drop-shadow'>
                     <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Product Name</h1>
                       <h1 className='w-[8vw] text-[0.7vw] text-center'>Reference #</h1>
@@ -145,6 +152,26 @@ const stockout = () => {
                           />
                         </div>
                       </div>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <h1 className="text-[1vw] text-darkp font-bold tracking-tighter mb-2">Status Bar:</h1>
+                    <div className="w-[16vw] h-[3.5vw] rounded-2xl border border-darkp flex justify-center items-center gap-2 font-medium tracking-tighter text-[.7vw] text-darkp">
+                      <button
+                        onClick={() => handleButtonClick('VALIDATING')}
+                        className={`py-3 px-4 hover:bg-darkp hover:text-white rounded-xl button ${activeButton === 'VALIDATING' ? 'bg-darkp text-white rounded-xl' : ''
+                          }`}
+                      >
+                        VALIDATING
+                      </button>
+                      <img src={right} className="w-[1.5vw] h-[1.2vw]" />
+                      <button
+                        onClick={() => handleButtonClick('CONFIRMED')}
+                        className={`py-3 px-4 hover:bg-darkp hover:text-white rounded-xl button ${activeButton === 'CONFIRMED' ? 'bg-darkp text-white rounded-xl' : ''
+                          }`}
+                      >
+                        CONFIRMED
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -183,13 +210,13 @@ const stockout = () => {
                 </div>
                 <div className='flex gap-4'>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-green-500 button'
                     onClick={handleCloseAddPrompt}
                   >
                     Confirm
                   </button>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-red-500 button'
                     onClick={handleCloseAddPrompt}
                   >
                     Cancel
@@ -218,13 +245,13 @@ const stockout = () => {
                 </div>
                 <div className='flex gap-4 mt-10'>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-green-500 button'
                     onClick={handleCloseEdit2Prompt}
                   >
                     Confirm
                   </button>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-red-500 button'
                     onClick={handleCloseEdit2Prompt}
                   >
                     Cancel
@@ -261,13 +288,13 @@ const stockout = () => {
                 </div>
                 <div className='flex gap-4 mt-10'>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-green-500 button'
                     onClick={handleCloseEdit3Prompt}
                   >
                     Confirm
                   </button>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-red-500 button'
                     onClick={handleCloseEdit3Prompt}
                   >
                     Cancel

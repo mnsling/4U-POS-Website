@@ -5,8 +5,9 @@ import open from '../assets/unboxing.png'
 import exit from '../assets/reject.png'
 import edit from '../assets/edit.png'
 import del from '../assets/delete.png'
+import right from '../assets/right-chevron.png'
 
-const movestock = () => {
+const repack = () => {
 
   const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
   const [showAddPrompt, setShowAddPrompt] = useState(false);
@@ -45,12 +46,18 @@ const movestock = () => {
     setShowDetailsPrompt(false);
   };
 
+  const [activeButton, setActiveButton] = useState('DRAFT'); // Set the initial active button
+
+  const handleButtonClick = (status) => {
+    setActiveButton(status); // Update the active button state
+  };
+
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
       <div className='w-[83.5vw] h-screen flex flex-col items-center z-50'>
         <div className='w-full h-[10vh] bg-white flex items-center justify-between px-[2vw] drop-shadow-xl'>
-          <h1 className='text-[1.5vw] text-darkp font-medium tracking-tighter z-10'>Move Stock</h1>
+          <h1 className='text-[1.5vw] text-darkp font-medium tracking-tighter z-10'>Repack Stock</h1>
         </div>
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-between'>
@@ -115,18 +122,24 @@ const movestock = () => {
                   <div className='w-full flex justify-end items-end mb-2'>
                     <button onClick={handleAddClick} className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Add Product</button>
                   </div>
-                  <div className='w-full h-[68vh] flex flex-col drop-shadow'>
+                  <div className='w-full h-[50vh] flex flex-col drop-shadow'>
                     <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Product Name</h1>
                       <h1 className='w-[8vw] text-[0.7vw] text-center'>Reference #</h1>
-                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Stocks Moved</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Stocks Opened</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Qty. Added</h1>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Previous Qty.</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Damaged</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Mother Stock</h1>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Actions</h1>
                     </div>
                     <div className='w-full h-full bg-white border-x rounded-b-2xl border-b border-darkp overflow-auto'>
                       <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'>Ice Candy</h1>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'>5.00</h1>
+                        <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
+                        <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
+                        <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'>1000.00</h1>
                         <div className='w-[8%] flex justify-center gap-5'>
@@ -143,6 +156,26 @@ const movestock = () => {
                           />
                         </div>
                       </div>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <h1 className="text-[1vw] text-darkp font-bold tracking-tighter mb-2">Status Bar:</h1>
+                    <div className="w-[16vw] h-[3.5vw] rounded-2xl border border-darkp flex justify-center items-center gap-2 font-medium tracking-tighter text-[.7vw] text-darkp">
+                      <button
+                        onClick={() => handleButtonClick('VALIDATING')}
+                        className={`py-3 px-4 hover:bg-darkp hover:text-white rounded-xl button ${activeButton === 'VALIDATING' ? 'bg-darkp text-white rounded-xl' : ''
+                          }`}
+                      >
+                        VALIDATING
+                      </button>
+                      <img src={right} className="w-[1.5vw] h-[1.2vw]" />
+                      <button
+                        onClick={() => handleButtonClick('CONFIRMED')}
+                        className={`py-3 px-4 hover:bg-darkp hover:text-white rounded-xl button ${activeButton === 'CONFIRMED' ? 'bg-darkp text-white rounded-xl' : ''
+                          }`}
+                      >
+                        CONFIRMED
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -170,7 +203,7 @@ const movestock = () => {
                   </div>
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Stocks Moved</label>
+                      <label className='text-[0.7vw]'>Stocks Opened</label>
                       <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                     </div>
                   </div>
@@ -248,7 +281,7 @@ const movestock = () => {
                   </div>
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Boxes Opened</label>
+                      <label className='text-[0.7vw]'>Stocks Opened</label>
                       <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                     </div>
                   </div>
@@ -276,4 +309,4 @@ const movestock = () => {
   )
 }
 
-export default movestock
+export default repack

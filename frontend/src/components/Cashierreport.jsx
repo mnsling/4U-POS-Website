@@ -51,28 +51,32 @@ const CashierReport = () => {
     return (
         <div className='flex flex-wrap justify-start items-center gap-5'>
             <div className='w-fit flex flex-col gap-3'>
-                <div className='flex gap-2 items-center'>
-                    <input type='date' className='py-2 px-4 w-[10vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
-                    <span className='text-sm text-darkp'>to</span>
-                    <input type='date' className='py-2 px-4 w-[10vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
-                    <button className='bg-darkp text-white text-sm  px-5 py-2 rounded-lg button'>Enter</button>
-                </div>
-                <div className='flex gap-2'>
-                    <select className='py-2 px-4 w-[10vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
-                        <option>All Terminal</option>
-                        <option>Terminal 1</option>
-                        <option>Terminal 2</option>
-                        <option>Terminal 3</option>
-                    </select>
+                <div className='flex gap-2 items-end'>
+                    <div className='flex gap-2'>
+                        <div className='flex flex-col'>
+                            <label className='text-[0.6vw] text-darkp py-1'>Choose Terminal:</label>
+                            <select className='py-2 px-4 w-[10vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
+                                <option>All Terminal</option>
+                                <option>Terminal 1</option>
+                                <option>Terminal 2</option>
+                                <option>Terminal 3</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className='flex flex-col'>
+                        <label className='text-[0.6vw] text-darkp py-1'>Date:</label>
+                        <input type='date' className='py-2 px-4 w-[10vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
+                    </div>
+                    <button className='bg-darkp text-white text-[0.7vw] px-5 py-2 rounded-lg button'>Enter</button>
                 </div>
             </div>
             <div className='flex gap-7'>
                 <div className='mt-2 flex flex-col gap-2'>
                     <div className="h-[55vh] w-[80vw] bg-darkp opacity-80 rounded-2xl flex flex-col overflow-hidden">
-                        <h1 className="text-xl font-bold tracking-tight text-white p-4">Cash Variance</h1>
+                        <h1 className="text-[1.2vw] font-bold tracking-tight text-white p-4">Cash Variance</h1>
                         <div className="overflow-y-auto mt-2 max-h-full">
                             <table className="table-auto w-full text-white">
-                                <thead className="sticky top-[-1px] bg-white text-darkp border-y border-white z-10">
+                                <thead className="sticky top-[-1px] text-[0.8vw] bg-white text-darkp border-y border-white z-10">
                                     <tr>
                                         <th className="px-4 py-2 text-left"></th>
                                         <th className="px-4 py-2 text-left">Terminal #</th>
@@ -82,7 +86,7 @@ const CashierReport = () => {
                                         <th className="px-4 py-2 text-left">Variance Amount</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className='text-[0.7vw]'>
                                     {cashData.map((data, index) => (
                                         <React.Fragment key={index}>
                                             <tr className='border-white border-t'>
@@ -104,7 +108,7 @@ const CashierReport = () => {
                                             </tr>
                                             {expandedRow === index && (
                                                 <tr className='bg-darkp'>
-                                                    <label className='font-bold text-2xl flex justify-center items-center h-full mt-20'>REASON:</label>
+                                                    <label className='font-bold text-[1.2vw] flex justify-center items-start h-full'>REASON:</label>
                                                     <td colSpan="5" className="px-4 py-2">
                                                         <textarea
                                                             className="w-full h-[10vh] bg-darkp text-white p-2 rounded-md border border-white resize-none"
@@ -113,7 +117,6 @@ const CashierReport = () => {
                                                             onChange={(e) => handleDescriptionChange(index, e.target.value)}
                                                             rows={3}
                                                         />
-                                                        <button className='flex my-5 px-10 py-3 button bg-white text-black hover:text-white hover:bg-darkp2 rounded-lg'>Save</button>
                                                     </td>
                                                 </tr>
                                             )}

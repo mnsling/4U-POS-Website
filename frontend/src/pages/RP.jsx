@@ -10,7 +10,7 @@ import open from '../assets/unboxing.png';
 import out from '../assets/not-available.png'
 // import axios from 'axios';
 
-const stock = () => {
+const rp = () => {
 
   const [showEditPrompt, setShowEditPrompt] = useState(false);
   const [showFormPrompt, setShowFormPrompt] = useState(false);
@@ -73,7 +73,7 @@ const stock = () => {
       <Sidebar />
       <div className='w-[83.5vw] h-screen flex flex-col items-center z-50'>
         <div className='w-full h-[10vh] bg-white flex items-center justify-between px-[2vw] drop-shadow-xl'>
-          <h1 className='text-[1.5vw] text-darkp font-medium tracking-tighter z-10'>Product Stock</h1>
+          <h1 className='text-[1.5vw] text-darkp font-medium tracking-tighter z-10'>RP Stock</h1>
         </div>
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-between'>
@@ -92,16 +92,14 @@ const stock = () => {
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Product ID</h1>
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Backhouse Stock</h1>
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Backhouse UoM</h1>
-              <h1 className='w-[8vw] text-[0.7vw] text-center'>Display Stock</h1>
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Display UoM</h1>
               <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
               <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>001</h1>
-                <h1 className='w-[8vw] text-[0.7vw] text-center'>200</h1>
-                <h1 className='w-[8vw] text-[0.7vw] text-center'>Case</h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>100</h1>
+                <h1 className='w-[8vw] text-[0.7vw] text-center'>Case</h1>
                 <h1 className='w-[8vw] text-[0.7vw] text-center'>Pcs</h1>
                 <div className='w-[8vw] flex justify-center gap-5'>
                   <img
@@ -185,12 +183,6 @@ const stock = () => {
                             <h1 className='text-[0.8vw] tracking-tighter'>Case</h1>
                           </div>
                           <div className='flex justify-between border-b border-darkp px-2 py-1'>
-                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Display Stock:</h1>
-                            <h1 className='text-[0.8vw] tracking-tighter'>100</h1>
-                          </div>
-                        </div>
-                        <div className='w-[20vw] flex flex-col gap-2'>
-                          <div className='flex justify-between border-b border-darkp px-2 py-1'>
                             <h1 className='text-[0.8vw] font-bold tracking-tighter'>Display UoM:</h1>
                             <h1 className='text-[0.8vw] tracking-tighter'>Pcs</h1>
                           </div>
@@ -207,14 +199,14 @@ const stock = () => {
                   <div className='w-full h-[64vh] flex flex-col drop-shadow'>
                     <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Reference #</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Product</h1>
                       <h1 className='w-[8vw] text-[0.7vw] text-center'>Closed Stock</h1>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Open Stock</h1>
-                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>To Display</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>To Repack</h1>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Displayed</h1>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Damaged</h1>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Stocked Out</h1>
                       <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Expiry Date</h1>
-                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Actions</h1>
                     </div>
                     <div className='w-full h-full bg-white border-x rounded-b-2xl border-b border-darkp overflow-auto'>
                       <div className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
@@ -224,28 +216,9 @@ const stock = () => {
                         <h1 className='w-[8vw] text-[0.7vw] text-center'></h1>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'></h1>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'></h1>
+                        <h1 className='w-[8vw] text-[0.7vw] text-center'></h1>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'>20</h1>
                         <h1 className='w-[8vw] text-[0.7vw] text-center'>06/05/2024</h1>
-                        <div className='w-[8%] flex justify-center gap-5'>
-                          <img
-                            src={open}
-                            alt='edit'
-                            className='w-[1.3vw] h-[1.3vw] cursor-pointer'
-                            onClick={handleOpenBoxClick}
-                          />
-                          <img
-                            src={move}
-                            alt='delete'
-                            className='w-[1vw] h-[1.3vw] cursor-pointer'
-                            onClick={handleMoveClick}
-                          />
-                          <img
-                            src={out}
-                            alt='delete'
-                            className='w-[1.3vw] h-[1.3vw] cursor-pointer'
-                            onClick={handleOutClick}
-                          />
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -394,4 +367,4 @@ const stock = () => {
   );
 };
 
-export default stock;
+export default rp;

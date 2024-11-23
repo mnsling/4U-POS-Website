@@ -179,13 +179,13 @@ const openstock = () => {
                 </div>
                 <div className='flex gap-4 mt-10'>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-green-500 button'
                     onClick={handleCloseAddPrompt}
                   >
                     Confirm
                   </button>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-red-500 button'
                     onClick={handleCloseAddPrompt}
                   >
                     Cancel
@@ -214,13 +214,13 @@ const openstock = () => {
                 </div>
                 <div className='flex gap-4 mt-10'>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-green-500 button'
                     onClick={handleCloseEdit2Prompt}
                   >
                     Confirm
                   </button>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-red-500 button'
                     onClick={handleCloseEdit2Prompt}
                   >
                     Cancel
@@ -257,13 +257,13 @@ const openstock = () => {
                 </div>
                 <div className='flex gap-4 mt-10'>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-green-500 button'
                     onClick={handleCloseEdit3Prompt}
                   >
                     Confirm
                   </button>
                   <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-red-500 button'
                     onClick={handleCloseEdit3Prompt}
                   >
                     Cancel

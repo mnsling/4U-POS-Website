@@ -13,6 +13,9 @@ import Suppliers from './pages/suppliers'
 import Open from './pages/openstock'
 import Move from './pages/movestock'
 import Out from './pages/stockout'
+import Second from './pages/sinventory'
+import RP from './pages/RP'
+import Repack from './pages/repack'
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -22,6 +25,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/scanner" element={<Scanner />} />
       <Route path="/transaction" element={<Transaction />} />
       <Route path="/" element={<Inventory />} />
+      <Route path="/sinventory" element={<Second />} />
       <Route path="/return" element={<Return />} />
       <Route path="/stock" element={<Stock />} />
       <Route path="/suppliers" element={<Suppliers />} />
@@ -30,6 +34,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/open" element={<Open />} />
       <Route path="/move" element={<Move />} />
       <Route path="/out" element={<Out />} />
+      <Route path="/rp" element={<RP />} />
+      <Route path="/repack" element={<Repack />} />
     </Routes>
   </BrowserRouter>
 );
