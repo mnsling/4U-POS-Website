@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register('product', ProductViewset, basename='product')
+router.register('repackedProduct', RepackedProductViewset, basename='repackedProduct')
 router.register('stock', StockViewset, basename='stock')
 router.register('supplier', SupplierViewset, basename='supplier')
 router.register('deliveryRecord', DeliveryRecordViewset, basename='deliveryRecord')
@@ -11,5 +12,11 @@ router.register('deliveryRecordItem', DeliveryRecordItemViewset, basename='deliv
 router.register('stockItem', StockItemViewset, basename='stockItem')
 router.register('transaction', TransactionViewset, basename='transaction')
 router.register('transactionItem', TransactionItemViewset, basename='transactionItem')
+router.register('openStockLog', OpenStockLogViewset, basename='openStockLog')
+router.register('openStockLogItem', OpenStockLogItemViewset, basename='openStockLogItem')
+router.register('moveStockLog', MoveStockLogViewset, basename='moveStockLog')
+router.register('moveStockLogItem', MoveStockLogItemViewset, basename='moveStockLogItem')
+router.register('stockOutLog', StockOutLogViewset, basename='stockOutLog')
+router.register('stockOutLogItem', StockOutLogItemViewset, basename='stockOutLogItem')
 
 urlpatterns = router.urls

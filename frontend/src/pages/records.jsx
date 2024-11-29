@@ -10,6 +10,7 @@ import axios from 'axios';
 
 const Records = () => {
 
+  const [stocks, setStocks] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
 
@@ -27,7 +28,7 @@ const Records = () => {
   const [item, setItem] = useState({
     id: 0,
     deliveryRecordID: '',
-    productID: 1, 
+    stockID: 1, 
     price: 0,
     qty: 0,
     total: 0,
@@ -65,6 +66,7 @@ const Records = () => {
     fetchRecords();
     fetchProducts();
     fetchItems();
+    fetchStocks();
     console.log(record);
   }, [record]);
 
@@ -73,9 +75,19 @@ const Records = () => {
     return supplier || { supplierName: 'Unknown Supplier' };
   };
 
-  const getProductForRecord = (productId) => {
-    const product = products.find(p => p.id === productId);
-    return product || { productName: 'Unknown Product' };
+  const getStockForRecord = (stockId) => {
+    const stock = stocks.find(s => s.id === stockId)
+    return stock || { stockName: 'Unknown Product' };
+  };
+
+  const fetchStocks = () => {
+    axios.get('http://127.0.0.1:8000/stock/')
+      .then(response => {
+        setStocks(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
   };
 
   const fetchSuppliers = () => {
@@ -186,7 +198,7 @@ const Records = () => {
     // Send POST request
     axios.post('http://127.0.0.1:8000/deliveryRecordItem/', {
       deliveryRecordID: record.id,
-      productID: item.productID, 
+      stockID: item.stockID,
       price: item.price,
       qty: item.qty,
       expiryDate: expiryDateToPost,
@@ -195,7 +207,7 @@ const Records = () => {
         console.log('Item created:', response.data);
         setItem({
           deliveryRecordID: '',
-          productID: '', 
+          stockID: '', 
           price: 0,
           qty: 0,
           expiryDate: '',
@@ -226,7 +238,7 @@ const Records = () => {
     setItem({
       id: upItem.id,
       deliveryRecordID: upItem.deliveryRecordID,
-      productID: upItem.productID, 
+      stockID: upItem.stockID, 
       price: upItem.price,
       qty: upItem.qty,
       expiryDate: upItem.expiryDate,
@@ -238,19 +250,22 @@ const Records = () => {
   };
 
   const handleUpdateItem = () => {
+
+    const expiryDateToPost = item.expiryDate ? item.expiryDate : null;
+
     // Send POST request
     axios.put(`http://127.0.0.1:8000/deliveryRecordItem/${item.id}/`, {
       deliveryRecordID: item.deliveryRecordID,
-      productID: item.productID, 
+      stockID: item.stockID, 
       price: item.price,
       qty: item.qty,
-      expiryDate: item.expiryDate,
+      expiryDate: expiryDateToPost,
     })
       .then(response => {
         console.log('Item updated:', response.data);
         setItem({
           deliveryRecordID: '',
-          productID: '', 
+          stockID: '', 
           price: 0,
           qty: 0,
           expiryDate: '',
@@ -335,6 +350,7 @@ const Records = () => {
       
       // Send the status update to the server using Axios
       axios.put(`http://127.0.0.1:8000/deliveryRecord/${record.id}/`, {
+        id: record.id,
         status: newStatus,
       })
         .then(response => {
@@ -343,7 +359,7 @@ const Records = () => {
           setActiveButton(newStatus);
         })
         .catch(error => {
-          console.error('Error updating status:', error);
+          console.error('Error updating status:', error.response.data);
         });
   };
 
@@ -398,7 +414,7 @@ const Records = () => {
           {/* Add Delivery Record Modal */}
           {showFormPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+              <div className='bg-white w-[50vw] h-min p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
                 <h2 className='text-black text-[1.3vw] font-black'>Add Delivery Record</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex gap-5'>
@@ -412,6 +428,7 @@ const Records = () => {
                         className={`className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' `}
                         placeholder="enter supplier*"
                       >
+                        <option>-Choose Supplier-</option>
                         {suppliers.map(supplier => {
                           return (
                             <option key={supplier.id} value={supplier.id}>
@@ -497,7 +514,7 @@ const Records = () => {
                   </div>
                   <div className='w-full h-[50vh] flex flex-col drop-shadow'>
                     <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center'>
-                      <h1 className='w-[45%] text-[0.7vw] leading-tight text-center'>Product</h1>
+                      <h1 className='w-[45%] text-[0.7vw] leading-tight text-center'>Stock Name</h1>
                       <h1 className='w-[10%] text-[0.7vw] text-center'>Price</h1>
                       <h1 className='w-[10%] text-[0.7vw] leading-tight text-center'>Quantity</h1>
                       <h1 className='w-[10%] text-[0.7vw] leading-tight text-center'>Total</h1>
@@ -509,10 +526,10 @@ const Records = () => {
                       {items
                         .filter(item => item.deliveryRecordID === record.id)
                         .map(item => {
-                        const product = getProductForRecord(item.productID);
+                        const stock = getStockForRecord(item.stockID);
                         return (
                           <div key={item.id} className='w-full text-darkp border-b border-darkp text-center flex items-center justify-between py-2'>
-                            <h1 className='w-[45%] text-[0.7vw] text-center'>{product.name}</h1>
+                            <h1 className='w-[45%] text-[0.7vw] text-center'>{stock.stockName}</h1>
                             <h1 className='w-[10%] text-[0.7vw] text-center'>{item.price}</h1>
                             <h1 className='w-[10%] text-[0.7vw] text-center'>{item.qty}</h1>
                             <h1 className='w-[10%] text-[0.7vw] text-center'>{item.total}</h1>
@@ -563,24 +580,25 @@ const Records = () => {
           {/* Add Item Modal */}
           {showAddPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+              <div className='bg-white w-[50vw] h-min p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
                 <h2 className='text-black text-[1.3vw] font-black'>Add Item</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex gap-5'>
                   <div className='w-[50%] flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Product Name</label>
+                      <label className='text-[0.7vw]'>Stock Name</label>
                       <select
-                        name="productID"
-                        value={item.productID}
+                        name="stockID"
+                        value={item.stockID}
                         onChange={handleChangeItem}
                         className={`className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]'' `}
                         placeholder="enter product*"
                       >
-                        {products.map(product => {
+                        <option>-Choose Stock-</option>
+                        {stocks.map(stock => {
                           return (
-                            <option key={product.id} value={product.id}>
-                              {product.name}
+                            <option key={stock.id} value={stock.id}>
+                              {stock.stockName}
                             </option>
                           );
                         })}
@@ -622,7 +640,7 @@ const Records = () => {
           {/* Edit Delivery Record Modal */}
           {showEdit2Prompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+              <div className='bg-white w-[50vw] h-min p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
                 <h2 className='text-black text-[1.3vw] font-black'>Stock Record</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex gap-5'>
@@ -640,6 +658,7 @@ const Records = () => {
                         className={`w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' `}
                         placeholder="enter supplier*"
                       >
+                        <option>-Choose Supplier-</option>
                         {suppliers.map(supplier => {
                           return (
                             <option key={supplier.id} value={supplier.id}>
@@ -677,24 +696,25 @@ const Records = () => {
           {/* Edit Item Modal */}
           {showEdit3Prompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+              <div className='bg-white w-[50vw] h-min p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
                 <h2 className='text-black text-[1.3vw] font-black'>Edit Item</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex gap-5'>
                   <div className='w-[50%] flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Product Name</label>
+                      <label className='text-[0.7vw]'>Stock Name</label>
                       <select
-                        name="productID"
-                        value={item.productID}
+                        name="stockID"
+                        value={item.stockID}
                         onChange={handleChangeItem}
                         className={`className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]'' `}
                         placeholder="enter product*"
                       >
-                        {products.map(product => {
+                        <option>-Choose Stock-</option>
+                        {stocks.map(stock => {
                           return (
-                            <option key={product.id} value={product.id}>
-                              {product.name}
+                            <option key={stock.id} value={stock.id}>
+                              {stock.stockName}
                             </option>
                           );
                         })}

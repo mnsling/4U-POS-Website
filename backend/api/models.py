@@ -3,6 +3,7 @@ from django.db.models import Sum
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
+from django.db import transaction
 
 # Supplier Model
 class Supplier(models.Model):
@@ -14,7 +15,7 @@ class Supplier(models.Model):
 
     def __str__(self):
         return self.supplierName
-
+    
 # Product Model
 class Product(models.Model):
     # Category Field Choices
@@ -32,7 +33,6 @@ class Product(models.Model):
     ]
 
     name = models.CharField(unique=True, max_length=100)
-    supplier = models.ForeignKey(Supplier, default='', on_delete=models.CASCADE)
     barcodeNo = models.CharField(unique=True, max_length=100)
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
     unitPrice = models.DecimalField(max_digits=10, decimal_places=2)
@@ -46,15 +46,49 @@ class Product(models.Model):
     
 # Stock Model
 class Stock(models.Model):
-    productId = models.OneToOneField(Product, default=0, on_delete=models.CASCADE)
+    stockName = models.CharField(max_length=100, unique=True, default='')
+    supplier = models.ForeignKey(Supplier, default='', on_delete=models.CASCADE)
+    productId = models.ForeignKey(Product, default='', on_delete=models.CASCADE, null=True, blank=True)
     backhouseStock = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     backUoM = models.CharField(default='', max_length=50)
+    standardQuantity= models.IntegerField(default=0)
     displayStock = models.IntegerField(default=0)
     displayUoM = models.CharField(default='', max_length=50)
     created = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.productId.name
+        return self.stockName
+    
+# Product Model
+class RepackedProduct(models.Model):
+    # Category Field Choices
+    CATEGORY_CHOICES = [
+        ('MISC', 'Miscellaneous'),
+        ('STATIONERY', 'Stationery and Office Supplies'),
+        ('SMOKING', 'Tobacco & Smoking Accessories'),
+        ('HOUSE', 'Household Items'),
+        ('HEALTH', 'Health & Beauty'),
+        ('FROZEN', 'Frozen Foods'),
+        ('REFRIDGERATED', 'Dairy & Refridgerated Items'),
+        ('GROCERY', 'Grocery Items'),
+        ('SNACKS', 'Snacks'),
+        ('BEVERAGES', 'Beverages'),
+    ]
+
+    name = models.CharField(unique=True, max_length=100)
+    stock = models.ForeignKey(Stock, default='', on_delete=models.CASCADE)
+    barcodeNo = models.CharField(unique=True, max_length=100)
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
+    displayedStock = models.IntegerField()
+    unitWeight = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    unitPrice = models.DecimalField(max_digits=10, decimal_places=2)
+    wsmq = models.IntegerField()
+    wsp = models.DecimalField(max_digits=10, decimal_places=2)
+    reorderLevel = models.IntegerField()
+    created = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
 
 # DeliveryRecord Model
 class DeliveryRecord(models.Model):
@@ -78,11 +112,10 @@ class DeliveryRecord(models.Model):
     def update_stock_for_delivery(self):
         if self.status == 'DELIVERED':
             for item in DeliveryRecordItem.objects.filter(deliveryRecordID=self):
-                product = item.productID
                 quantity = item.qty
 
                 try:
-                    stock_entry = Stock.objects.get(productId=product)
+                    stock_entry = Stock.objects.get(id=item.stockID.id)
                 except Stock.DoesNotExist:
                     continue
 
@@ -93,7 +126,6 @@ class DeliveryRecord(models.Model):
                 stock_entry.save()
 
                 StockItem.objects.create(
-                    productID=product,
                     stockID=stock_entry,
                     referenceNumber=self.referenceNumber,
                     closedStock=quantity,
@@ -102,7 +134,6 @@ class DeliveryRecord(models.Model):
                     displayedStock=0,
                     damagedStock=0,
                     stockedOutQty=0,
-                    stockOutDescription='',
                     expiryDate=expiry_date,
                 )
 
@@ -126,8 +157,8 @@ class DeliveryRecord(models.Model):
 # DeliveryRecordItem Model
 class DeliveryRecordItem(models.Model):
     deliveryRecordID = models.ForeignKey(DeliveryRecord, on_delete=models.CASCADE)
-    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2, )
+    stockID = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     qty = models.IntegerField()
     total = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     expiryDate = models.DateField(null=True, blank=True)
@@ -138,7 +169,7 @@ class DeliveryRecordItem(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return self.productID.name
+        return f"{self.deliveryRecordID}"
 
 # Signal functions to update totalAmount when DeliveryRecordItem changes
 @receiver(post_save, sender=DeliveryRecordItem)
@@ -149,7 +180,6 @@ def update_delivery_record_total(sender, instance, **kwargs):
     delivery_record.save()
 
 class StockItem(models.Model):
-    productID = models.ForeignKey(Product, null=True, on_delete=models.CASCADE)
     stockID = models.ForeignKey(Stock, null=True, on_delete=models.CASCADE)
     referenceNumber = models.CharField(null=True, max_length=100)
     closedStock = models.IntegerField(null=True)
@@ -158,11 +188,10 @@ class StockItem(models.Model):
     displayedStock = models.IntegerField(null=True)
     damagedStock = models.IntegerField(null=True)
     stockedOutQty = models.IntegerField(null=True)
-    stockOutDescription = models.TextField(null=True)
     expiryDate = models.DateField(null=True)
 
     def __str__(self):
-        return f"{self.productID.name} - {self.referenceNumber}"
+        return f"{self.stockID.stockName} - {self.referenceNumber}"
 
 class Transaction(models.Model):
     TERMINAL_CHOICES = [
@@ -245,3 +274,187 @@ class TransactionItem(models.Model):
 def update_transaction_amount_due(sender, instance, **kwargs):
     transaction = instance.transactionID
     transaction.calculate_amount_due()
+
+class OpenStockLog(models.Model):
+    # Status Field Choices
+    STATUS_CHOICES = [
+        ('VALIDATING', 'Validating'),
+        ('CONFIRMED', 'Confirmed'),
+    ]
+
+    dateCreated = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='VALIDATING')
+
+    def __str__(self):
+        return str(self.dateCreated)
+    
+class OpenStockLogItem(models.Model):
+    logID = models.ForeignKey(OpenStockLog, on_delete=models.CASCADE, default=0)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    stockItemID = models.ForeignKey(StockItem, on_delete=models.CASCADE, default=0)
+    referenceNumber = models.CharField(max_length=25, null=True, blank=True)
+    boxesOpened = models.IntegerField()
+    previousQty = models.IntegerField()
+    qtyAdded = models.IntegerField()
+    damagedQty = models.IntegerField()
+
+    def __str__(self):
+        return self.referenceNumber
+
+# Signal for OpenStockLog
+@receiver(post_save, sender=OpenStockLog)
+def handle_open_stock_log_confirmation(sender, instance, created, **kwargs):
+    if created or instance.status != "CONFIRMED":
+        return
+
+    log_items = OpenStockLogItem.objects.filter(logID=instance)
+
+    with transaction.atomic():
+        for log_item in log_items:
+            stock_item = log_item.stockItemID
+            if not stock_item:
+                raise ValueError(f"StockItem not found for log item {log_item.referenceNumber}")
+
+            # Update StockItem
+            stock_item.closedStock = (stock_item.closedStock or 0) - log_item.boxesOpened
+            stock_item.openStock = (stock_item.openStock or 0) + log_item.boxesOpened
+            stock_item.toDisplayStock = (stock_item.toDisplayStock or 0) + log_item.qtyAdded
+            stock_item.damagedStock = (stock_item.damagedStock or 0) + log_item.damagedQty
+            stock_item.save()
+
+            # Update Stock
+            stock = stock_item.stockID
+            if not stock:
+                raise ValueError(f"Stock not found for StockItem {stock_item.id}")
+
+            stock.backhouseStock = (stock.backhouseStock or 0) - log_item.boxesOpened
+            stock.save()
+
+class MoveStockLog(models.Model):
+    # Status Field Choices
+    STATUS_CHOICES = [
+        ('VALIDATING', 'Validating'),
+        ('CONFIRMED', 'Confirmed'),
+    ]
+
+    dateCreated = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='VALIDATING')
+
+    def __str__(self):
+        return str(self.dateCreated)
+    
+class MoveStockLogItem(models.Model):
+    logID = models.ForeignKey(MoveStockLog, on_delete=models.CASCADE, default=0)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    stockItemID = models.ForeignKey(StockItem, on_delete=models.CASCADE, default=0)
+    referenceNumber = models.CharField(max_length=25, null=True, blank=True)
+    previousQty = models.IntegerField()
+    stocksMoved = models.IntegerField()
+
+    def __str__(self):
+        return self.referenceNumber
+    
+# Signal for MoveStockLog
+@receiver(post_save, sender=MoveStockLog)
+def handle_open_stock_log_confirmation(sender, instance, created, **kwargs):
+    if created or instance.status != "CONFIRMED":
+        return
+
+    log_items = MoveStockLogItem.objects.filter(logID=instance)
+
+    with transaction.atomic():
+        for log_item in log_items:
+            stock_item = log_item.stockItemID
+            if not stock_item:
+                raise ValueError(f"StockItem not found for log item {log_item.referenceNumber}")
+
+            # Update StockItem
+            stock_item.toDisplayStock = (stock_item.toDisplayStock or 0) - log_item.stocksMoved
+            stock_item.displayedStock = (stock_item.displayedStock or 0) + log_item.stocksMoved
+            stock_item.save()
+
+            # Update Stock
+            stock = stock_item.stockID
+            if not stock:
+                raise ValueError(f"Stock not found for StockItem {stock_item.id}")
+
+            stock.displayStock = (stock.displayStock or 0) + log_item.stocksMoved
+            stock.save()
+    
+class StockOutLog(models.Model):
+    # Status Field Choices
+    STATUS_CHOICES = [
+        ('VALIDATING', 'Validating'),
+        ('CONFIRMED', 'Confirmed'),
+    ]
+
+    dateCreated = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='VALIDATING')
+
+    def __str__(self):
+        return str(self.dateCreated)
+    
+class StockOutLogItem(models.Model):
+    logID = models.ForeignKey(StockOutLog, on_delete=models.CASCADE, default=0)
+    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    stockItemID = models.ForeignKey(StockItem, on_delete=models.CASCADE, default=0)
+    referenceNumber = models.CharField(max_length=25, null=True, blank=True)
+    previousQty = models.IntegerField()
+    stockOutQty = models.IntegerField()
+    stockOutDescription = models.TextField(null=True)
+
+    def __str__(self):
+        return self.referenceNumber
+    
+# Signal for OpenStockLog
+@receiver(post_save, sender=StockOutLog)
+def handle_open_stock_log_confirmation(sender, instance, created, **kwargs):
+    if created or instance.status != "CONFIRMED":
+        return
+
+    log_items = StockOutLogItem.objects.filter(logID=instance)
+
+    with transaction.atomic():
+        for log_item in log_items:
+            stock_item = log_item.stockItemID
+            if not stock_item:
+                raise ValueError(f"StockItem not found for log item {log_item.referenceNumber}")
+
+            # Update StockItem
+            stock_item.displayedStock = (stock_item.displayedStock or 0) - log_item.stockOutQty
+            stock_item.stockedOutQty = (stock_item.stockedOutQty or 0) + log_item.stockOutQty
+            stock_item.save()
+
+            # Update Stock
+            stock = stock_item.stockID
+            if not stock:
+                raise ValueError(f"Stock not found for StockItem {stock_item.id}")
+
+            stock.displayStock = (stock.displayStock or 0) - log_item.stockOutQty
+            stock.save()
+
+class RepackProductLog(models.Model):
+    # Status Field Choices
+    STATUS_CHOICES = [
+        ('VALIDATING', 'Validating'),
+        ('CONFIRMED', 'Confirmed'),
+    ]
+
+    dateCreated = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='VALIDATING')
+
+    def __str__(self):
+        return str(self.dateCreated)
+    
+class RepackProductLogItem(models.Model):
+    logID = models.ForeignKey(OpenStockLog, on_delete=models.CASCADE, default=0)
+    productID = models.ForeignKey(RepackedProduct, on_delete=models.CASCADE)
+    stockItemID = models.ForeignKey(StockItem, on_delete=models.CASCADE, default=0)
+    referenceNumber = models.CharField(max_length=25, null=True, blank=True)
+    boxesOpened = models.IntegerField()
+    previousQty = models.IntegerField()
+    qtyAdded = models.IntegerField()
+    damagedQty = models.IntegerField()
+
+    def __str__(self):
+        return self.referenceNumber

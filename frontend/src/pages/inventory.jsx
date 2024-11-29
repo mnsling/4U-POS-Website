@@ -8,12 +8,10 @@ import axios from 'axios'
 const Inventory = () => {
 
   const[stocks, setStocks] = useState([]);
-  const[suppliers, setSuppliers] = useState([]);
 
   const [products, setProducts] = useState([]);
   const [product, setProduct] = useState({
     name: '',
-    supplier: 1,
     barcodeNo: '',
     category: '',
     unitPrice: '',
@@ -60,24 +58,12 @@ const Inventory = () => {
       });
   };
 
-  const fetchSuppliers = () => {
-    axios.get('http://127.0.0.1:8000/supplier/')
-      .then(response => {
-        setSuppliers(response.data);
-        console.log(response.data); // Log the updated product list
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
     // Send POST request
     axios.post('http://127.0.0.1:8000/product/', {
       name: product.name,
-      supplier: product.supplier,
       barcodeNo: product.barcodeNo,
       category: product.category,
       unitPrice: parseFloat(product.unitPrice),
@@ -89,7 +75,6 @@ const Inventory = () => {
         console.log('Product created:', response.data);
         setProduct({
           name: '',
-          supplier: '',
           barcodeNo: '',
           category: '',
           unitPrice: '',
@@ -122,7 +107,6 @@ const Inventory = () => {
   const handleUpdatePass = (upProduct) => {
     setProduct({
       name: upProduct.name,
-      supplier: upProduct.supplier,
       barcodeNo: upProduct.barcodeNo,
       category: upProduct.category,
       unitPrice: upProduct.unitPrice,
@@ -140,7 +124,6 @@ const Inventory = () => {
     // Send POST request
     axios.put(`http://127.0.0.1:8000/product/${upProductId}/`, {
       name: product.name,
-      supplier: product.supplier,
       barcodeNo: product.barcodeNo,
       category: product.category,
       unitPrice: parseFloat(product.unitPrice),
@@ -152,7 +135,6 @@ const Inventory = () => {
         console.log('Product created:', response.data);
         setProduct({
           name: '',
-          supplier: '',
           barcodeNo: '',
           category: '',
           unitPrice: '',
@@ -173,7 +155,6 @@ const Inventory = () => {
   useEffect(() => {``
     fetchProducts();
     fetchStocks();
-    fetchSuppliers();
   }, []);
 
   const [showPrompt, setShowPrompt] = useState(false);
@@ -291,7 +272,7 @@ const Inventory = () => {
                     onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[1vw] border outline-none text-xs rounded-lg`}
                   >
-                    <option value=""></option>
+                    <option value="">-Choose Category-</option>
                     <option value="MISC">Miscellaneous</option>
                     <option value="STATIONERY">Stationery & Office Supplies</option>
                     <option value="SMOKING">Tobacco & Smoking Accessories</option>
@@ -352,25 +333,6 @@ const Inventory = () => {
                     placeholder="enter reorder level*"
                   />
                 </div>
-                <div className='flex flex-col gap-[0.3vh]'>
-                  <label className='text-[0.7vw]'>Supplier Name</label>
-                    <select
-                      name="supplier"
-                      value={product.supplier}
-                      onChange={handleChange}
-                      className={`bg-white px-[1vw] py-[1vh] text-[1vw] border outline-none text-xs rounded-lg`}
-                      placeholder="enter supplier*"
-                    >
-                      {suppliers.map(supplier => {
-                        return (
-                          <option key={supplier.id} value={supplier.id}>
-                            {supplier.supplierName}
-                          </option>
-                        );
-                      })}
-                    </select>
-                </div>
-                
                 <div className='w-full flex items-end justify-end'>
                 {showConfirmButton ? (
                   <button

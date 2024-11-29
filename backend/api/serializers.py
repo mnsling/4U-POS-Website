@@ -6,7 +6,17 @@ class ProductSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Product
-        fields = ('id', 'name', 'supplier', 'barcodeNo', 'category', 'category_label', 'unitPrice', 'wsmq', 'wsp', 'reorderLevel')
+        fields = ('id', 'name', 'barcodeNo', 'category', 'category_label', 'unitPrice', 'wsmq', 'wsp', 'reorderLevel')
+
+    def get_category_label(self, obj):
+        return obj.get_category_display()
+
+class RepackedProductSerializer(serializers.ModelSerializer):
+    category_label = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = RepackedProduct
+        fields = ('id', 'name', 'stock', 'barcodeNo', 'category', 'category_label', 'unitWeight', 'unitPrice', 'wsmq', 'wsp', 'reorderLevel')
 
     def get_category_label(self, obj):
         return obj.get_category_display()
@@ -15,7 +25,7 @@ class StockSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Stock
-        fields = ('id', 'productId', 'backhouseStock', 'backUoM', 'displayStock', 'displayUoM')
+        fields = ('id', 'stockName', 'supplier', 'productId', 'backhouseStock', 'backUoM', 'standardQuantity', 'displayStock', 'displayUoM')
 
 class SupplierSerializer(serializers.ModelSerializer):
 
@@ -33,13 +43,13 @@ class DeliveryRecordItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DeliveryRecordItem
-        fields =('id', 'deliveryRecordID', 'productID', 'price', 'qty', 'total', 'expiryDate')
+        fields =('id', 'deliveryRecordID', 'stockID', 'price', 'qty', 'total', 'expiryDate')
 
 class StockItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockItem
-        fields =('id', 'productID', 'stockID', 'referenceNumber', 'closedStock', 'openStock', 'toDisplayStock', 'displayedStock', 'damagedStock', 'stockedOutQty', 'stockOutDescription', 'expiryDate')
+        fields =('id', 'stockID', 'referenceNumber', 'closedStock', 'openStock', 'toDisplayStock', 'displayedStock', 'damagedStock', 'stockedOutQty', 'expiryDate')
 
 class TransactionSerializer(serializers.ModelSerializer):
 
@@ -52,3 +62,39 @@ class TransactionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransactionItem
         fields =('id', 'transactionID', 'productID', 'quantity', 'price', 'productTotal', 'unitMeasurement')    
+
+class OpenStockLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OpenStockLog
+        fields =('id', 'dateCreated', 'status')
+
+class OpenStockLogItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OpenStockLogItem
+        fields =('id', 'logID', 'productID', 'stockItemID', 'referenceNumber', 'boxesOpened', 'previousQty', 'qtyAdded', 'damagedQty')
+
+class MoveStockLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MoveStockLog
+        fields =('id', 'dateCreated', 'status')  
+
+class MoveStockLogItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MoveStockLogItem
+        fields =('id', 'logID', 'productID', 'stockItemID', 'referenceNumber', 'previousQty', 'stocksMoved')
+
+class StockOutLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StockOutLog
+        fields =('id', 'dateCreated', 'status')  
+
+class StockOutLogItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StockOutLogItem
+        fields =('id', 'logID', 'productID', 'stockItemID', 'referenceNumber', 'previousQty', 'stockOutQty', 'stockOutDescription') 
