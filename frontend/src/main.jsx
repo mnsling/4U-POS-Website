@@ -17,25 +17,26 @@ import Second from './pages/sinventory'
 import RP from './pages/RP'
 import Repack from './pages/repack'
 import './index.css';
+import ProtectedRoute from './components/ProtectedRoute';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login />} />
-      <Route path="/scanner" element={<Scanner />} />
-      <Route path="/transaction" element={<Transaction />} />
-      <Route path="/inventory" element={<Inventory />} />
-      <Route path="/sinventory" element={<Second />} />
-      <Route path="/return" element={<Return />} />
-      <Route path="/stock" element={<Stock />} />
-      <Route path="/suppliers" element={<Suppliers />} />
-      <Route path="/records" element={<Records />} />
-      <Route path="/report" element={<Report />} />
-      <Route path="/open" element={<Open />} />
-      <Route path="/move" element={<Move />} />
-      <Route path="/out" element={<Out />} />
-      <Route path="/rp" element={<RP />} />
-      <Route path="/repack" element={<Repack />} />
+      <Route path="/scanner" element={<ProtectedRoute><Scanner /></ProtectedRoute>} />
+      <Route path="/transaction" element={<ProtectedRoute><Transaction /></ProtectedRoute>} />
+      <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+      <Route path="/sinventory" element={<ProtectedRoute><Second /></ProtectedRoute>} />
+      <Route path="/return" element={<ProtectedRoute><Return /></ProtectedRoute>} />
+      <Route path="/stock" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
+      <Route path="/suppliers" element={<ProtectedRoute><Suppliers /></ProtectedRoute>} />
+      <Route path="/records" element={<ProtectedRoute><Records /></ProtectedRoute>} />
+      <Route path="/report" element={<ProtectedRoute><Report /></ProtectedRoute>} />
+      <Route path="/open" element={<ProtectedRoute><Open /></ProtectedRoute>} />
+      <Route path="/move" element={<ProtectedRoute><Move /></ProtectedRoute>} />
+      <Route path="/out" element={<ProtectedRoute><Out /></ProtectedRoute>} />
+      <Route path="/rp" element={<ProtectedRoute><RP /></ProtectedRoute>} />
+      <Route path="/repack" element={<ProtectedRoute><Repack /></ProtectedRoute>} />
     </Routes>
   </BrowserRouter>
 );

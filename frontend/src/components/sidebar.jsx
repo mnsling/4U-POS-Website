@@ -173,10 +173,17 @@ const Sidebar = () => {
                 </button>
             )}
           {/* Logout button: Visible to all roles */}
-          <button onClick={() => handleNavigation('/')} className="flex gap-4 items-center px-6 py-3 border-b border-white hover:bg-darkp2 button">
-                    <img src={right} className="w-[1vw]" alt="Logout" />
-                    <h1 className="text-[0.8vw] text-white">Logout</h1>
-                </button>
+          <button
+              onClick={() => {
+                localStorage.removeItem('userRole'); // Clear user role
+                navigate('/'); // Redirect to login
+              }}
+              className="flex gap-4 items-center px-6 py-3 border-b border-white hover:bg-darkp2 button"
+            >
+              <img src={right} className="w-[1vw]" alt="Logout" />
+              <h1 className="text-[0.8vw] text-white">Logout</h1>
+            </button>
+
         </div>
       </div>
     </div>
