@@ -21,6 +21,16 @@ const Login = () => {
             alert("Please enter your password.");
             return;
         }
+        if (!terminalNumber) {
+            alert("Please enter terminal number.");
+            return;
+        }
+
+        const validTerminalNumbers = ['001', '002', '003'];
+        if (!validTerminalNumbers.includes(terminalNumber)) {
+        alert("Invalid terminal number!");
+        return;
+         }
     
         // Check if password belongs to a cashier
         if (['pass1', 'pass2', 'pass3'].includes(password)) {
