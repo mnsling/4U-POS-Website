@@ -21,10 +21,10 @@ import './index.css';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <Routes>
-      <Route path="/logout" element={<Login />} />
+      <Route path="/" element={<Login />} />
       <Route path="/scanner" element={<Scanner />} />
       <Route path="/transaction" element={<Transaction />} />
-      <Route path="/" element={<Inventory />} />
+      <Route path="/inventory" element={<Inventory />} />
       <Route path="/sinventory" element={<Second />} />
       <Route path="/return" element={<Return />} />
       <Route path="/stock" element={<Stock />} />
