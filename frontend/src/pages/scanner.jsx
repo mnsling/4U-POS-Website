@@ -19,7 +19,7 @@ const Scanner = () => {
     amountPaid: 0,
     customerChange: 0,
   });
-
+ 
   const [transactionItems, setTransactionItems] = useState([]);
   const [transactionItem, setTransactionItem] = useState({
     id: '',
@@ -743,7 +743,7 @@ const Scanner = () => {
                     type="text" // Changed to text for custom validation
                     className="w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]"
                     placeholder="enter quantity"
-/>
+                  />
 
                 </div>
               </div>
