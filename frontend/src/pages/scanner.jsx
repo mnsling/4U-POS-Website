@@ -19,7 +19,7 @@ const Scanner = () => {
     amountPaid: 0,
     customerChange: 0,
   });
- 
+
   const [transactionItems, setTransactionItems] = useState([]);
   const [transactionItem, setTransactionItem] = useState({
     id: '',
@@ -351,6 +351,28 @@ const Scanner = () => {
     setShowEditModal(false);
   };
 
+  const handleNumericInput = (e, callback) => {
+    if (e.type === 'keydown') {
+      if (
+        e.key === 'e' ||
+        e.key === 'E' ||
+        e.key === '-' ||
+        e.key === '+' ||
+        e.key === '=' ||
+        e.key === '.'
+      ) {
+        e.preventDefault();
+        return;
+      }
+    }
+  
+    if (e.type === 'change') {
+      const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+      callback(value);
+    }
+  };
+  
+
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
@@ -424,35 +446,19 @@ const Scanner = () => {
                 Quantity:
               </div>
               <input
-                type="text" // Changed to text to allow custom validation
+                type="text" // Changed to text for custom validation
                 name="quantity"
                 value={transactionItem.quantity}
-                onChange={(e) => {
-                  const value = e.target.value;
-
-                  // Validate input: allow only digits
-                  if (/^\d*$/.test(value)) {
-                    handleChange(e); // Call the existing handleChange function if input is valid
-                  } else {
-                    console.warn('Invalid input: Only numbers are allowed.');
-                  }
-                }}
-                onKeyDown={(e) => {
-                  // Block invalid key presses
-                  if (
-                    e.key === 'e' ||
-                    e.key === 'E' ||
-                    e.key === '-' ||
-                    e.key === '+' ||
-                    e.key === '.'
-                  ) {
-                    e.preventDefault();
-                    console.warn('Invalid key press: Only numbers are allowed.');
-                  }
-                }}
+                onChange={(e) =>
+                  handleNumericInput(e, (value) =>
+                    setTransactionItem((prev) => ({ ...prev, quantity: value }))
+                  )
+                }
+                onKeyDown={(e) => handleNumericInput(e)}
                 className="h-4/6 w-full px-5 text-[2.5vw] text-darkp font-bold border-none outline-none rounded-b-2xl"
-                placeholder="enter quantity"
+                placeholder="Enter quantity"
               />
+
             </div>
             <div className='flex gap-2 w-full h-[30vh] justify-between mt-3'>
               <div className='flex flex-col gap-2 justify-between w-full'>
@@ -716,33 +722,15 @@ const Scanner = () => {
                   <input
                     name="qty"
                     value={newQuantity.qty}
-                    onChange={(e) => {
-                      const value = e.target.value;
-
-                      // Validate input: allow only digits
-                      if (/^\d*$/.test(value)) {
-                        handleQuantityChange(e); // Call the existing handleQuantityChange function if input is valid
-                      } else {
-                        console.warn('Invalid input: Only numbers are allowed.');
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      // Block invalid key presses
-                      if (
-                        e.key === 'e' ||
-                        e.key === 'E' ||
-                        e.key === '-' ||
-                        e.key === '+' ||
-                        e.key === "=" ||
-                        e.key === '.'
-                      ) {
-                        e.preventDefault();
-                        console.warn('Invalid key press: Only numbers are allowed.');
-                      }
-                    }}
-                    type="text" // Changed to text for custom validation
+                    onChange={(e) =>
+                      handleNumericInput(e, (value) =>
+                        setNewQuantity((prev) => ({ ...prev, qty: value }))
+                      )
+                    }
+                    onKeyDown={(e) => handleNumericInput(e)}
+                    type="text"
                     className="w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]"
-                    placeholder="enter quantity"
+                    placeholder="Enter quantity"
                   />
 
                 </div>
