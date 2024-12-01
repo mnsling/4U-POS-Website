@@ -79,25 +79,25 @@ const Transaction = () => {
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-between'>
             <div className='w-[15.5vw] flex justify-between gap-5'>
-              <select className='py-2 px-4 w-[8vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
+              <select className='py-2 px-4 w-[8vw] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
                 <option>All</option>
                 <option>Terminal 1</option>
                 <option>Terminal 2</option>
                 <option>Terminal 3</option>
               </select>
-              <input type='datetime-local' className='py-2 px-4 w-[10vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
+              <input type='datetime-local' className='py-2 px-4 w-[10vw] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
             </div>
           </div>
           <div className='w-full h-[63vh] rounded-2xl flex flex-col drop-shadow'>
             <div className='h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
-              <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Time</h1>
-              <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Date</h1>
-              <h1 className='w-[16%] text-[0.7vw] text-center'>Terminal #</h1>
-              <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Sales Invoice</h1>
-              <h1 className='w-[16%] text-[0.7vw] leading-tight text-center'>Amount</h1>
-              <h1 className='w-[16%] text-[0.7vw] text-center'>Actions</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Time</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Date</h1>
+              <h1 className='w-[8vw] text-[0.7vw] text-center'>Terminal #</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Sales Invoice</h1>
+              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Amount</h1>
+              <h1 className='w-[8vw] text-[0.7vw] text-center'>Actions</h1>
             </div>
-            <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
+            <div className='w-full h-full bg-white rounded-b-2xl overflow-auto hide-scrollbar'>
             {transactions.map(transaction => {
               let terminal = '';
 
@@ -116,17 +116,17 @@ const Transaction = () => {
 
               return (
                 <div key={transaction.id} className='w-full text-darkp text-center flex items-center justify-between px-10 py-2 border-b border-gray-200'>
-                  <h1 className='w-[16%] text-[0.8vw]'>{transactionTime}</h1>
-                  <h1 className='w-[16%] text-[0.8vw]'>{transactionDate}</h1>
-                  <h1 className='w-[16%] text-[0.8vw]'>Terminal {terminal}</h1>
-                  <h1 className='w-[16%] text-[0.8vw]'>Transaction #{transaction.id}</h1>
-                  <h1 className='w-[16%] text-[0.8vw]'>{transaction.finalAmount}</h1>
-                  <h1 className='w-[16%] flex gap-[1vw] justify-center'>
+                  <h1 className='w-[8vw] text-[0.7vw]'>{transactionTime}</h1>
+                  <h1 className='w-[8vw] text-[0.7vw]'>{transactionDate}</h1>
+                  <h1 className='w-[8vw] text-[0.7vw]'>Terminal {terminal}</h1>
+                  <h1 className='w-[8vw] text-[0.7vw]'>Transaction #{transaction.id}</h1>
+                  <h1 className='w-[8vw] text-[0.7vw]'>{transaction.finalAmount}</h1>
+                  <h1 className='w-[8vw] flex gap-[1vw] justify-center'>
                     <button>
                       <img
                         src={info}
                         alt='edit'
-                        className='w-[0.8vw] h-[0.8vw] cursor-pointer'
+                        className='w-[0.8vw] h-[0.7vw] cursor-pointer'
                         onClick={() => handleDetailsClick(transaction)}
                       />
                     </button>
@@ -138,8 +138,8 @@ const Transaction = () => {
           </div>
           <div className='w-full h-[12vh] rounded-2xl flex flex-col drop-shadow bg-darkp opacity-80'>
             <div className='w-full h-full flex px-10 justify-between items-center text-white font-bold tracking-tighter'>
-              <h1 className='text-2xl'>Total Amount:</h1>
-              <h1 className='text-2xl'>Php {transactionTotal}</h1>
+              <h1 className='text-[1.5vw]'>Total Amount:</h1>
+              <h1 className='text-[1.5vw]'>Php {transactionTotal}</h1>
             </div>
           </div>
           {/* Details Modal */}
@@ -188,11 +188,11 @@ const Transaction = () => {
                   </div>
                   <div className='w-full h-[60vh] flex flex-col drop-shadow'>
                     <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
-                      <h1 className='w-[19%] text-[0.7vw] leading-tight text-center'>Product</h1>
-                      <h1 className='w-[19%] text-[0.7vw] leading-tight text-center'>Quantity</h1>
-                      <h1 className='w-[19%] text-[0.7vw] text-center'>Unit of Measurement</h1>
-                      <h1 className='w-[19%] text-[0.7vw] leading-tight text-center'>Unit Price</h1>
-                      <h1 className='w-[19%] text-[0.7vw] leading-tight text-center'>Amount</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Product</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Quantity</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] text-center'>Unit of Measurement</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Unit Price</h1>
+                      <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Amount</h1>
                     </div>
                     <div className='w-full h-full bg-white border-x rounded-b-2xl border-b border-darkp overflow-auto'>
                       {transactionItems
@@ -208,11 +208,11 @@ const Transaction = () => {
 
                           return (
                             <div key={item.id} className='w-full border-b border-darkp text-darkp text-center flex items-center justify-between px-10 py-2'>
-                              <h1 className='w-[19%] text-[0.7vw] leading-tight text-center'>{product ? product.name : 'Unknown Product'}</h1>
-                              <h1 className='w-[19%] text-[0.7vw] text-center'>{item.quantity}</h1>
-                              <h1 className='w-[19%] text-[0.7vw] text-center'>{item.unitMeasurement}</h1>
-                              <h1 className='w-[19%] text-[0.7vw] text-center'>{item.price}</h1>
-                              <h1 className='w-[19%] text-[0.7vw] text-center'>{item.productTotal}</h1>
+                              <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>{product ? product.name : 'Unknown Product'}</h1>
+                              <h1 className='w-[8vw] text-[0.7vw] text-center'>{item.quantity}</h1>
+                              <h1 className='w-[8vw] text-[0.7vw] text-center'>{item.unitMeasurement}</h1>
+                              <h1 className='w-[8vw] text-[0.7vw] text-center'>{item.price}</h1>
+                              <h1 className='w-[8vw] text-[0.7vw] text-center'>{item.productTotal}</h1>
                             </div>
                           );
                       })}
@@ -220,8 +220,8 @@ const Transaction = () => {
                   </div>
                   <div className='w-full h-[12vh] rounded-2xl flex flex-col drop-shadow bg-darkp opacity-80'>
                     <div className='w-full h-full flex px-10 justify-between items-center text-white font-bold tracking-tighter'>
-                      <h1 className='text-2xl'>Total Amount:</h1>
-                      <h1 className='text-2xl'>Php {transactionView.amountDue}</h1>
+                      <h1 className='text-[1.5vw]'>Total Amount:</h1>
+                      <h1 className='text-[1.5vw]'>Php {transactionView.amountDue}</h1>
                     </div>
                   </div>
                 </div>
