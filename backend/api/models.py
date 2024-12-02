@@ -183,10 +183,10 @@ class StockItem(models.Model):
     stockID = models.ForeignKey(Stock, null=True, on_delete=models.CASCADE)
     referenceNumber = models.CharField(null=True, max_length=100)
     closedStock = models.IntegerField(null=True)
-    openStock = models.DecimalField(max_digits=10, decimal_places=2,null=True)
+    openStock = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     toDisplayStock = models.IntegerField(null=True)
     displayedStock = models.IntegerField(null=True)
-    damagedStock = models.IntegerField(null=True)
+    damagedStock = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     stockedOutQty = models.IntegerField(null=True)
     expiryDate = models.DateField(null=True)
 
@@ -475,6 +475,7 @@ def handle_open_stock_log_confirmation(sender, instance, created, **kwargs):
             # Update StockItem
             stock_item.closedStock = (stock_item.closedStock or 0) - log_item.openedStock
             stock_item.openStock = (stock_item.openStock or 0) + log_item.qtyAdded
+            stock_item.damagedStock = (stock_item.damagedStock or 0) + log_item.damagedQty
             stock_item.save()
 
             # Update Stock
@@ -501,6 +502,7 @@ class RepackStockLog(models.Model):
 class RepackStockLogItem(models.Model):
     logID = models.ForeignKey(RepackStockLog, on_delete=models.CASCADE, default=0)
     productID = models.ForeignKey(RepackedProduct, on_delete=models.CASCADE)
+    stockID = models.ForeignKey(Stock, on_delete=models.CASCADE)
     stockItemID = models.ForeignKey(StockItem, on_delete=models.CASCADE, default=0)
     referenceNumber = models.CharField(max_length=25, null=True, blank=True)
     qtyUsed = models.DecimalField(max_digits=10, decimal_places=2)
@@ -545,7 +547,7 @@ class RepackedProductStockOutLog(models.Model):
         return str(self.dateCreated)
     
 class RepackedProductStockOutLogItem(models.Model):
-    logID = models.ForeignKey(StockOutLog, on_delete=models.CASCADE, default=0)
+    logID = models.ForeignKey(RepackedProductStockOutLog, on_delete=models.CASCADE, default=0)
     productID = models.ForeignKey(RepackedProduct, on_delete=models.CASCADE)
     stockItemID = models.ForeignKey(StockItem, on_delete=models.CASCADE, default=0)
     referenceNumber = models.CharField(max_length=25, null=True, blank=True)

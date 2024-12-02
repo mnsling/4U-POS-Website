@@ -121,7 +121,7 @@ class RepackStockLogItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RepackStockLogItem
-        fields =('id', 'logID', 'productID', 'stockItemID', 'referenceNumber', 'qtyUsed', 'repackQty')
+        fields =('id', 'logID', 'productID', 'stockID', 'stockItemID', 'referenceNumber', 'qtyUsed', 'repackQty')
 
 class RepackedProductStockOutLogSerializer(serializers.ModelSerializer):
 

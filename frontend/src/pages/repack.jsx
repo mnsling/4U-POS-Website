@@ -188,6 +188,59 @@ const repack = () => {
       });
   };
 
+  const handleDeleteItem = (logId) => {
+    axios.delete(`http://127.0.0.1:8000/repackStockLogItem/${logId}/`)
+      .then(response => {
+        console.log('Open Stock Log deleted:', response.data);
+        fetchRepackStockLogItems();
+      })
+      .catch(error => {
+        console.error('Error deleting product:', error.response ? error.response.data : error.message);
+      });
+  };
+
+  const [currentItemID, setCurrentItemID] = useState([]);
+
+  const handleUpdateItem = (e) => {
+    e.preventDefault();
+
+    const product = products.find(product => String(product.id) === String(repackStockLogItem.productID));
+    const stockItemtoAdd = stockItems.find(stockItemtoAdd => {
+      return String(stockItemtoAdd.referenceNumber) === String(repackStockLogItem.referenceNumber) &&
+             String(stockItemtoAdd.stockID) === String(repackStockLogItem.stockID);
+    });
+
+    const qtyUsed = repackStockLogItem.repackQty * product.unitWeight;
+
+    // Send POST request
+    axios.put(`http://127.0.0.1:8000/repackStockLogItem/${currentItemID}/`, {
+      logID: currentLog.id,
+      productID: repackStockLogItem.productID,
+      stockID: repackStockLogItem.stockID,
+      stockItemID: stockItemtoAdd.id,
+      referenceNumber: repackStockLogItem.referenceNumber,
+      qtyUsed: qtyUsed,
+      repackQty: repackStockLogItem.repackQty,
+    })
+      .then(response => {
+        console.log('Product created:', response.data);
+        setRepackStockLogItem({
+          logID: null,
+          productID: null,
+          stockID: null,
+          stockItemID: null,
+          referenceNumber: null,
+          qtyUsed: 0,
+          repackQty: 0,
+        })
+        fetchRepackStockLogItems();
+        handleCloseEdit3Prompt();
+      })
+      .catch(error => {
+        console.error('Error creating product:', error.response.data);
+      });
+  };
+
   const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
   const [showAddPrompt, setShowAddPrompt] = useState(false);
   const [showEdit3Prompt, setShowEdit3Prompt] = useState(false);
@@ -203,7 +256,14 @@ const repack = () => {
     setShowAddPrompt(true);
   };
 
-  const handleEdit3Click = () => {
+  const handleEdit3Click = (item) => {
+    setCurrentItemID(item.id)
+    setRepackStockLogItem({
+      productID: item.productID,
+      stockID: item.stockID,
+      referenceNumber: item.referenceNumber,
+      repackQty: item.repackQty,
+    });
     setShowEdit3Prompt(true);
   };
 
@@ -221,8 +281,22 @@ const repack = () => {
 
   const [activeButton, setActiveButton] = useState('DRAFT'); // Set the initial active button
 
-  const handleButtonClick = (status) => {
-    setActiveButton(status); // Update the active button state
+  const handleButtonClick = (newStatus) => {
+
+    setActiveButton(newStatus);
+
+    // Send the status update to the server using Axios
+    axios.put(`http://127.0.0.1:8000/repackStockLog/${currentLog.id}/`, {
+      status: newStatus,
+    })
+      .then(response => {
+        console.log('Status updated:', response.data);
+        fetchRepackStockLogs();
+        setActiveButton(newStatus);
+      })
+      .catch(error => {
+        console.error('Error updating status:', error.response.data);
+      });
   };
 
   return (
@@ -440,33 +514,62 @@ const repack = () => {
           {/* Prompt (Modal) na girequest ni master para sa edit item sa sulod sa stock records ngayong oct 17 lang */}
           {showEdit3Prompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-[50vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+              <div className='bg-white w-[50vw] h-min p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
                 <h2 className='text-black text-[1.3vw] font-black'>Edit Item</h2>
                 {/* Input for adding stock */}
                 <div className='w-full flex gap-5'>
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Product Name</label>
-                      <input type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter product' />
+                        <select
+                          name="productID"
+                          value={repackStockLogItem.productID}
+                          onChange={handleChange}
+                          className={`w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]`}
+                        >
+                          <option value="">-Choose Product-</option>
+                          {products
+                            .map(product => {
+                            return (
+                              <option key={product.id} value={product.id}>
+                                {product.name}
+                              </option>
+                            );
+                          })}
+                        </select>
                     </div>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Reference #</label>
-                      <select className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' >
-                        <option>2020240001</option>
+                      <select 
+                        name='referenceNumber'
+                        value={repackStockLogItem.referenceNumber}
+                        onChange={handleChange}
+                        className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]'
+                      >
+                        <option>-Reference Number-</option>
+                        {stockItems
+                          .filter(stockItem => {
+                            return (
+                            stockItem.stockID === parseInt(repackStockLogItem.stockID) &&
+                            stockItem.closedStock > 0
+                          )})
+                          .map(stockItem => (
+                            <option key={stockItem.id} value={stockItem.referenceNumber}>
+                              {stockItem.referenceNumber} - {stockItem.expiryDate ? stockItem.expiryDate : "N/A"}
+                            </option>
+                        ))}
                       </select>
                     </div>
-                  </div>
-                  <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Stocks Opened</label>
-                      <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                      <label className='text-[0.7vw]'>Repack Amount</label>
+                      <input name='repackQty' value={repackStockLogItem.repackQty} onChange={handleChange} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                     </div>
                   </div>
                 </div>
-                <div className='flex gap-4 mt-10'>
+                <div className='flex gap-4'>
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white text-[0.7vw] rounded-lg hover:bg-green-500 button'
-                    onClick={handleCloseEdit3Prompt}
+                    onClick={handleUpdateItem}
                   >
                     Confirm
                   </button>

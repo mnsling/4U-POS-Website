@@ -440,7 +440,6 @@ const rp = () => {
                       <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Reference #</h1>
                       <h1 className='w-[12%] text-[0.7vw] text-center'>Closed Stock</h1>
                       <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Open Stock</h1>
-                      <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Displayed</h1>
                       <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Amount Disparity</h1>
                       <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Stocked Out</h1>
                       <h1 className='w-[12%] text-[0.7vw] leading-tight text-center'>Expiry Date</h1>
@@ -455,7 +454,6 @@ const rp = () => {
                             <h1 className='w-[11%] text-[0.7vw] text-center'>{stockItem.referenceNumber}</h1>
                             <h1 className='w-[12%] text-[0.7vw] text-center'>{stockItem.closedStock}</h1>
                             <h1 className='w-[12%] text-[0.7vw] text-center'>{stockItem.openStock}</h1>
-                            <h1 className='w-[12%] text-[0.7vw] text-center'>{stockItem.displayedStock}</h1>
                             <h1 className='w-[12%] text-[0.7vw] text-center'>{stockItem.damagedStock}</h1>
                             <h1 className='w-[12%] text-[0.7vw] text-center'>{stockItem.stockedOutQty}</h1>
                             <h1 className='w-[12%] text-[0.7vw] text-center'>{stockItem.expiryDate}</h1>
