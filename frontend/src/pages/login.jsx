@@ -36,6 +36,7 @@ const Login = () => {
         if (['pass1', 'pass2', 'pass3'].includes(password)) {
             localStorage.setItem('userRole', 'cashier'); // Save role in localStorage
             alert("Login successful! Welcome, Cashier.");
+            window.history.replaceState(null, '', '/scanner');
             window.location.href = '/scanner'; // Redirect to scanner
             return;
         }
@@ -44,6 +45,7 @@ const Login = () => {
         if (password === 'admin') {
             localStorage.setItem('userRole', 'admin'); // Save role in localStorage
             alert("Login successful! Welcome, Admin.");
+            window.history.replaceState(null, '', '/inventory');
             window.location.href = '/inventory'; // Redirect to inventory
             return;
         }

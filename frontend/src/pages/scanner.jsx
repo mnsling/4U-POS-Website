@@ -25,7 +25,7 @@ const Scanner = () => {
     id: '',
     transactionID: '',
     productID: '',
-    quantity: 0,
+    quantity: 1,
     price: 0,
   });
 
@@ -84,20 +84,60 @@ const Scanner = () => {
 
   const handleAddProduct = () => {
     if (transactionItem.productID && transactionItem.quantity > 0) {
-      setTransactionItems((prevItems) => [...prevItems, transactionItem]);
-      console.log('Added Transaction Item:', transactionItem);
+      setTransactionItems((prevItems) => {
+        // Check if the product already exists in the transaction items
+        const existingItemIndex = prevItems.findIndex(
+          (item) => item.productID === transactionItem.productID
+        );
+  
+        if (existingItemIndex !== -1) {
+          // If it exists, update the quantity and total for that item
+          const updatedItems = [...prevItems];
+          updatedItems[existingItemIndex].quantity += Number(transactionItem.quantity);
+  
+          // Update productTotal for the item
+          const product = products.find(
+            (p) => String(p.id) === String(transactionItem.productID)
+          );
+          const unitPrice = product ? product.unitPrice : 0;
+  
+          updatedItems[existingItemIndex].productTotal =
+            updatedItems[existingItemIndex].quantity * unitPrice;
+  
+          return updatedItems;
+        }
+  
+        // If it doesn't exist, add the new item at the top of the list
+        const product = products.find(
+          (p) => String(p.id) === String(transactionItem.productID)
+        );
+        const unitPrice = product ? product.unitPrice : 0;
+  
+        return [
+          {
+            ...transactionItem,
+            quantity: Number(transactionItem.quantity), // Ensure quantity is a number
+            productTotal: Number(transactionItem.quantity) * unitPrice,
+          },
+          ...prevItems, // Prepend the new item
+        ];
+      });
+  
+      // Reset the transactionItem to default values
       setTransactionItem({
         id: '',
         transactionID: '',
         productID: '',
-        quantity: 0,
+        quantity: 1,
         price: 0,
       });
-      console.log(transactionItems)
+  
+      console.log('Updated Transaction Items:', transactionItems);
     } else {
       console.warn('Please select a product and enter a valid quantity before adding.');
     }
   };
+  
 
   const handleDeleteProduct = (productID) => {
     setTransactionItems(prevItems =>
@@ -113,31 +153,39 @@ const Scanner = () => {
 
   const handleEditQuantity = () => {
     console.log(newQuantity);
-
+  
     const productID = newQuantity.productId;
-
-    setTransactionItems(prevItems =>
-      prevItems.map(item =>
-        item.productID === productID ? { ...item, quantity: newQuantity.qty } : item
+  
+    setTransactionItems((prevItems) =>
+      prevItems.map((item) =>
+        item.productID === productID
+          ? { ...item, quantity: Number(newQuantity.qty) } // Ensure the quantity is a number
+          : item
       )
     );
-
+  
     console.log(`Updated quantity for product ID: ${productID} to ${newQuantity.qty}`);
+  
+    // Close the edit modal after updating
+    handleCloseEditModal();
   };
+  
 
   const handleQuantityChange = (e) => {
     const { name, value } = e.target;
-
-    setNewQuantity(prevQuantity => {
-      const updatedQuantity = {
+  
+    // Strictly allow only digits
+    if (/^\d+$/.test(value) || value === '') { // Allow only numeric characters or an empty string
+      setNewQuantity((prevQuantity) => ({
         ...prevQuantity,
         [name]: value,
-      };
-      // Log updated product here
-      console.log('Updated Quantity:', updatedQuantity);
-      return updatedQuantity;
-    });
+      }));
+    } else {
+      console.warn('Invalid input: Only numbers are allowed.');
+    }
   };
+   
+  
 
   const postTransaction = () => {
     // Step 1: First, create the transaction to get the transactionID
@@ -303,6 +351,28 @@ const Scanner = () => {
     setShowEditModal(false);
   };
 
+  const handleNumericInput = (e, callback) => {
+    if (e.type === 'keydown') {
+      if (
+        e.key === 'e' ||
+        e.key === 'E' ||
+        e.key === '-' ||
+        e.key === '+' ||
+        e.key === '=' ||
+        e.key === '.'
+      ) {
+        e.preventDefault();
+        return;
+      }
+    }
+  
+    if (e.type === 'change') {
+      const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+      callback(value);
+    }
+  };
+  
+
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
@@ -315,50 +385,58 @@ const Scanner = () => {
           </div>
         </div>
         <div className='w-full h-full flex px-10 gap-5 mt-10'>
-          <div className='h-full w-[80vw] flex flex-col gap-5 items-center'>
-            <div className='w-full h-[63vh] rounded-2xl flex flex-col drop-shadow'>
-              <div className='h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
-                <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Quantity</h1>
-                <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>UoM</h1>
-                <h1 className='w-[8vw] text-[0.7vw] text-center'>Product</h1>
-                <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Unit Price</h1>
-                <h1 className='w-[8vw] text-[0.7vw] leading-tight text-center'>Amount</h1>
-                <h1 className='w-[8vw] text-[0.7vw] text-center'>Actions</h1>
+          <div className="h-full w-[80vw] flex flex-col gap-5 items-center">
+            <div className="w-full h-[60vh] rounded-2xl flex flex-col drop-shadow">
+              {/* Table Header */}
+              <div className="h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10 sticky top-0 z-10">
+                <h1 className="w-[8vw] text-[0.7vw] leading-tight text-center">Quantity</h1>
+                <h1 className="w-[8vw] text-[0.7vw] leading-tight text-center">UoM</h1>
+                <h1 className="w-[8vw] text-[0.7vw] text-center">Product</h1>
+                <h1 className="w-[8vw] text-[0.7vw] leading-tight text-center">Unit Price</h1>
+                <h1 className="w-[8vw] text-[0.7vw] leading-tight text-center">Amount</h1>
+                <h1 className="w-[8vw] text-[0.7vw] text-center">Actions</h1>
               </div>
-              <div className='w-full h-full flex flex-col'>
-                <div className='w-full h-full bg-white rounded-b-2xl overflow-auto hide-scrollbar'>
-                  {transactionItems.map((item, index) => {
-                    const product = products.find((p) => String(p.id) === String(item.productID));
-                    const stock = stocks.find((s) => String(s.productId) === String(item.productID));
-                    const productName = product ? product.name : 'N/A';
-                    const unitPrice = product ? product.unitPrice : 0;
-                    const unitMeasurement = stock ? stock.displayUoM : 'N/A';
+              {/* Table Body */}
+              <div className="w-full h-full bg-white rounded-b-2xl overflow-y-auto hide-scrollbar">
+                {transactionItems.map((item, index) => {
+                  const product = products.find((p) => String(p.id) === String(item.productID));
+                  const stock = stocks.find((s) => String(s.productId) === String(item.productID));
+                  const productName = product ? product.name : 'N/A';
+                  const unitPrice = product ? product.unitPrice : 0;
+                  const unitMeasurement = stock ? stock.displayUoM : 'N/A';
 
-                    return (
-                      <div key={index} className='flex gap-8 text-[1vw] items-center justify-between px-10 py-3 border-b border-gray-200'>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>{item.quantity}</h1>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>{unitMeasurement}</h1>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>{productName}</h1>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>₱ {unitPrice}</h1>
-                        <h1 className='w-[8vw] text-[0.7vw] text-center'>₱ {(unitPrice * item.quantity).toFixed(2)}</h1>
-                        <div className='flex justify-center gap-2 w-[8vw] text-[0.7] text-center'>
-                          <button onClick={() => handleEditButtonClick(item.productID)}><img src={edit} alt="Edit" className='w-[0.8vw]' /></button>
-                          <button onClick={() => handleDeleteProduct(item.productID)}><img src={del} alt="Delete" className='w-[0.8vw]' /></button>
-                        </div>
+                  return (
+                    <div
+                      key={index}
+                      className="flex text-[1vw] items-center justify-between px-10 py-3 border-b border-gray-200"
+                    >
+                      <h1 className="w-[8vw] text-[0.7vw] text-center">{item.quantity}</h1>
+                      <h1 className="w-[8vw] text-[0.7vw] text-center">{unitMeasurement}</h1>
+                      <h1 className="w-[8vw] text-[0.7vw] text-center">{productName}</h1>
+                      <h1 className="w-[8vw] text-[0.7vw] text-center">₱ {unitPrice}</h1>
+                      <h1 className="w-[8vw] text-[0.7vw] text-center">₱ {(unitPrice * item.quantity).toFixed(2)}</h1>
+                      <div className="flex justify-center gap-2 w-[8vw] text-[0.7] text-center">
+                        <button onClick={() => handleEditButtonClick(item.productID)}>
+                          <img src={edit} alt="Edit" className="w-[0.8vw]" />
+                        </button>
+                        <button onClick={() => handleDeleteProduct(item.productID)}>
+                          <img src={del} alt="Delete" className="w-[0.8vw]" />
+                        </button>
                       </div>
-                    )
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-            <div className='w-full h-[15vh] rounded-2xl flex flex-col gap-2 drop-shadow bg-darkp opacity-80 justify-center'>
-              <div className='w-full flex px-10 justify-between items-center text-white font-bold tracking-tighter'>
-                <h1 className='text-[1vw]'>Cost before Discount:</h1>
-                <h1 className='text-[1vw]'>₱ {totalAmountGlobal}</h1>
+            {/* Summary Section */}
+            <div className="w-full h-[15vh] rounded-2xl flex flex-col gap-2 drop-shadow bg-darkp opacity-80 justify-center">
+              <div className="w-full flex px-10 justify-between items-center text-white font-bold tracking-tighter">
+                <h1 className="text-[1vw]">Cost before Discount:</h1>
+                <h1 className="text-[1vw]">₱ {totalAmountGlobal}</h1>
               </div>
-              <div className='w-full flex px-10 justify-between items-center text-white font-bold tracking-tighter'>
-                <h1 className='text-[1.5vw]'>Total Amount:</h1>
-                <h1 className='text-[1.5vw]'>₱ {finalAmountGlobal}</h1>
+              <div className="w-full flex px-10 justify-between items-center text-white font-bold tracking-tighter">
+                <h1 className="text-[1.5vw]">Total Amount:</h1>
+                <h1 className="text-[1.5vw]">₱ {finalAmountGlobal}</h1>
               </div>
             </div>
           </div>
@@ -368,13 +446,19 @@ const Scanner = () => {
                 Quantity:
               </div>
               <input
-                type='number'
-                name='quantity'
+                type="text" // Changed to text for custom validation
+                name="quantity"
                 value={transactionItem.quantity}
-                onChange={handleChange}
-                className='h-4/6 w-full px-5 text-[2.5vw] text-darkp font-bold border-none outline-none rounded-b-2xl'
-                placeholder='enter quantity'
+                onChange={(e) =>
+                  handleNumericInput(e, (value) =>
+                    setTransactionItem((prev) => ({ ...prev, quantity: value }))
+                  )
+                }
+                onKeyDown={(e) => handleNumericInput(e)}
+                className="h-4/6 w-full px-5 text-[2.5vw] text-darkp font-bold border-none outline-none rounded-b-2xl"
+                placeholder="Enter quantity"
               />
+
             </div>
             <div className='flex gap-2 w-full h-[30vh] justify-between mt-3'>
               <div className='flex flex-col gap-2 justify-between w-full'>
@@ -560,7 +644,7 @@ const Scanner = () => {
                 >
                   Add
                 </button>
-                <button onClick={handleCloseProductList} 
+                <button onClick={handleCloseProductList}
                   className='text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button'>
                   Close
                 </button>
@@ -642,7 +726,20 @@ const Scanner = () => {
               <div className='w-full flex flex-col gap-5'>
                 <div className='w-full flex flex-col justify-start gap-1'>
                   <label className='text-[0.7vw]'>Product Quantity</label>
-                  <input name='qty' value={newQuantity.qty} onChange={handleQuantityChange} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  <input
+                    name="qty"
+                    value={newQuantity.qty}
+                    onChange={(e) =>
+                      handleNumericInput(e, (value) =>
+                        setNewQuantity((prev) => ({ ...prev, qty: value }))
+                      )
+                    }
+                    onKeyDown={(e) => handleNumericInput(e)}
+                    type="text"
+                    className="w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]"
+                    placeholder="Enter quantity"
+                  />
+
                 </div>
               </div>
             </div>

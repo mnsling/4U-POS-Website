@@ -181,40 +181,47 @@ const Inventory = () => {
               placeholder="search for products"
             />
           </div>
-          <div className='w-full h-[45vh] rounded-2xl flex flex-col drop-shadow'>
-            <div className='h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
-              <h1 className='w-[6vw] text-[0.7vw] leading-tight text-center'>Barcode #</h1>
-              <h1 className='w-[6vw] text-[0.7vw] leading-tight text-center'>Product Name</h1>
-              <h1 className='w-[6vw] text-[0.7vw] text-center'>Category</h1>
-              <h1 className='w-[6vw] text-[0.7vw] leading-tight text-center'>Backhouse Stock</h1>
-              <h1 className='w-[6vw] text-[0.7vw] leading-tight text-center'>Display Stock</h1>
-              <h1 className='w-[6vw] text-[0.7vw] leading-tight text-center'>Unit Price</h1>
-              <h1 className='w-[6vw] text-[0.7vw] text-center'>WSMQ</h1>
-              <h1 className='w-[6vw] text-[0.7vw] text-center'>WSP</h1>
-              <h1 className='w-[6vw] text-[0.7vw] text-center'>Actions</h1>
+          <div className="w-full h-[45vh] rounded-2xl flex flex-col drop-shadow">
+            {/* Table Header */}
+            <div className="h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10 sticky top-0 z-10">
+              <h1 className="w-[6vw] text-[0.7vw] leading-tight text-center">Barcode #</h1>
+              <h1 className="w-[6vw] text-[0.7vw] leading-tight text-center">Product Name</h1>
+              <h1 className="w-[6vw] text-[0.7vw] text-center">Category</h1>
+              <h1 className="w-[6vw] text-[0.7vw] leading-tight text-center">Backhouse Stock</h1>
+              <h1 className="w-[6vw] text-[0.7vw] leading-tight text-center">Display Stock</h1>
+              <h1 className="w-[6vw] text-[0.7vw] text-center">Unit Price</h1>
+              <h1 className="w-[6vw] text-[0.7vw] text-center">WSMQ</h1>
+              <h1 className="w-[6vw] text-[0.7vw] text-center">WSP</h1>
+              <h1 className="w-[6vw] text-[0.7vw] text-center">Actions</h1>
             </div>
-            <div className='w-full h-full flex flex-col'>
-              <div className='w-full h-full bg-white rounded-b-2xl overflow-y-scroll hide-scrollbar'>
-                {products.map(product => {
-                  const stock = getStockForProduct(product.id);
-                  return (
-                    <div key={product.id} className='w-full text-darkp text-center flex items-center justify-between px-10 py-2 border-b border-gray-200'>
-                      <h1 className='w-[6vw] text-[0.7vw] text-center'>{product.barcodeNo}</h1>
-                      <h1 className='w-[6vw] text-[0.7vw] text-center'>{product.name}</h1>
-                      <h1 className='w-[6vw] text-[0.7vw] text-center'>{product.category_label}</h1>
-                      <h1 className='w-[6vw] text-[0.7vw] text-center'>{stock.backhouseStock}</h1>
-                      <h1 className='w-[6vw] text-[0.7vw] text-center'>{stock.displayStock}</h1>
-                      <h1 className='w-[6vw] text-[0.7vw] text-center'>{product.unitPrice}</h1>
-                      <h1 className='w-[6vw] text-[0.7vw] text-center'>{product.wsmq}</h1>
-                      <h1 className='w-[6vw] text-[0.7vw] text-center'>{product.wsp}</h1>
-                      <h1 className='w-[6vw] flex gap-[1vw] justify-center'>
-                        <button onClick={() => handleUpdatePass(product)}><img src={edit} alt="Edit" className='w-[0.8vw] h-[0.8vw]' /></button>
-                        <button onClick={() => handleDelete(product.id)}><img src={del} alt="Delete" className='w-[0.8vw] h-[0.8vw]' /></button>
-                      </h1>
-                    </div>
-                  );
-                })}
-              </div>
+            {/* Table Body */}
+            <div className="w-full h-full bg-white rounded-b-2xl overflow-y-auto hide-scrollbar">
+              {products.map((product) => {
+                const stock = getStockForProduct(product.id);
+                return (
+                  <div
+                    key={product.id}
+                    className="w-full text-darkp text-center flex items-center justify-between px-10 py-4 border-b border-gray-200"
+                  >
+                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.barcodeNo}</h1>
+                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.name}</h1>
+                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.category_label}</h1>
+                    <h1 className="w-[6vw] text-[0.7vw] text-center">{stock.backhouseStock}</h1>
+                    <h1 className="w-[6vw] text-[0.7vw] text-center">{stock.displayStock}</h1>
+                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.unitPrice}</h1>
+                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.wsmq}</h1>
+                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.wsp}</h1>
+                    <h1 className="w-[6vw] flex gap-[1vw] justify-center">
+                      <button onClick={() => handleUpdatePass(product)}>
+                        <img src={edit} alt="Edit" className="w-[0.8vw] h-[0.8vw]" />
+                      </button>
+                      <button onClick={() => handleDelete(product.id)}>
+                        <img src={del} alt="Delete" className="w-[0.8vw] h-[0.8vw]" />
+                      </button>
+                    </h1>
+                  </div>
+                );
+              })}
             </div>
           </div>
           <div className='w-full h-[30vh] bg-darkp opacity-80 flex items-center justify-center rounded-2xl px-[1vw] py-[1vh] drop-shadow'>
@@ -316,7 +323,7 @@ const Inventory = () => {
                     <button
                       onClick={handleSubmit}
                       className={`bg-white px-[1vw] py-[1vh] text-[0.6vw] border outline-none rounded-lg hover:bg-green-500 hover:text-white button`}
-                      >
+                    >
                       Confirm
                     </button>
                   ) : (
