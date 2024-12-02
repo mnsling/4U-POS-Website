@@ -14,18 +14,132 @@ const returns = () => {
   const [transactionItems, setTransactionItems] = useState([]);
 
   const [returns, setReturns] = useState([]);
-  const [returnItems, setReturnItems] = useState([]);
-  const [returnItem, setReturnItem] = useState({
-    
+  const [newReturn, setNewReturn] = useState({
+    transactionID: null,
+    status: 'VALIDATING',
+    refundAmount: 0,
   });
 
+  const [returnItems, setReturnItems] = useState([]);
+  const [returnItem, setReturnItem] = useState({
+    returnID: null,
+    transactionItemID: null,
+    itemQty: 0,
+  });
 
+  const handleReturnChange = (e) => {
+    const { name, value } = e.target;
+
+    setNewReturn(prevReturn => {
+      const updatedReturn = {
+        ...prevReturn,
+        [name]: value,
+      };
+      // Log updated product here
+      console.log('Updated product:', updatedReturn);
+      return updatedReturn;
+    });
+  };
+
+  const fetchTransactions = () => {
+    axios.get('http://127.0.0.1:8000/transaction/')
+      .then(response => {
+        setTransactions(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  const fetchTransactionItems = () => {
+    axios.get('http://127.0.0.1:8000/transactionItem/')
+      .then(response => {
+        setTransactionItems(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  const fetchReturns = () => {
+    axios.get('http://127.0.0.1:8000/return/')
+      .then(response => {
+        setReturns(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  const fetchReturnItems = () => {
+    axios.get('http://127.0.0.1:8000/returnItem/')
+      .then(response => {
+        setReturnItems(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  useEffect(() => {``
+    fetchTransactions();
+    fetchTransactionItems();
+    fetchReturns();
+    fetchReturnItems();
+  }, []);
+
+  const [currentReturn, setCurrentReturn] = useState([]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const logResponse = await axios.post('http://127.0.0.1:8000/return/', {
+        transactionID: newReturn.transactionID,
+        dateCreated: '',
+      });
+  
+      const currentReturn = logResponse.data;
+  
+      await fetchReturns();
+  
+      setCurrentReturn(currentReturn);
+      setShowAddPrompt(false);
+      setShowDetailsPrompt(true);
+  
+      console.log('Created Log:', newLog);
+    } catch (error) {
+      console.error('Error creating log:', error.response ? error.response.data : error.message);
+    }
+  };
+
+  const handleDelete = (returnId) => {
+    axios.delete(`http://127.0.0.1:8000/return/${returnId}/`)
+      .then(response => {
+        console.log('Open Stock Log deleted:', response.data);
+        fetchReturns();
+        setCurrentReturn();
+        handleClosePrompt();
+      })
+      .catch(error => {
+        console.error('Error deleting product:', error.response ? error.response.data : error.message);
+      });
+  };
+
+  const [activeButton, setActiveButton] = useState('DRAFT'); // Set the initial active button
 
   const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
   const [showAddPrompt, setShowAddPrompt] = useState(false);
+  const [showAddItemPrompt, setShowAddItemPrompt] = useState(false);
   const [showEdit3Prompt, setShowEdit3Prompt] = useState(false);
 
-  const handleDetailsClick = (logId) => {
+  const handleDetailsClick = (currentReturn) => {
+    setCurrentReturn(currentReturn);
+    setActiveButton(currentReturn.status);
     setShowDetailsPrompt(true);
   };
 
@@ -47,6 +161,14 @@ const returns = () => {
 
   const handleClosePrompt = () => {
     setShowDetailsPrompt(false);
+  };
+
+  const handleAddItemClick = (item) => {
+    setShowAddItemPrompt(true);
+  };
+
+  const handleCloseAddItemPrompt = () => {
+    setShowAddItemPrompt(false);
   };
 
   return (
@@ -75,6 +197,25 @@ const returns = () => {
               <h1 className='w-[15%] text-[0.7vw] text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
+            {returns.map(currentReturn => {
+                return (
+                  <div key={currentReturn .id} className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
+                    <h1 className='w-[15%] text-[0.7vw] text-center'>{currentReturn.id}</h1>
+                    <h1 className='w-[15%] text-[0.7vw] text-center'>{currentReturn.returnDate}</h1>
+                    <h1 className='w-[15%] text-[0.7vw] text-center'>{currentReturn.transactionID}</h1>
+                    <h1 className='w-[15%] text-[0.7vw] text-center'>{currentReturn.status}</h1>
+                    <h1 className='w-[15%] text-[0.7vw] text-center'>{currentReturn.refundAmount}</h1>
+                    <h1 className='w-[15%] flex gap-[1vw] justify-center'>
+                    <img
+                      src={open}
+                      alt='edit'
+                      className='w-[1.3vw] h-[1.3vw] cursor-pointer'
+                      onClick={() => handleDetailsClick(currentReturn)}
+                    />
+                    </h1>
+                  </div>
+                );
+              })}
             </div>
           </div>
           {/* Prompt (Modal) kini kay mao na ni tong mga specific details sa records mismo */}
@@ -85,20 +226,32 @@ const returns = () => {
                   <div className='w-full flex justify-start'>
                     <div className='text-darkp w-full flex flex-col gap-5'>
                       <div className='flex gap-10 items-end'>
-                        <h1 className='text-[3vw] font-bold tracking-tighter'>ID #</h1>
+                        <h1 className='text-[3vw] font-bold tracking-tighter'>ID #{currentReturn.id}</h1>
                         <div className='flex gap-3 h-fit justify-end items-end pb-5'>
-                          <button className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Delete</button>
+                          <button onClick={() => handleDelete(currentReturn.id)} className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Delete</button>
                         </div>
                       </div>
                       <div className='w-full flex gap-10'>
                         <div className='w-[20vw] flex flex-col gap-2'>
                           <div className='flex justify-between border-b border-darkp px-2 py-1'>
-                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Date:</h1>
-                            <h1 className='text-[0.8vw] tracking-tighter'></h1>
+                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Invoice #</h1>
+                            <h1 className='text-[0.8vw] tracking-tighter'>{currentReturn.transactionID}</h1>
+                          </div>
+                        </div>
+                        <div className='w-[20vw] flex flex-col gap-2'>
+                          <div className='flex justify-between border-b border-darkp px-2 py-1'>
+                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Return Date:</h1>
+                            <h1 className='text-[0.8vw] tracking-tighter'>{currentReturn.returnDate}</h1>
+                          </div>
+                        </div>
+                        <div className='w-[20vw] flex flex-col gap-2'>
+                          <div className='flex justify-between border-b border-darkp px-2 py-1'>
+                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Refund Amount:</h1>
+                            <h1 className='text-[0.8vw] tracking-tighter'>{currentReturn.refundAmount}</h1>
                           </div>
                         </div>
                         <div className='w-full flex justify-end items-end mb-2'>
-                          <button className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Create Return</button>
+                          <button onClick={handleAddItemClick} className='px-[2vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Add Item</button>
                         </div>
                       </div>
                     </div>
@@ -150,14 +303,25 @@ const returns = () => {
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Invoice #</label>
-                      <select className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' >
-
+                      <select 
+                        name='transactionID'
+                        value={newReturn.transactionID}
+                        onChange={handleReturnChange}
+                        className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity'
+                      >
+                        <option value=''>-Choose Invoice #</option>
+                        {transactions.map((transaction) => (
+                          <option key={transaction.id} value={transaction.id}>
+                            {transaction.id}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
                 </div>
                 <div className='flex gap-4'>
                   <button
+                  onClick={handleSubmit}
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
                   >
                     Confirm
@@ -171,7 +335,49 @@ const returns = () => {
                 </div>
               </div>
             </div>
-          )}          
+          )}
+          {showAddItemPrompt && (
+            <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
+              <div className='bg-white w-[50vw] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+                <h2 className='text-black text-[1.3vw] font-black'>Create Return</h2>
+                {/* Input for adding stock */}
+                <div className='w-full flex gap-5'>
+                  <div className='w-full flex flex-col gap-5'>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Invoice #</label>
+                      <select 
+                        name='transactionID'
+                        value={newReturn.transactionID}
+                        onChange={handleReturnChange}
+                        className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity'
+                      >
+                        <option value=''>-Choose Invoice #</option>
+                        {transactions.map((transaction) => (
+                          <option key={transaction.id} value={transaction.id}>
+                            {transaction.id}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className='flex gap-4'>
+                  <button
+                  onClick={handleSubmit}
+                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                    onClick={handleCloseAddPrompt}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}    
           {/* Prompt (Modal) na girequest ni master para sa edit item sa sulod sa stock records ngayong oct 17 lang */}
           {showEdit3Prompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>

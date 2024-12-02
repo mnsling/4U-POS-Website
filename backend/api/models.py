@@ -234,7 +234,7 @@ class Transaction(models.Model):
     
 class TransactionItem(models.Model):
     transactionID = models.ForeignKey(Transaction, on_delete=models.CASCADE)
-    barcodeNo = models.CharField(max_length=25)
+    barcodeNo = models.CharField(max_length=25, default='')
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     productTotal = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
@@ -604,7 +604,7 @@ class Returns(models.Model):
     transactionID = models.ForeignKey(Transaction, on_delete=models.CASCADE)
     returnDate = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='VALIDATING')
-    refundAmount = models.DecimalField(max_digits=10, decimal_places=2)
+    refundAmount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0)
 
     def __str__(self):
         return f"{self.transactionID} - {self.returnDate}"
@@ -613,7 +613,6 @@ class ReturnItems(models.Model):
 
     returnID = models.ForeignKey(Returns, on_delete=models.CASCADE)
     transactionItemID = models.ForeignKey(TransactionItem, on_delete=models.CASCADE)
-
     itemQty = models.IntegerField()
 
     def __str__(self):

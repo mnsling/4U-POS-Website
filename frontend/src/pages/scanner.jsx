@@ -8,6 +8,7 @@ import axios from 'axios';
 const Scanner = () => {
 
   const [products, setProducts] = useState([]);
+  const [repackedProducts, setRepackedProducts] = useState([]);
   const [stocks, setStocks] = useState([]);
   
   const [transaction, setTransaction] = useState({
@@ -24,7 +25,7 @@ const Scanner = () => {
   const [transactionItem, setTransactionItem] = useState({
     id: '',
     transactionID: '',
-    productID: '',
+    barcodeNo: '',
     quantity: 0,
     price: 0,
   });
@@ -66,6 +67,16 @@ const Scanner = () => {
       });
   };
 
+  const fetchRepackedProducts = () => {
+    axios.get('http://127.0.0.1:8000/repackedProduct/')
+      .then(response => {
+        setRepackedProducts(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
   const fetchStocks = () => {
     axios.get('http://127.0.0.1:8000/stock/')
       .then(response => {
@@ -78,17 +89,18 @@ const Scanner = () => {
 
   useEffect(() => {``
     fetchProducts();
+    fetchRepackedProducts();
     fetchStocks();
   }, []);
   
   const handleAddProduct = () => {
-    if (transactionItem.productID && transactionItem.quantity > 0) {
+    if (transactionItem.barcodeNo && transactionItem.quantity > 0) {
       setTransactionItems((prevItems) => [...prevItems, transactionItem]);
       console.log('Added Transaction Item:', transactionItem);
       setTransactionItem({
         id: '',
         transactionID: '',
-        productID: '', 
+        barcodeNo: '', 
         quantity: 0,
         price: 0,
       });
@@ -98,11 +110,11 @@ const Scanner = () => {
     }
   };
 
-  const handleDeleteProduct = (productID) => {
+  const handleDeleteProduct = (barcodeNo) => {
     setTransactionItems(prevItems => 
-      prevItems.filter(item => item.productID !== productID)
+      prevItems.filter(item => item.barcodeNo !== barcodeNo)
     );
-    console.log(`Deleted product with ID: ${productID}`);
+    console.log(`Deleted product with ID: ${barcodeNo}`);
   };
 
   const [newQuantity, setNewQuantity] = useState({
@@ -113,11 +125,11 @@ const Scanner = () => {
   const handleEditQuantity = () => {
     console.log(newQuantity);
 
-    const productID = newQuantity.productId;
+    const barcodeNo = newQuantity.barcodeNo;
 
     setTransactionItems(prevItems =>
       prevItems.map(item => 
-        item.productID === productID ? { ...item, quantity: newQuantity.qty } : item
+        item.barcodeNo === barcodeNo ? { ...item, quantity: newQuantity.qty } : item
       )
     );
 
@@ -165,19 +177,20 @@ const Scanner = () => {
   
       const postRequests = transactionItems.map(item => {
 
-        const product = products.find((p) => String(p.id) === String(item.productID));
+        const product = getProduct(item.barcodeNo)
         const price = product.unitPrice;
 
         console.log(product);
 
-        const stock = stocks.find((s) => String(s.productId) === String(item.productID));
-        const unitMeasurement = stock.unitMeasurement;
+        const stock = getStock(item)
+
+        const unitMeasurement = stock.displayUoM;
 
         console.log(stock);
 
         return axios.post('http://127.0.0.1:8000/transactionItem/', {
           transactionID: transactionID,
-          productID: item.productID,
+          barcodeNo: item.barcodeNo,
           quantity: item.quantity,
           price: price,
           productTotal: item.productTotal,
@@ -211,7 +224,12 @@ const Scanner = () => {
   
   const totalAmountGlobal = useMemo(() => {
     return transactionItems.reduce((total, item) => {
-      const product = products.find((p) => String(p.id) === String(item.productID));
+      let product = products.find((p) => String(p.barcodeNo) === String(item.barcodeNo));
+
+      if (!product) {
+        product = repackedProducts.find((p) => String(p.barcodeNo) === String(item.barcodeNo));
+      }
+
       const unitPrice = product ? product.unitPrice : 0;
       return total + item.quantity * unitPrice;
     }, 0).toFixed(2); // Limiting to 2 decimal places
@@ -232,11 +250,37 @@ const Scanner = () => {
       ...prevTransaction,
       discountApplicable: !prevTransaction.discountApplicable,
     }));
-  };  
+  };
+
+  const getProduct = (barcode) => {
+    let product = products.find(p => String(p.barcodeNo) === String(barcode))
+
+    if (!product) {
+      product = repackedProducts.find(p => String(p.barcodeNo) === String(barcode))
+    }
+
+    return product
+  }
+
+  const getStock = (item) => {
+    const product = getProduct(item.barcodeNo)
+
+    let stock = stocks.find((s) => String(s.productId) === String(product.id));
+
+    if (!stock) {
+      stock = stocks.find((s) => String(s.id) === String(product.stock));
+    }
+
+    console.log(stock)
+
+    return stock
+  }
 
   const [showProductList, setShowProductList] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showBegBalModal, setShowBegBalModal] = useState(false);
+  const [showEndModal, setShowEndModal] = useState(false);
 
   const handleNumberClick = (number) => {
     setTransactionItem((prevItem) => ({
@@ -284,12 +328,32 @@ const Scanner = () => {
     setShowEditModal(false);
   };
 
+  const handleBegClick = () => {
+    setShowBegBalModal(true);
+  };
+
+  const handleBegClose = () => {
+    setShowBegBalModal(false);
+  };
+
+  const handleEndClick = () => {
+    setShowEndModal(true);
+  };
+
+  const handleEndClose = () => {
+    setShowEndModal(false);
+  };
+
   return (
     <div className='w-screen h-full bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
       <div className='flex flex-col w-[83.5vw] h-screen'>
         <div className='w-full h-[10%] bg-white flex items-center justify-between px-[2vw] drop-shadow-xl z-10'>
           <h1 className='text-2xl text-darkp font-medium tracking-tighter'>Point of Sale System</h1>
+          <div className='flex gap-4'>
+            <button className='bg-gray-200 text-[0.8vw] text-darkp px-4 py-2 hover:bg-darkp hover:text-white button' onClick={handleBegClick}>Beginning Balance</button>
+            <button className='bg-gray-200 text-[0.8vw] text-darkp px-4 py-2 hover:bg-darkp hover:text-white button' onClick={handleEndClick}>End of Day Cash Count</button>
+          </div>
         </div>
         <div className='w-full h-[5%]'/>
         <div className='w-full h-[85%] flex'>
@@ -307,8 +371,8 @@ const Scanner = () => {
                 <div className='w-full h-[88%] flex flex-col'>
                   <div className='w-full h-full bg-white rounded-b-2xl overflow-auto hide-scrollbar'>
                       {transactionItems.map((item, index) => {
-                        const product = products.find((p) => String(p.id) === String(item.productID));
-                        const stock = stocks.find((s) => String(s.productId) === String(item.productID));
+                        const product = getProduct(item.barcodeNo);
+                        const stock = getStock(item);
                         const productName = product ? product.name : 'N/A';
                         const unitPrice = product ? product.unitPrice : 0;
                         const unitMeasurement = stock ? stock.displayUoM : 'N/A';
@@ -380,15 +444,20 @@ const Scanner = () => {
             </div>
             <div className='flex w-full'>
               <select
-                name="productID"
-                value={transactionItem.productID}
+                name="barcodeNo"
+                value={transactionItem.barcodeNo}
                 onChange={handleChange}
                 placeholder='barcode'
                 className={`w-full text-[1vw] outline-none py-5 border mt-8 rounded-l-lg shadow-2xl px-5g`}
               >
-                <option value=''></option>
+                <option value=''>-Input Barcode-</option>
                 {products.map((product) => (
-                  <option key={product.id} value={product.id}>
+                  <option key={product.id} value={product.barcodeNo}>
+                    {product.barcodeNo}
+                  </option>
+                ))}
+                {repackedProducts.map((product) => (
+                  <option key={product.id} value={product.barcodeNo}>
                     {product.barcodeNo}
                   </option>
                 ))}
@@ -532,6 +601,119 @@ const Scanner = () => {
               >
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showBegBalModal && (
+        <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50'>
+          <div className='bg-white w-[25vw] h-[30vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+            <h2 className='text-black text-[1.3vw] font-black'>Enter Beginning Balance</h2>
+            <div className='w-full flex gap-5'>
+              <div className='w-full flex flex-col justify-start gap-1'>
+                <label className='text-[0.7vw]'>Amount</label>
+                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
+              </div>
+            </div>
+            <div className='flex gap-4'>
+            <button
+              onClick={() => {
+                if (selectedProduct) {
+                  addOrUpdateTransactionItem(selectedProduct, Number(transactionItem.quantity));
+                  setSelectedProduct(null); // Reset selection
+                } else {
+                  console.warn('No product selected');
+                }
+              }}
+              className="text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button"
+            >
+              Confirm
+            </button>
+
+              <button
+                className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-red-500 button'
+                onClick={handleBegClose}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showEndModal && (
+        <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50'>
+          <div className='bg-white w-max h-min p-[2vw] rounded-xl shadow-lg flex items-start gap-5'>
+            <div classNAme='flex flex-col w-full'>
+              <h2 className='text-black text-[1.3vw] font-black mb-4'>End of Day Cash Denomination</h2>
+              <div className='w-full flex gap-6'>
+                <div className='w-[48%] flex flex-col gap-4'>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱1000.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱500.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱200.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱100.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱50.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱20.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start gap-4'>
+                    <button
+                      className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-green-500 button'
+                      onClick={handleEndClose}
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-red-500 button'
+                      onClick={handleEndClose}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+                <div className='w-[48%] flex flex-col gap-4'>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱10.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱5.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱1.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱0.25</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱0.10</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱0.05</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

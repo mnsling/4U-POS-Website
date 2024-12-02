@@ -29,4 +29,7 @@ router.register('repackStockLogItem', RepackStockLogItemViewset, basename='repac
 router.register('repackStockOutLog', RepackedProductStockOutLogViewset, basename='repackProductStockOutLog')
 router.register('repackStockOutLogItem', RepackedProductStockOutLogItemViewset, basename='repackProductStockOutLogItem')
 
+router.register('return', ReturnViewset, basename='return')
+router.register('returnItem', ReturnItemViewset, basename='returnItem')
+
 urlpatterns = router.urls

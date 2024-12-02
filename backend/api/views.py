@@ -867,3 +867,85 @@ class RepackedProductStockOutLogItemViewset(viewsets.ViewSet):
         stockRecord = self.queryset.get(pk=pk)
         stockRecord.delete()
         return Response(status=204)
+    
+class ReturnViewset(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = Returns.objects.all()
+    serializer_class = ReturnSerializer
+
+    def get_queryset(self):
+        """Return a fresh queryset each time."""
+        return Returns.objects.all()
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
+
+    def retrieve(self, request, pk=None):
+        stockRecord = self.queryset.get(pk=pk)
+        serializer = self.serializer_class(stockRecord)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        stockRecord = self.queryset.get(pk=pk)
+        serializer = self.serializer_class(stockRecord, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
+
+    def destroy(self, request, pk=None):
+        stockRecord = self.queryset.get(pk=pk)
+        stockRecord.delete()
+        return Response(status=204)
+    
+class ReturnItemViewset(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = ReturnItems.objects.all()
+    serializer_class = ReturnItemSerializer
+
+    def get_queryset(self):
+        """Return a fresh queryset each time."""
+        return ReturnItems.objects.all()
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
+
+    def retrieve(self, request, pk=None):
+        stockRecord = self.queryset.get(pk=pk)
+        serializer = self.serializer_class(stockRecord)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        stockRecord = self.queryset.get(pk=pk)
+        serializer = self.serializer_class(stockRecord, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
+
+    def destroy(self, request, pk=None):
+        stockRecord = self.queryset.get(pk=pk)
+        stockRecord.delete()
+        return Response(status=204)

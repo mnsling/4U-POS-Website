@@ -141,3 +141,15 @@ class RepackedProductStockOutLogItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = RepackedProductStockOutLogItem
         fields =('id', 'logID', 'productID', 'stockItemID', 'referenceNumber', 'previousQty', 'stockOutQty', 'stockOutDescription')
+
+class ReturnSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Returns
+        fields =('id', 'transactionID', 'returnDate', 'status', 'refundAmount')
+
+class ReturnItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ReturnItems
+        fields =('id', 'returnID', 'transactionItemIdD', 'itemQty')

@@ -11,6 +11,7 @@ const Transaction = () => {
   const [transactions, setTransactions] = useState([]);
   const [transactionItems, setTransactionItems] = useState([]);
   const [products, setProducts] = useState([]);
+  const [repackedProducts, setRepackedProducts] = useState([]);
 
   const fetchTransactions = () => {
     axios.get('http://127.0.0.1:8000/transaction/')
@@ -45,23 +46,45 @@ const Transaction = () => {
       });
   };
 
+  const fetchRepackedProducts = () => {
+    axios.get('http://127.0.0.1:8000/repackedProduct/')
+      .then(response => {
+        setRepackedProducts(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
   useEffect(() => {``
     fetchTransactions();
     fetchTransactionItems();
     fetchProducts();
+    fetchRepackedProducts();
   }, []);
 
   const[transactionView, setTransactionView] = useState([]);
 
   const transactionTotal = parseFloat(transactions.reduce((total, transaction) => {
     return total + parseFloat(transaction.finalAmount || 0); // Ensure the value is treated as a number
-  }, 0).toFixed(2)); // Limit the total to 2 decimal places and convert it back to a number  
+  }, 0).toFixed(2)); // Limit the total to 2 decimal places and convert it back to a number 
+  
+  const getProduct = (barcode) => {
+    let product = products.find(p => String(p.barcodeNo) === String(barcode))
+
+    if (!product) {
+      product = repackedProducts.find(p => String(p.barcodeNo) === String(barcode))
+    }
+
+    return product
+  }
 
   const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
 
   const handleDetailsClick = (transaction) => {
     setShowDetailsPrompt(true);
     setTransactionView(transaction);
+    console.log(transaction);
   };
 
   const handleClosePrompt = () => {
@@ -177,6 +200,14 @@ const Transaction = () => {
                             </h1>
                           </div>
                         </div>
+                        <div className='w-[20vw] flex flex-col gap-2'>
+                          <div className='flex justify-between border-b border-darkp px-2 py-1'>
+                            <h1 className='text-[0.8vw] font-bold tracking-tighter'>Discount Applied: </h1>
+                            <h1 className='text-[0.8vw] tracking-tighter'>
+                              {transactionView.discountApplicable === true ? 'True' : 'False'}
+                            </h1>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -198,12 +229,12 @@ const Transaction = () => {
                       {transactionItems
                         .filter(item => item.transactionID === transactionView.id)
                         .map(item => {
-                          const product = products.find((p) => String(p.id) === String(item.productID));
+                          const product = getProduct(item.barcodeNo)
 
                           if (product) {
                             console.log('Found Product:', product); // Log product details to verify
                           } else {
-                            console.warn(`Product with ID ${item.productID} not found`);
+                            console.warn(`Product with ID ${item.barcodeNo} not found`);
                           }
 
                           return (
@@ -221,7 +252,7 @@ const Transaction = () => {
                   <div className='w-full h-[12vh] rounded-2xl flex flex-col drop-shadow bg-darkp opacity-80'>
                     <div className='w-full h-full flex px-10 justify-between items-center text-white font-bold tracking-tighter'>
                       <h1 className='text-[1.5vw]'>Total Amount:</h1>
-                      <h1 className='text-[1.5vw]'>Php {transactionView.amountDue}</h1>
+                      <h1 className='text-[1.5vw]'>Php {transactionView.finalAmount}</h1>
                     </div>
                   </div>
                 </div>
