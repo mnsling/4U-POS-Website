@@ -82,61 +82,67 @@ const Scanner = () => {
     fetchStocks();
   }, []);
 
-  const handleAddProduct = () => {
-    if (transactionItem.productID && transactionItem.quantity > 0) {
-      setTransactionItems((prevItems) => {
-        // Check if the product already exists in the transaction items
-        const existingItemIndex = prevItems.findIndex(
-          (item) => item.productID === transactionItem.productID
-        );
+  const addOrUpdateTransactionItem = (product, quantity) => {
+    setTransactionItems((prevItems) => {
+      const existingItemIndex = prevItems.findIndex(
+        (item) => item.productID === product.id
+      );
   
-        if (existingItemIndex !== -1) {
-          // If it exists, update the quantity and total for that item
-          const updatedItems = [...prevItems];
-          updatedItems[existingItemIndex].quantity += Number(transactionItem.quantity);
+      if (existingItemIndex !== -1) {
+        // Update existing product quantity and total
+        const updatedItems = [...prevItems];
+        const updatedQuantity = updatedItems[existingItemIndex].quantity + quantity;
   
-          // Update productTotal for the item
-          const product = products.find(
-            (p) => String(p.id) === String(transactionItem.productID)
-          );
-          const unitPrice = product ? product.unitPrice : 0;
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedQuantity,
+          productTotal: updatedQuantity * product.unitPrice,
+        };
   
-          updatedItems[existingItemIndex].productTotal =
-            updatedItems[existingItemIndex].quantity * unitPrice;
+        return updatedItems;
+      }
   
-          return updatedItems;
-        }
-  
-        // If it doesn't exist, add the new item at the top of the list
-        const product = products.find(
-          (p) => String(p.id) === String(transactionItem.productID)
-        );
-        const unitPrice = product ? product.unitPrice : 0;
-  
-        return [
-          {
-            ...transactionItem,
-            quantity: Number(transactionItem.quantity), // Ensure quantity is a number
-            productTotal: Number(transactionItem.quantity) * unitPrice,
-          },
-          ...prevItems, // Prepend the new item
-        ];
-      });
-  
-      // Reset the transactionItem to default values
-      setTransactionItem({
-        id: '',
-        transactionID: '',
-        productID: '',
-        quantity: 1,
-        price: 0,
-      });
-  
-      console.log('Updated Transaction Items:', transactionItems);
-    } else {
-      console.warn('Please select a product and enter a valid quantity before adding.');
-    }
+      // Add new product at the top
+      return [
+        {
+          productID: product.id,
+          quantity: quantity,
+          price: product.unitPrice,
+          productTotal: quantity * product.unitPrice,
+        },
+        ...prevItems,
+      ];
+    });
   };
+  
+
+  const handleAddProduct = () => {
+    if (!transactionItem.productID || transactionItem.quantity <= 0) {
+      console.warn('Please select a valid product and enter a valid quantity before adding.');
+      return;
+    }
+  
+    const product = products.find(
+      (p) => String(p.id) === String(transactionItem.productID)
+    );
+  
+    if (!product) {
+      console.warn('Selected product not found in product list.');
+      return;
+    }
+  
+    addOrUpdateTransactionItem(product, Number(transactionItem.quantity)); // Add or increment by specified quantity
+  
+    // Reset the transactionItem to default values
+    setTransactionItem({
+      id: '',
+      transactionID: '',
+      productID: '',
+      quantity: 1,
+      price: 0,
+    });
+  };
+  
   
 
   const handleDeleteProduct = (productID) => {
@@ -325,7 +331,8 @@ const Scanner = () => {
   };
 
   const handleCloseProductList = () => {
-    setShowProductList(false);
+    console.log("Closing product list modal...");
+    setTimeout(() => setShowProductList(false), 0);
   };
 
   const handlePaymentButtonClick = () => {
@@ -371,6 +378,23 @@ const Scanner = () => {
       callback(value);
     }
   };
+
+  const [selectedProduct, setSelectedProduct] = useState(null); // State to track the selected product
+
+  const handleProductSelection = (product) => {
+    if (!product) {
+      console.warn('No product selected');
+      return;
+    }
+  
+    addOrUpdateTransactionItem(product, 1); // Add or increment by 1 when selecting
+    setSelectedProduct(product);
+  };
+
+  
+  
+  
+
   
 
   return (
@@ -639,18 +663,28 @@ const Scanner = () => {
                 placeholder="search for products"
               />
               <div className='flex gap-3'>
-                <button
-                  className='text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button'
-                >
-                  Add
-                </button>
-                <button onClick={handleCloseProductList}
+              <button
+                    onClick={() => {
+                      try {
+                        handleAddSelectedProduct(); // Attempt to add the product
+                      } catch (error) {
+                        console.error("Error adding product:", error);
+                      } finally {
+                        handleCloseProductList(); // Always close the modal
+                      }
+                    }}
+                    className='text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button'
+                  >
+                    Add
+                  </button>
+
+                <button onClick={(handleCloseProductList)}
                   className='text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button'>
                   Close
                 </button>
               </div>
             </div>
-            <div className='overflow-y-scroll px-10 mb-10'>
+            <div className='overflow-y-scroll hide-scrollbar px-10 mb-10'>
               <table className='w-full text-left'>
                 <thead>
                   <tr className='bg-darkp text-white text-[0.7vw] sticky top-0'>
@@ -662,6 +696,27 @@ const Scanner = () => {
                   </tr>
                 </thead>
                 <tbody>
+                  {products.map((product, index) => {
+                    const unitPrice = parseFloat(product.unitPrice) || 0;
+                    const wholesalePrice = parseFloat(product.wholesalePrice) || 0;
+                    return (
+                      <tr
+                        key={index}
+                        className={`hover:bg-gray-100 ${
+                          selectedProduct && selectedProduct.id === product.id
+                            ? 'bg-gray-200'
+                            : ''
+                        }`}
+                        onClick={() => handleProductSelection(product)}
+                      >
+                        <td className='py-2 px-4'>{product.barcodeNo || 'N/A'}</td>
+                        <td className='py-2 px-4'>{product.name || 'N/A'}</td>
+                        <td className='py-2 px-4'>{product.supplier || 'N/A'}</td>
+                        <td className='py-2 px-4'>₱ {wholesalePrice.toFixed(2)}</td>
+                        <td className='py-2 px-4'>₱ {unitPrice.toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
