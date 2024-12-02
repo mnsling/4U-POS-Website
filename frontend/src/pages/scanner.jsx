@@ -6,14 +6,9 @@ import edit from '../assets/edit.png';
 import axios from 'axios';
 
 const Scanner = () => {
-  
+
   const [products, setProducts] = useState([]);
-  const [repackedProducts, setRepackedProducts] = useState([]);
-
   const [stocks, setStocks] = useState([]);
-
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(''); // User's search query
 
   const [transaction, setTransaction] = useState({
     terminalIssued: 'ONE',
@@ -29,7 +24,7 @@ const Scanner = () => {
   const [transactionItem, setTransactionItem] = useState({
     id: '',
     transactionID: '',
-    barcodeNo: '',
+    productID: '',
     quantity: 1,
     price: 0,
   });
@@ -65,18 +60,6 @@ const Scanner = () => {
     axios.get('http://127.0.0.1:8000/product/')
       .then(response => {
         setProducts(response.data);
-        setFilteredProducts(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  };
-
-  const fetchRepackedProducts = () => {
-    axios.get('http://127.0.0.1:8000/repackedProduct/')
-      .then(response => {
-        setRepackedProducts(response.data);
-        setFilteredProducts(response.data);
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -96,29 +79,68 @@ const Scanner = () => {
   useEffect(() => {
     ``
     fetchProducts();
-    fetchRepackedProducts();
     fetchStocks();
   }, []);
+
+  const addOrUpdateTransactionItem = (product, quantity) => {
+    setTransactionItems((prevItems) => {
+      const existingItemIndex = prevItems.findIndex(
+        (item) => item.productID === product.id
+      );
   
+      if (existingItemIndex !== -1) {
+        // Update existing product quantity and total
+        const updatedItems = [...prevItems];
+        const updatedQuantity = updatedItems[existingItemIndex].quantity + quantity;
+  
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedQuantity,
+          productTotal: updatedQuantity * product.unitPrice,
+        };
+  
+        return updatedItems;
+      }
+  
+      // Add new product at the top
+      return [
+        {
+          productID: product.id,
+          quantity: quantity,
+          price: product.unitPrice,
+          productTotal: quantity * product.unitPrice,
+        },
+        ...prevItems,
+      ];
+    });
+  };
+  
+
   const handleAddProduct = () => {
-    if (!transactionItem.barcodeNo || transactionItem.quantity <= 0) {
+    if (!transactionItem.productID || transactionItem.quantity <= 0) {
       console.warn('Please select a valid product and enter a valid quantity before adding.');
       return;
     }
   
     const product = products.find(
-      (p) => String(p.barcodeNo) === String(transactionItem.barcodeNo)
+      (p) => String(p.id) === String(transactionItem.productID)
     );
   
     if (!product) {
-      product = repackedProducts.find(
-        (p) => String(p.barcodeNo) === String(transactionItem.barcodeNo)
-      );
-      if(!product) {
-        console.warn('Product not found.')
-      }
+      console.warn('Selected product not found in product list.');
       return;
     }
+  
+    addOrUpdateTransactionItem(product, Number(transactionItem.quantity)); // Add or increment by specified quantity
+  
+    // Reset the transactionItem to default values
+    setTransactionItem({
+      id: '',
+      transactionID: '',
+      productID: '',
+      quantity: 1,
+      price: 0,
+    });
   };
 
   const handleDeleteProduct = (productID) => {
@@ -151,6 +173,23 @@ const Scanner = () => {
     // Close the edit modal after updating
     handleCloseEditModal();
   };
+  
+
+  const handleQuantityChange = (e) => {
+    const { name, value } = e.target;
+  
+    // Strictly allow only digits
+    if (/^\d+$/.test(value) || value === '') { // Allow only numeric characters or an empty string
+      setNewQuantity((prevQuantity) => ({
+        ...prevQuantity,
+        [name]: value,
+      }));
+    } else {
+      console.warn('Invalid input: Only numbers are allowed.');
+    }
+  };
+   
+  
 
   const postTransaction = () => {
     // Step 1: First, create the transaction to get the transactionID
@@ -290,12 +329,9 @@ const Scanner = () => {
   };
 
   const handleCloseProductList = () => {
-    setSearchQuery(''); // Clear search input
-    setFilteredProducts(products); // Reset filtered products
-    setSelectedProduct(null); // Reset selected product
-    setShowProductList(false); // Close modal
+    console.log("Closing product list modal...");
+    setTimeout(() => setShowProductList(false), 0);
   };
-  
 
   const handlePaymentButtonClick = () => {
     setShowPaymentModal(true);
@@ -343,20 +379,21 @@ const Scanner = () => {
 
   const [selectedProduct, setSelectedProduct] = useState(null); // State to track the selected product
 
-  const handleSearchChange = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
+  const handleProductSelection = (product) => {
+    if (!product) {
+      console.warn('No product selected');
+      return;
+    }
   
-    // Perform filtering directly
-    const filtered = products.filter((product) => {
-      const nameMatch = product.name?.toLowerCase().includes(query);
-      const barcodeMatch = product.barcodeNo?.toLowerCase().includes(query);
-      const supplierMatch = product.supplier?.supplierName?.toLowerCase().includes(query);
-      return nameMatch || barcodeMatch || supplierMatch;
-    });
-  
-    setFilteredProducts(filtered);
+    addOrUpdateTransactionItem(product, 1); // Add or increment by 1 when selecting
+    setSelectedProduct(product);
   };
+
+  
+  
+  
+
+  
 
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
@@ -468,8 +505,8 @@ const Scanner = () => {
             </div>
             <div className='flex w-full'>
               <select
-                name="barcodeNo"
-                value={transactionItem.barcodeNo}
+                name="productID"
+                value={transactionItem.productID}
                 onChange={handleChange}
                 placeholder='barcode'
                 className={`w-full text-[1vw] outline-none py-5 border rounded-l-lg shadow-2xl px-5`}
@@ -478,11 +515,6 @@ const Scanner = () => {
                 {products.map((product) => (
                   <option key={product.id} value={product.id}>
                     {product.barcodeNo}
-                  </option>
-                ))}
-                {repackedProducts.map((repackedProduct) => (
-                  <option key={repackedProduct.id} value={repackedProduct.id}>
-                    {repackedProduct.barcodeNo}
                   </option>
                 ))}
               </select>
@@ -524,20 +556,12 @@ const Scanner = () => {
               </div>
             </div>
             <div className='flex gap-4'>
-            <button
-              onClick={() => {
-                if (selectedProduct) {
-                  addOrUpdateTransactionItem(selectedProduct, Number(transactionItem.quantity));
-                  setSelectedProduct(null); // Reset selection
-                } else {
-                  console.warn('No product selected');
-                }
-              }}
-              className="text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button"
-            >
-              Confirm
-            </button>
-
+              <button
+                className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-green-500 button'
+                onClick={handleBegClose}
+              >
+                Confirm
+              </button>
               <button
                 className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-red-500 button'
                 onClick={handleBegClose}
@@ -633,40 +657,24 @@ const Scanner = () => {
               <h1 className='text-[1vw] font-medium'>Products List</h1>
               <input
                 type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="px-4 py-2 text-darkp text-[0.7vw] font-light outline-none w-4/12 rounded-full border border-darkp placeholder:text-darkp2"
-                placeholder="Search for products..."
+                className='px-4 py-2 text-darkp text-[0.7vw] font-light outline-none w-4/12 rounded-full border border-darkp placeholder:text-darkp2'
+                placeholder="search for products"
               />
               <div className='flex gap-3'>
               <button
-                onClick={() => {
-                  try {
-                    if (selectedProduct) {
-                      const quantity = Number(transactionItem.quantity); // Use the entered quantity
-
-                      if (quantity <= 0) {
-                        console.warn('Invalid quantity. Must be greater than zero.');
-                        return;
+                    onClick={() => {
+                      try {
+                        handleAddSelectedProduct(); // Attempt to add the product
+                      } catch (error) {
+                        console.error("Error adding product:", error);
+                      } finally {
+                        handleCloseProductList(); // Always close the modal
                       }
-
-                      addOrUpdateTransactionItem(selectedProduct, quantity); // Add the selected product to the transaction
-                      setSelectedProduct(null); // Reset the selected product
-                      setSearchQuery(''); // Clear search input
-                      setFilteredProducts(products); // Reset filtered products
-                      handleCloseProductList(); // Close modal after adding the product
-                    } else {
-                      console.warn('No product selected.');
-                    }
-                  } catch (error) {
-                    console.error("Error adding product:", error);
-                  }
-                }}
-                className="text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button"
-              >
-                Add
-              </button>
-
+                    }}
+                    className='text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button'
+                  >
+                    Add
+                  </button>
 
                 <button onClick={(handleCloseProductList)}
                   className='text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button'>
@@ -686,29 +694,28 @@ const Scanner = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredProducts.map((product, index) => {
+                  {products.map((product, index) => {
                     const unitPrice = parseFloat(product.unitPrice) || 0;
                     const wholesalePrice = parseFloat(product.wholesalePrice) || 0;
-
                     return (
                       <tr
                         key={index}
-                        className={`hover:bg-gray-100 cursor-pointer ${
-                          selectedProduct && selectedProduct.id === product.id ? 'bg-gray-200' : ''
+                        className={`hover:bg-gray-100 ${
+                          selectedProduct && selectedProduct.id === product.id
+                            ? 'bg-gray-200'
+                            : ''
                         }`}
-                        onClick={() => setSelectedProduct(product)} // Set the selected product
+                        onClick={() => handleProductSelection(product)}
                       >
-                        <td className="py-2 px-4">{product.barcodeNo || 'N/A'}</td>
-                        <td className="py-2 px-4">{product.name || 'N/A'}</td>
-                        <td className="py-2 px-4">{product.supplier ? product.supplier.supplierName : 'N/A'}</td>
-                        <td className="py-2 px-4">₱ {wholesalePrice.toFixed(2)}</td>
-                        <td className="py-2 px-4">₱ {unitPrice.toFixed(2)}</td>
+                        <td className='py-2 px-4'>{product.barcodeNo || 'N/A'}</td>
+                        <td className='py-2 px-4'>{product.name || 'N/A'}</td>
+                        <td className='py-2 px-4'>{product.supplier || 'N/A'}</td>
+                        <td className='py-2 px-4'>₱ {wholesalePrice.toFixed(2)}</td>
+                        <td className='py-2 px-4'>₱ {unitPrice.toFixed(2)}</td>
                       </tr>
                     );
                   })}
                 </tbody>
-
-
               </table>
             </div>
           </div>
@@ -742,7 +749,7 @@ const Scanner = () => {
                 </div>
                 <div className='flex flex-col gap-20 h-full w-full bg-white border-2 rounded-2xl px-10 py-5'>
                   <p className='text-[2vw] font-semibold tracking-tight'>Change:</p>
-                  <p className='text-[7vw] font-semibold leading-10 tracking-tight'>P {transaction.amountPaid <= 0 ? 0 : Math.max(0, customerChange)}</p>
+                  <p className='text-[7vw] font-semibold leading-10 tracking-tight'>P {customerChange}</p>
                 </div>
               </div>
               <div className='flex gap-5 justify-end'>
