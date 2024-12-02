@@ -68,7 +68,7 @@ class TransactionItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TransactionItem
-        fields =('id', 'transactionID', 'productID', 'quantity', 'price', 'productTotal', 'unitMeasurement')    
+        fields =('id', 'transactionID', 'barcodeNo', 'quantity', 'price', 'productTotal', 'unitMeasurement')    
 
 class OpenStockLogSerializer(serializers.ModelSerializer):
 
