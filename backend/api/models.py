@@ -234,26 +234,39 @@ class Transaction(models.Model):
     
 class TransactionItem(models.Model):
     transactionID = models.ForeignKey(Transaction, on_delete=models.CASCADE)
-    productID = models.ForeignKey(Product, on_delete=models.CASCADE)
+    barcodeNo = models.CharField(max_length=25)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    productTotal = models.DecimalField( max_digits=10, decimal_places=2,null=True, blank=True)
+    productTotal = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
     unitMeasurement = models.CharField(max_length=25, null=True, blank=True)
 
     def fetch_product_price_and_display_uom(self):
         try:
-            product_price = self.productID.unitPrice
-            stock_entry = Stock.objects.get(productId=self.productID)
+            # Try to fetch the product from the Product model
+            product = Product.objects.get(barcodeNo=self.barcodeNo)
+        except Product.DoesNotExist:
+            try:
+                # If not found, try to fetch it from the RepackedProduct model
+                product = RepackedProduct.objects.get(barcodeNo=self.barcodeNo)
+            except RepackedProduct.DoesNotExist:
+                # If neither exists, handle the case
+                return {
+                    "price": None,
+                    "displayUoM": "UoM not found",
+                }
+        
+        # Retrieve the product's price and displayUoM
+        product_price = product.unitPrice
+        try:
+            stock_entry = Stock.objects.get(productId=product.id)
             display_uom = stock_entry.displayUoM
-            return {
-                "price": product_price,
-                "displayUoM": display_uom,
-            }
-        except ObjectDoesNotExist:
-            return {
-                "price": None,
-                "displayUoM": "UoM not found",
-            }
+        except Stock.DoesNotExist:
+            display_uom = "UoM not found"
+        
+        return {
+            "price": product_price,
+            "displayUoM": display_uom,
+        }
 
     def save(self, *args, **kwargs):
         product_data = self.fetch_product_price_and_display_uom()
@@ -580,3 +593,28 @@ def handle_open_stock_log_confirmation(sender, instance, created, **kwargs):
             product = log_item.productID
             product.displayedStock = (product.displayedStock or 0) - log_item.stockOutQty
             product.save()
+
+class Returns(models.Model):
+    # Status Field Choices
+    STATUS_CHOICES = [
+        ('VALIDATING', 'Validating'),
+        ('CONFIRMED', 'Confirmed'),
+    ]
+
+    transactionID = models.ForeignKey(Transaction, on_delete=models.CASCADE)
+    returnDate = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='VALIDATING')
+    refundAmount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.transactionID} - {self.returnDate}"
+
+class ReturnItems(models.Model):
+
+    returnID = models.ForeignKey(Returns, on_delete=models.CASCADE)
+    transactionItemID = models.ForeignKey(TransactionItem, on_delete=models.CASCADE)
+
+    itemQty = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.returnID} - {self.transactionItemID}"

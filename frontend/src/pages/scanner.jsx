@@ -8,8 +8,11 @@ import axios from 'axios';
 const Scanner = () => {
   
   const [products, setProducts] = useState([]);
+  const [repackedProducts, setRepackedProducts] = useState([]);
+
   const [stocks, setStocks] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]); // Filtered products to display
+
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState(''); // User's search query
 
   const [transaction, setTransaction] = useState({
@@ -26,7 +29,7 @@ const Scanner = () => {
   const [transactionItem, setTransactionItem] = useState({
     id: '',
     transactionID: '',
-    productID: '',
+    barcodeNo: '',
     quantity: 1,
     price: 0,
   });
@@ -69,6 +72,17 @@ const Scanner = () => {
       });
   };
 
+  const fetchRepackedProducts = () => {
+    axios.get('http://127.0.0.1:8000/repackedProduct/')
+      .then(response => {
+        setRepackedProducts(response.data);
+        setFilteredProducts(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
   const fetchStocks = () => {
     axios.get('http://127.0.0.1:8000/stock/')
       .then(response => {
@@ -82,72 +96,30 @@ const Scanner = () => {
   useEffect(() => {
     ``
     fetchProducts();
+    fetchRepackedProducts();
     fetchStocks();
   }, []);
-
-
-  const addOrUpdateTransactionItem = (product, quantity) => {
-    setTransactionItems((prevItems) => {
-      const existingItemIndex = prevItems.findIndex(
-        (item) => item.productID === product.id
-      );
   
-      if (existingItemIndex !== -1) {
-        // Update existing product quantity and total
-        const updatedItems = [...prevItems];
-        const updatedQuantity = updatedItems[existingItemIndex].quantity + quantity;
-  
-        updatedItems[existingItemIndex] = {
-          ...updatedItems[existingItemIndex],
-          quantity: updatedQuantity,
-          productTotal: updatedQuantity * product.unitPrice,
-        };
-  
-        return updatedItems;
-      }
-  
-      // Add new product at the top
-      return [
-        {
-          productID: product.id,
-          quantity: quantity,
-          price: product.unitPrice,
-          productTotal: quantity * product.unitPrice,
-        },
-        ...prevItems,
-      ];
-    });
-  };
-  
-
   const handleAddProduct = () => {
-    if (!transactionItem.productID || transactionItem.quantity <= 0) {
+    if (!transactionItem.barcodeNo || transactionItem.quantity <= 0) {
       console.warn('Please select a valid product and enter a valid quantity before adding.');
       return;
     }
   
     const product = products.find(
-      (p) => String(p.id) === String(transactionItem.productID)
+      (p) => String(p.barcodeNo) === String(transactionItem.barcodeNo)
     );
   
     if (!product) {
-      console.warn('Selected product not found in product list.');
+      product = repackedProducts.find(
+        (p) => String(p.barcodeNo) === String(transactionItem.barcodeNo)
+      );
+      if(!product) {
+        console.warn('Product not found.')
+      }
       return;
     }
-  
-    addOrUpdateTransactionItem(product, Number(transactionItem.quantity)); // Add or increment by specified quantity
-  
-    // Reset the transactionItem to default values
-    setTransactionItem({
-      id: '',
-      transactionID: '',
-      productID: '',
-      quantity: 1,
-      price: 0,
-    });
   };
-  
-  
 
   const handleDeleteProduct = (productID) => {
     setTransactionItems(prevItems =>
@@ -179,23 +151,6 @@ const Scanner = () => {
     // Close the edit modal after updating
     handleCloseEditModal();
   };
-  
-
-  const handleQuantityChange = (e) => {
-    const { name, value } = e.target;
-  
-    // Strictly allow only digits
-    if (/^\d+$/.test(value) || value === '') { // Allow only numeric characters or an empty string
-      setNewQuantity((prevQuantity) => ({
-        ...prevQuantity,
-        [name]: value,
-      }));
-    } else {
-      console.warn('Invalid input: Only numbers are allowed.');
-    }
-  };
-   
-  
 
   const postTransaction = () => {
     // Step 1: First, create the transaction to get the transactionID
@@ -388,24 +343,6 @@ const Scanner = () => {
 
   const [selectedProduct, setSelectedProduct] = useState(null); // State to track the selected product
 
-  const handleProductSelection = (product) => {
-    if (!product) {
-      console.warn('No product selected');
-      return;
-    }
-  
-    // Use the inputted quantity from transactionItem
-    const inputQuantity = Number(transactionItem.quantity);
-  
-    if (inputQuantity <= 0) {
-      console.warn('Invalid quantity. Must be greater than zero.');
-      return;
-    }
-  
-    addOrUpdateTransactionItem(product, inputQuantity); // Add or increment by inputted quantity
-    setSelectedProduct(product); // Set the selected product
-  };
-
   const handleSearchChange = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
@@ -420,12 +357,6 @@ const Scanner = () => {
   
     setFilteredProducts(filtered);
   };
-
-  
-  
-  
-
-  
 
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
@@ -537,8 +468,8 @@ const Scanner = () => {
             </div>
             <div className='flex w-full'>
               <select
-                name="productID"
-                value={transactionItem.productID}
+                name="barcodeNo"
+                value={transactionItem.barcodeNo}
                 onChange={handleChange}
                 placeholder='barcode'
                 className={`w-full text-[1vw] outline-none py-5 border rounded-l-lg shadow-2xl px-5`}
@@ -547,6 +478,11 @@ const Scanner = () => {
                 {products.map((product) => (
                   <option key={product.id} value={product.id}>
                     {product.barcodeNo}
+                  </option>
+                ))}
+                {repackedProducts.map((repackedProduct) => (
+                  <option key={repackedProduct.id} value={repackedProduct.id}>
+                    {repackedProduct.barcodeNo}
                   </option>
                 ))}
               </select>
