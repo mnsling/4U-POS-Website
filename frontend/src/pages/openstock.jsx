@@ -144,6 +144,14 @@ const openstock = () => {
 
     const stockToPass = stocks.find(stock => String(stock.productId) === String(openStockLogItem.productID));
     const stockItemtoAdd = stockItems.find(stockItemtoAdd => String(stockItemtoAdd.referenceNumber) === String(openStockLogItem.referenceNumber));   
+    
+    // Check if boxesOpened is greater than closedBoxes
+    if (openStockLogItem.boxesOpened > stockItemToAdd.closedBoxes) {
+      console.error("Error: The number of boxes opened cannot exceed the closed boxes available.");
+      alert("The number of boxes opened cannot exceed the closed boxes available."); // Optional user feedback
+      return;
+    }
+    
     const qtyAdded = (openStockLogItem.boxesOpened * stockToPass.standardQuantity) - openStockLogItem.damagedQty;
 
     // Send POST request
@@ -286,6 +294,22 @@ const openstock = () => {
     setShowDetailsPrompt(false);
   };
 
+  const [filterDate, setFilterDate] = useState("");
+
+  const filteredStocks = () => {
+    let result = openStockLogs;
+  
+    // Filter by date if provided
+    if (filterDate) {
+      result = result.filter(openStockLog => {
+        const openStockLogDate = new Date(openStockLog.dateCreated).toISOString().split("T")[0];
+        return openStockLogDate === filterDate;
+      });
+    }
+  
+    return result;
+  };
+
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
@@ -296,7 +320,13 @@ const openstock = () => {
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-between'>
             <div className='w-[15.5vw] flex justify-between gap-5'>
-              <input type='date' className='py-2 px-4 w-[8vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
+              <input
+                type='date'
+                name='filterDate'
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className='py-2 px-4 w-[8vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button'
+              />
             </div>
             <div className='flex justify-between'>
               <button onClick={handleSubmit} className='px-[1vw] py-[0.8vh] text-[0.8vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Open Stock</button>
@@ -310,7 +340,7 @@ const openstock = () => {
               <h1 className='w-[20%] text-[0.7vw] text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
-              {openStockLogs.map(openStockLog => {
+              {filteredStocks().map(openStockLog => {
                   return (
                     <div key={openStockLog.id} className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
                       <h1 className='w-[20%] text-[0.7vw] text-center'>{openStockLog.id}</h1>

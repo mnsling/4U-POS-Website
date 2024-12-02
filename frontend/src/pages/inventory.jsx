@@ -161,6 +161,35 @@ const Inventory = () => {
     return stock || { backhouseStock: 0, displayStock: 0 };
   };
 
+  const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredProducts = () => {
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    
+    return products.filter(product => {
+      const stock = getStockForProduct(product.id);
+  
+      // Filter by stock level
+      if (filter === 'noStock') {
+        if (stock.displayStock === 0) return false;
+      } else if (filter === 'lowStock') {
+        if (stock.displayStock <= product.reorderLevel && stock.displayStock > 0) return false;
+      }
+  
+      // Filter by search query
+      if (
+        !product.name.toLowerCase().includes(lowerCaseQuery) &&
+        !product.barcodeNo.toLowerCase().includes(lowerCaseQuery) &&
+        !product.category.toLowerCase().includes(lowerCaseQuery)
+      ) {
+        return false;
+      }
+  
+      return true; // Passes all filters
+    });
+  };
+
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
@@ -171,47 +200,51 @@ const Inventory = () => {
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-between'>
             <div className='w-[15.5vw] flex gap-[2%]'>
-              <button className='px-[1vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>All</button>
-              <button className='px-[1vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>No Stock</button>
-              <button className='px-[1vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Low Stock</button>
+              <button onClick={() => setFilter('all')}  className='px-[1vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>All</button>
+              <button onClick={() => setFilter('noStock')}  className='px-[1vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>No Stock</button>
+              <button onClick={() => setFilter('lowStock')}  className='px-[1vw] py-[0.8vh] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Low Stock</button>
             </div>
             <input
               type="text"
               className='bg-white px-[1vw] text-darkp text-[0.7vw] font-light outline-none w-4/12 rounded-xl border border-darkp placeholder:text-darkp2'
               placeholder="search for products"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="w-full h-[45vh] rounded-2xl flex flex-col drop-shadow">
             {/* Table Header */}
             <div className="h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10 sticky top-0 z-10">
-              <h1 className="w-[6vw] text-[0.7vw] leading-tight text-center">Barcode #</h1>
-              <h1 className="w-[6vw] text-[0.7vw] leading-tight text-center">Product Name</h1>
-              <h1 className="w-[6vw] text-[0.7vw] text-center">Category</h1>
-              <h1 className="w-[6vw] text-[0.7vw] leading-tight text-center">Backhouse Stock</h1>
-              <h1 className="w-[6vw] text-[0.7vw] leading-tight text-center">Display Stock</h1>
-              <h1 className="w-[6vw] text-[0.7vw] text-center">Unit Price</h1>
-              <h1 className="w-[6vw] text-[0.7vw] text-center">WSMQ</h1>
-              <h1 className="w-[6vw] text-[0.7vw] text-center">WSP</h1>
-              <h1 className="w-[6vw] text-[0.7vw] text-center">Actions</h1>
+              <h1 className="w-[10%] text-[0.7vw] leading-tight text-center">Barcode #</h1>
+              <h1 className="w-[10%] text-[0.7vw] leading-tight text-center">Product Name</h1>
+              <h1 className="w-[10%] text-[0.7vw] text-center">Category</h1>
+              <h1 className="w-[5%] text-[0.7vw] leading-tight text-center">Backhouse Stock</h1>
+              <h1 className="w-[5%] text-[0.7vw] leading-tight text-center">Display Stock</h1>
+              <h1 className="w-[5%] text-[0.7vw] text-center">Unit Price</h1>
+              <h1 className="w-[5%] text-[0.7vw] text-center">WSMQ</h1>
+              <h1 className="w-[5%] text-[0.7vw] text-center">WSP</h1>
+              <h1 className="w-[5%] text-[0.7vw] text-center">Reorder Level</h1>
+              <h1 className="w-[5%] text-[0.7vw] text-center">Actions</h1>
             </div>
             {/* Table Body */}
             <div className="w-full h-full bg-white rounded-b-2xl overflow-y-auto hide-scrollbar">
-              {products.map((product) => {
+              {filteredProducts().map((product) => {
                 const stock = getStockForProduct(product.id);
                 return (
                   <div
                     key={product.id}
                     className="w-full text-darkp text-center flex items-center justify-between px-10 py-4 border-b border-gray-200"
                   >
-                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.barcodeNo}</h1>
-                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.name}</h1>
-                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.category_label}</h1>
-                    <h1 className="w-[6vw] text-[0.7vw] text-center">{stock.backhouseStock}</h1>
-                    <h1 className="w-[6vw] text-[0.7vw] text-center">{stock.displayStock}</h1>
-                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.unitPrice}</h1>
-                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.wsmq}</h1>
-                    <h1 className="w-[6vw] text-[0.7vw] text-center">{product.wsp}</h1>
-                    <h1 className="w-[6vw] flex gap-[1vw] justify-center">
+                    <h1 className="w-[10%] text-[0.7vw] text-center">{product.barcodeNo}</h1>
+                    <h1 className="w-[10%] text-[0.7vw] text-center">{product.name}</h1>
+                    <h1 className="w-[10%] text-[0.7vw] text-center">{product.category_label}</h1>
+                    <h1 className="w-[5%] text-[0.7vw] text-center">{stock.backhouseStock}</h1>
+                    <h1 className={`w-[5%] text-[0.7vw] text-center ${stock.displayStock < product.reorderLevel ? 'text-red-500' : ''}`}>{stock.displayStock}</h1>
+                    <h1 className="w-[5%] text-[0.7vw] text-center">{product.unitPrice}</h1>
+                    <h1 className="w-[5%] text-[0.7vw] text-center">{product.wsmq}</h1>
+                    <h1 className="w-[5%] text-[0.7vw] text-center">{product.wsp}</h1>
+                    <h1 className="w-[5%] text-[0.7vw] text-center">{product.reorderLevel}</h1>
+                    <h1 className="w-[5%] flex gap-[1vw] justify-center">
                       <button onClick={() => handleUpdatePass(product)}>
                         <img src={edit} alt="Edit" className="w-[0.8vw] h-[0.8vw]" />
                       </button>

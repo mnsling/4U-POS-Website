@@ -192,6 +192,7 @@ const stock = () => {
       supplier: stock.supplier,
       backUoM: stock.backUoM,
       displayUoM: stock.displayUoM,
+      standardQuantity: stock.standardQuantity,
     })
   };
 
@@ -225,6 +226,15 @@ const stock = () => {
     setShowDetailsPrompt(false);
   };
 
+  const [selectedSupplier, setSelectedSupplier] = useState("");
+
+  const filteredStocks = () => {
+    if (!selectedSupplier) {
+      return stocks; // If no supplier is selected, return all stocks
+    }
+    return stocks.filter(stock => String(stock.supplier) === String(selectedSupplier));
+  };
+  
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
@@ -237,11 +247,18 @@ const stock = () => {
             <div className='w-[15.5vw] flex justify-between'>
               <button onClick={handleFormClick} className='px-[1vw] py-[0.8vh] text-[0.8vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white button'>Add New Product Stock</button>
             </div>
-            <input
-              type="text"
-              className='bg-white px-[1vw] py-[0.8vh] text-darkp text-[0.8vw] font-light outline-none w-4/12 rounded-xl border border-darkp placeholder:text-darkp2'
-              placeholder="search for supplier"
-            />
+            <select 
+                value={selectedSupplier}
+                onChange={(e) => setSelectedSupplier(e.target.value)}
+                              className='bg-white px-[1vw] py-[0.8vh] text-darkp text-[0.8vw] font-light outline-none w-4/12 rounded-xl border border-darkp placeholder:text-darkp2'
+              >
+                <option value=''>Select Supplier</option>
+                {suppliers.map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.supplierName}
+                  </option>
+                ))}
+              </select>
           </div>
           <div className='w-full h-[72vh] rounded-2xl flex flex-col drop-shadow'>
             <div className='h-[6vh] bg-darkp opacity-80 rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
@@ -254,7 +271,7 @@ const stock = () => {
               <h1 className='w-[10%] text-[0.7vw] leading-tight text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
-              {stocks
+              {filteredStocks()
                 .filter(stock => stock.productId !== null)
                 .map(stock => {
                   const supplier = getSupplierForStock(stock.supplier);
@@ -446,7 +463,7 @@ const stock = () => {
           )}
           {showEditPrompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-[30vw] h-[40vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+              <div className='bg-white w-[30vw] h-min p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
                 <h2 className='text-black text-[1.3vw] font-black'>
                   {products.find(p => p.id === displayStock.productId)?.name || 'Product not found'}
                 </h2>
@@ -460,6 +477,10 @@ const stock = () => {
                     <div className='w-full flex flex-col justify-start gap-1'>
                       <label className='text-[0.7vw]'>Display UoM</label>
                       <input name='displayUoM' value={stock.displayUoM} onChange={handleChange} type='text' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter uom' />
+                    </div>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Standard Quantity</label>
+                      <input name='standardQuantity' value={stock.standardQuantity} onChange={handleChange} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter uom' />
                     </div>
                   </div>
                 </div>

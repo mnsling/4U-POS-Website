@@ -12,7 +12,6 @@ const Records = () => {
 
   const [stocks, setStocks] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
-  const [products, setProducts] = useState([]);
 
   const [records, setRecords] = useState([]);
   const [record, setRecord] = useState({
@@ -64,7 +63,6 @@ const Records = () => {
   useEffect(() => {
     fetchSuppliers();
     fetchRecords();
-    fetchProducts();
     fetchItems();
     fetchStocks();
     console.log(record);
@@ -104,16 +102,6 @@ const Records = () => {
     axios.get('http://127.0.0.1:8000/deliveryRecord/')
       .then(response => {
         setRecords(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  };
-
-  const fetchProducts = () => {
-    axios.get('http://127.0.0.1:8000/product/')
-      .then(response => {
-        setProducts(response.data);
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -363,6 +351,28 @@ const Records = () => {
         });
   };
 
+  const [selectedSupplier, setSelectedSupplier] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+
+  const filteredStocks = () => {
+    let result = records;
+  
+    // Filter by supplier if selected
+    if (selectedSupplier) {
+      result = result.filter(record => String(record.supplierId) === String(selectedSupplier));
+    }
+  
+    // Filter by date if provided
+    if (filterDate) {
+      result = result.filter(record => {
+        const recordDate = new Date(record.dateDelivered).toISOString().split("T")[0];
+        return recordDate === filterDate;
+      });
+    }
+  
+    return result;
+  };
+  
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
@@ -373,10 +383,25 @@ const Records = () => {
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-between'>
             <div className='w-[15.5vw] flex justify-between gap-5'>
-              <select className='py-2 px-4 w-[8.5vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
-                <option>Select Supplier</option>
+              <select 
+                value={selectedSupplier}
+                onChange={(e) => setSelectedSupplier(e.target.value)}
+                className='py-2 px-4 w-[8.5vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'
+              >
+                <option value=''>Select Supplier</option>
+                {suppliers.map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.supplierName}
+                  </option>
+                ))}
               </select>
-              <input type='date' className='py-2 px-4 w-[8vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
+              <input
+                type='date'
+                name='filterDate'
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className='py-2 px-4 w-[8vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button'
+              />
             </div>
             <button onClick={handleFormClick} className='bg-white px-4 py-2 text-darkp font-light text-[0.6vw] outline-none w-[10vw] rounded-xl border border-darkp hover:bg-darkp hover:text-white button'>Create New Stock Record</button>
           </div>
@@ -392,7 +417,7 @@ const Records = () => {
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
               <div className='h-[9%] flex flex-col items-center justify-between'>
-              {records.map(record => {
+              {filteredStocks().map(record => {
                   const supplier = getSupplierForRecord(record.supplierId);
                   return (
                     <div key={record.id} className='w-full border-b border-darkp text-darkp text-center flex items-center justify-between py-2'>

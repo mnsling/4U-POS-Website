@@ -191,8 +191,6 @@ const movestock = () => {
       .then(response => {
         console.log('Open Stock Log deleted:', response.data);
         fetchMoveStockLogItems();
-        setCurrentLog();
-        handleClosePrompt();
       })
       .catch(error => {
         console.error('Error deleting log:', error.response ? error.response.data : error.message);
@@ -344,7 +342,7 @@ const movestock = () => {
                   <button onClick={handleClosePrompt} className='h-full pt-5 flex items-start'><img src={exit} className='w-[1.8vw] h-[1.8vw]' /></button>
                 </div>
                 <div className='w-full flex flex-col gap-2'>
-                  <div className='w-full h-[68vh] flex flex-col drop-shadow'>
+                  <div className='w-full h-[60vh] flex flex-col drop-shadow'>
                     <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
                       <h1 className='w-[18%] text-[0.7vw] leading-tight text-center'>Product Name</h1>
                       <h1 className='w-[18%] text-[0.7vw] text-center'>Reference #</h1>
@@ -516,17 +514,22 @@ const movestock = () => {
                       >
                         <option>-Reference Number-</option>
                         {stockItems
-                          .filter(stock =>
-                            stock.productID === parseInt(moveStockLogItem.productID) &&
-                            stock.closedStock > 0
-                          ) 
-                          .map(stock => {
+                          .filter(stockItem => {
+                            // Step 1: Find the stock that matches stockItem.stockID
+                            const matchingStock = stocks.find(stock => stock.id === stockItem.stockID);
+
+                            // Step 2: Check if the matchingStock's productID matches openStockLogItem.productID
                             return (
-                              <option key={stock.id} value={stock.referenceNumber}>
-                                {stock.referenceNumber} - {stock.expiryDate ? stock.expiryDate : "N/A"}
-                              </option>
+                              matchingStock && // Ensure stock is found
+                              matchingStock.productId === parseInt(moveStockLogItem.productID) &&
+                              stockItem.openStock > 0
                             );
-                        })}
+                          })
+                          .map(stockItem => (
+                            <option key={stockItem.id} value={stockItem.referenceNumber}>
+                              {stockItem.referenceNumber} - {stockItem.expiryDate ? stockItem.expiryDate : "N/A"}
+                            </option>
+                          ))}
                       </select>
                     </div>
                   </div>
