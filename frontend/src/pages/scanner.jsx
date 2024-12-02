@@ -806,7 +806,7 @@ const Scanner = () => {
                 </div>
                 <div className='flex flex-col gap-20 h-full w-full bg-white border-2 rounded-2xl px-10 py-5'>
                   <p className='text-[2vw] font-semibold tracking-tight'>Change:</p>
-                  <p className='text-[7vw] font-semibold leading-10 tracking-tight'>P {customerChange}</p>
+                  <p className='text-[7vw] font-semibold leading-10 tracking-tight'>P {transaction.amountPaid <= 0 ? 0 : Math.max(0, customerChange)}</p>
                 </div>
               </div>
               <div className='flex gap-5 justify-end'>
