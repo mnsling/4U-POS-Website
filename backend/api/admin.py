@@ -3,7 +3,6 @@ from django.shortcuts import render, redirect
 from django.urls import path
 from django.http import HttpResponseBadRequest
 from .models import *
-from .forms import QuantityForm
 
 admin.site.register(Stock)
 admin.site.register(Product)
@@ -19,3 +18,4 @@ admin.site.register(MoveStockLog)
 admin.site.register(MoveStockLogItem)
 admin.site.register(StockOutLog)
 admin.site.register(StockOutLogItem)
+admin.site.register(RepackedProduct)

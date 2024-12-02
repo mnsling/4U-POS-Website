@@ -3,9 +3,174 @@ import bg from '../assets/bg.jpg';
 import Sidebar from '../components/sidebar';
 import del from '../assets/delete.png';
 import edit from '../assets/edit.png';
-// import axios from 'axios';
+import axios from 'axios';
 
 const sinventory = () => {
+
+  const [stocks, setStocks] = useState([]);
+  const [repackedProducts, setRepackedProducts] = useState([]);
+  const [repackedProduct, setRepackedProduct] = useState({
+    name: '',
+    stock: '',
+    barcodeNo: '',
+    category: '',
+    unitWeight: '',
+    unitPrice: '',
+    wsmq: '',
+    wsp: '',
+    reorderLevel: '',
+  });
+
+  const [upProductId, setUpProductId] = useState([]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setRepackedProduct(prevProduct => {
+      const updatedProduct = {
+        ...prevProduct,
+        [name]: value,
+      };
+      // Log updated product here
+      console.log('Updated product:', updatedProduct);
+      return updatedProduct;
+    });
+  };
+
+  const fetchRepackedProducts = () => {
+    axios.get('http://127.0.0.1:8000/repackedProduct/')
+      .then(response => {
+        setRepackedProducts(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  const fetchStocks = () => {
+    axios.get('http://127.0.0.1:8000/stock/')
+      .then(response => {
+        setStocks(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  useEffect(() => {
+    fetchRepackedProducts();
+    fetchStocks();
+  }, []);
+
+  const getStockForProduct = (stockId) => {
+    const stock = stocks.find(stock => stock.id === stockId);
+    return stock || { backhouseStock: 0, displayStock: 0 };
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Send POST request
+    axios.post('http://127.0.0.1:8000/repackedProduct/', {
+      name: repackedProduct.name,
+      barcodeNo: repackedProduct.barcodeNo,
+      category: repackedProduct.category,
+      displayedStock: 0,
+      stock: repackedProduct.stock,
+      unitWeight: repackedProduct.unitWeight,
+      unitPrice: parseFloat(repackedProduct.unitPrice),
+      wsmq: parseInt(repackedProduct.wsmq),
+      wsp: parseFloat(repackedProduct.wsp),
+      reorderLevel: parseInt(repackedProduct.reorderLevel)
+    })
+      .then(response => {
+        console.log('Product created:', response.data);
+        setRepackedProduct({
+          name: '',
+          stock: '',
+          barcodeNo: '',
+          category: '',
+          unitWeight: '',
+          unitPrice: '',
+          wsmq: '',
+          wsp: '',
+          reorderLevel: '',
+        })
+        fetchRepackedProducts();
+        fetchStocks();
+      })
+      .catch(error => {
+        console.error('Error creating product:', error.response.data);
+      });
+  };
+
+  const handleDelete = (productId) => {
+    axios.delete(`http://127.0.0.1:8000/repackedProduct/${productId}/`)
+      .then(response => {
+        console.log('Product deleted:', response.data);
+        fetchRepackedProducts();
+        fetchStocks();
+      })
+      .catch(error => {
+        console.error('Error deleting product:', error.response ? error.response.data : error.message);
+      });
+  };
+
+  const handleUpdatePass = (upProduct) => {
+    setRepackedProduct({
+      name: upProduct.name,
+      barcodeNo: upProduct.barcodeNo,
+      category: upProduct.category,
+      stock: upProduct.stock,
+      unitWeight: upProduct.unitWeight,
+      unitPrice: upProduct.unitPrice,
+      wsmq: upProduct.wsmq,
+      wsp: upProduct.wsp,
+      reorderLevel: upProduct.reorderLevel,
+    })
+    setUpProductId(upProduct.id)
+    setShowConfirmButton(false)
+    console.log(upProductId)
+  };
+
+  const handleUpdate = (e) => {
+    e.preventDefault();
+
+    // Send POST request
+    axios.put(`http://127.0.0.1:8000/repackedProduct/${upProductId}/`, {
+      name: repackedProduct.name,
+      barcodeNo: repackedProduct.barcodeNo,
+      category: repackedProduct.category,
+      stock: repackedProduct.stock,
+      unitWeight: repackedProduct.unitWeight,
+      unitPrice: parseFloat(repackedProduct.unitPrice),
+      wsmq: parseInt(repackedProduct.wsmq),
+      wsp: parseFloat(repackedProduct.wsp),
+      reorderLevel: parseInt(repackedProduct.reorderLevel)
+    })
+      .then(response => {
+        console.log('Product created:', response.data);
+        setRepackedProduct({
+          name: '',
+          stock: '',
+          barcodeNo: '',
+          category: '',
+          unitWeight: '',
+          unitPrice: '',
+          wsmq: '',
+          wsp: '',
+          reorderLevel: '',
+        })
+        fetchRepackedProducts();
+        fetchStocks();
+        setShowConfirmButton(true);
+      })
+      .catch(error => {
+        console.error('Error creating product:', error.response.data);
+      });
+  };
 
   const [showConfirmButton, setShowConfirmButton] = useState(true);
 
@@ -35,39 +200,46 @@ const sinventory = () => {
               <h1 className='w-[9%] text-[0.7vw] leading-tight text-center'>Product Name</h1>
               <h1 className='w-[9%] text-[0.7vw] text-center'>Category</h1>
               <h1 className='w-[9%] text-[0.7vw] text-center'>Mother Stock</h1>
-              <h1 className='w-[9%] text-[0.7vw] leading-tight text-center'>Backhouse Stock</h1>
               <h1 className='w-[9%] text-[0.7vw] leading-tight text-center'>Display Stock</h1>
               <h1 className='w-[9%] text-[0.7vw] text-center'>Unit Weight</h1>
               <h1 className='w-[9%] text-[0.7vw] leading-tight text-center'>Unit Price</h1>
               <h1 className='w-[9%] text-[0.7vw] text-center'>WSMQ</h1>
               <h1 className='w-[9%] text-[0.7vw] text-center'>WSP</h1>
+              <h1 className='w-[9%] text-[0.7vw] text-center'>Restock Level</h1>
               <h1 className='w-[9%] text-[0.7vw] text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto'>
-              <div className='h-[9%] py-6 border-b border-darkp flex items-center justify-between px-3'>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>01223456</h1>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>Milk</h1>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>Beverages</h1>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>Oil</h1>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>100</h1>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>100</h1>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>1/2 kilo</h1>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>30.00</h1>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>100.00</h1>
-                <h1 className='w-[9%] text-[0.7vw] text-center'>200.00</h1>
-                <div className='w-[9%] flex justify-center gap-5'>
-                  <img
-                    src={edit}
-                    alt='edit'
-                    className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                  />
-                  <img
-                    src={del}
-                    alt='delete'
-                    className='w-[0.8vw] h-[0.8vw] cursor-pointer'
-                  />
-                </div>
-              </div>
+              {repackedProducts.map(repackedProduct => {
+                const stock = getStockForProduct(repackedProduct.stock);
+                return (
+                  <div key={repackedProduct.id} className='h-[9%] py-6 border-b border-darkp flex items-center justify-between px-3'>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{repackedProduct.barcodeNo}</h1>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{repackedProduct.name}</h1>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{repackedProduct.category_label}</h1>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{stock.stockName}</h1>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{repackedProduct.displayedStock}</h1>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{repackedProduct.unitWeight}</h1>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{repackedProduct.unitPrice}</h1>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{repackedProduct.wsmq}</h1>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{repackedProduct.wsp}</h1>
+                    <h1 className='w-[9%] text-[0.7vw] text-center'>{repackedProduct.reorderLevel}</h1>
+                    <div className='w-[9%] flex justify-center gap-5'>
+                      <img
+                        src={edit}
+                        alt='edit'
+                        onClick={() => handleUpdatePass(repackedProduct)}
+                        className='w-[0.8vw] h-[0.8vw] cursor-pointer'
+                      />
+                      <img
+                        src={del}
+                        alt='delete'
+                        onClick={() => handleDelete(repackedProduct.id)}
+                        className='w-[0.8vw] h-[0.8vw] cursor-pointer'
+                      />
+                    </div>  
+                  </div>
+                );
+              })}
             </div>
           </div>
           <div className='w-full h-[30vh] bg-darkp opacity-80 flex items-center justify-center rounded-2xl px-[1vw] py-[1vh] drop-shadow'>
@@ -76,8 +248,10 @@ const sinventory = () => {
                 <div className='flex flex-col gap-[0.5vh]'>
                   <label className='text-white font-bold text-[0.6vw]'>Barcode #</label>
                   <input
-                    type="number"
+                    type="text"
                     name="barcodeNo"
+                    value={repackedProduct.barcodeNo}
+                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter barcode*"
                   />
@@ -86,7 +260,9 @@ const sinventory = () => {
                   <label className='text-white font-bold text-[0.6vw]'>Product Name</label>
                   <input
                     type="text"
-                    name="productName"
+                    name="name"
+                    value={repackedProduct.name}
+                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter product name*"
                   />
@@ -95,6 +271,8 @@ const sinventory = () => {
                   <label className='text-white font-bold text-[0.6vw]'>Category</label>
                   <select
                     name="category"
+                    value={repackedProduct.category}
+                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                   >
                     <option value="">-Choose Category-</option>
@@ -116,7 +294,9 @@ const sinventory = () => {
                   <label className='text-white font-bold text-[0.6vw]'>Unit Weight</label>
                   <input
                     type="number"
-                    name="wsp"
+                    name="unitWeight"
+                    value={repackedProduct.unitWeight}
+                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter WSP*"
                   />
@@ -126,6 +306,8 @@ const sinventory = () => {
                   <input
                     type="number"
                     name="unitPrice"
+                    value={repackedProduct.unitPrice}
+                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter unit price*"
                   />
@@ -135,6 +317,8 @@ const sinventory = () => {
                   <input
                     type="number"
                     name="wsmq"
+                    value={repackedProduct.wsmq}
+                    onChange={handleChange}
                     className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     placeholder="enter WSMQ*"
                   />
@@ -147,6 +331,8 @@ const sinventory = () => {
                     <input
                       type="number"
                       name="wsp"
+                      value={repackedProduct.wsp}
+                      onChange={handleChange}
                       className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                       placeholder="enter WSP*"
                     />
@@ -154,12 +340,21 @@ const sinventory = () => {
                   <div className='flex flex-col gap-[0.5vh]'>
                     <label className='text-white font-bold text-[0.6vw]'>Mother Stock</label>
                     <select
-                      name="category"
+                      name="stock"
+                      value={repackedProduct.stock}
+                      onChange={handleChange}
                       className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                     >
                       <option value="">-Choose Stock-</option>
-                      <option value="MISC">Miscellaneous</option>
-                      <option value="STATIONERY">Stationery & Office Supplies</option>
+                      {stocks
+                        .filter(stock => stock.productId === null)
+                        .map(stock => {
+                        return (
+                          <option key={stock.id} value={stock.id}>
+                            {stock.stockName}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   
@@ -171,18 +366,22 @@ const sinventory = () => {
                       <input
                         type="number"
                         name="reorderLevel"
+                        value={repackedProduct.reorderLevel}
+                        onChange={handleChange}
                         className={`bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg`}
                         placeholder="enter reorder level*"
                       />
                     </div>
                     {showConfirmButton ? (
                       <button
+                        onClick={handleSubmit}
                         className='w-[48%] bg-white px-[1vw] py-[1vh] text-[0.66vw] border outline-none rounded-lg button hover:bg-green-600 hover:text-white'
                       >
                         Confirm
                       </button>
                     ) : (
                       <button
+                        onClick={handleUpdate}
                         className='w-[48%] px-[1vw] py-[1vh] bg-white text-[1vw] border border-black rounded-xl text-black hover:bg-green-500 hover:border-white hover:text-white button'
                       >
                         Update

@@ -79,7 +79,7 @@ class RepackedProduct(models.Model):
     stock = models.ForeignKey(Stock, default='', on_delete=models.CASCADE)
     barcodeNo = models.CharField(unique=True, max_length=100)
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
-    displayedStock = models.IntegerField()
+    displayedStock = models.IntegerField(blank=True)
     unitWeight = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     unitPrice = models.DecimalField(max_digits=10, decimal_places=2)
     wsmq = models.IntegerField()
@@ -183,7 +183,7 @@ class StockItem(models.Model):
     stockID = models.ForeignKey(Stock, null=True, on_delete=models.CASCADE)
     referenceNumber = models.CharField(null=True, max_length=100)
     closedStock = models.IntegerField(null=True)
-    openStock = models.IntegerField(null=True)
+    openStock = models.DecimalField(max_digits=10, decimal_places=2,null=True)
     toDisplayStock = models.IntegerField(null=True)
     displayedStock = models.IntegerField(null=True)
     damagedStock = models.IntegerField(null=True)
@@ -433,7 +433,7 @@ def handle_open_stock_log_confirmation(sender, instance, created, **kwargs):
             stock.displayStock = (stock.displayStock or 0) - log_item.stockOutQty
             stock.save()
 
-class RepackProductLog(models.Model):
+class OpenRepackStockLog(models.Model):
     # Status Field Choices
     STATUS_CHOICES = [
         ('VALIDATING', 'Validating'),
@@ -446,15 +446,135 @@ class RepackProductLog(models.Model):
     def __str__(self):
         return str(self.dateCreated)
     
-class RepackProductLogItem(models.Model):
-    logID = models.ForeignKey(OpenStockLog, on_delete=models.CASCADE, default=0)
-    productID = models.ForeignKey(RepackedProduct, on_delete=models.CASCADE)
+class OpenRepackStockLogItem(models.Model):
+    logID = models.ForeignKey(OpenRepackStockLog, on_delete=models.CASCADE, default=0)
+    stockID = models.ForeignKey(Stock, on_delete=models.CASCADE)
     stockItemID = models.ForeignKey(StockItem, on_delete=models.CASCADE, default=0)
     referenceNumber = models.CharField(max_length=25, null=True, blank=True)
-    boxesOpened = models.IntegerField()
-    previousQty = models.IntegerField()
-    qtyAdded = models.IntegerField()
-    damagedQty = models.IntegerField()
+    openedStock = models.IntegerField()
+    qtyAdded = models.DecimalField(max_digits=10, decimal_places=2)
+    damagedQty = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.referenceNumber
+    
+# Signal for OpenStockLog
+@receiver(post_save, sender=OpenRepackStockLog)
+def handle_open_stock_log_confirmation(sender, instance, created, **kwargs):
+    if created or instance.status != "CONFIRMED":
+        return
+
+    log_items = OpenRepackStockLogItem.objects.filter(logID=instance)
+
+    with transaction.atomic():
+        for log_item in log_items:
+            stock_item = log_item.stockItemID
+            if not stock_item:
+                raise ValueError(f"StockItem not found for log item {log_item.referenceNumber}")
+
+            # Update StockItem
+            stock_item.closedStock = (stock_item.closedStock or 0) - log_item.openedStock
+            stock_item.openStock = (stock_item.openStock or 0) + log_item.qtyAdded
+            stock_item.save()
+
+            # Update Stock
+            stock = stock_item.stockID
+            if not stock:
+                raise ValueError(f"Stock not found for StockItem {stock_item.id}")
+
+            stock.backhouseStock = (stock.backhouseStock or 0) - log_item.openedStock
+            stock.save()
+
+class RepackStockLog(models.Model):
+    # Status Field Choices
+    STATUS_CHOICES = [
+        ('VALIDATING', 'Validating'),
+        ('CONFIRMED', 'Confirmed'),
+    ]
+
+    dateCreated = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='VALIDATING')
+
+    def __str__(self):
+        return str(self.dateCreated)
+    
+class RepackStockLogItem(models.Model):
+    logID = models.ForeignKey(RepackStockLog, on_delete=models.CASCADE, default=0)
+    productID = models.ForeignKey(RepackedProduct, on_delete=models.CASCADE)
+    stockItemID = models.ForeignKey(StockItem, on_delete=models.CASCADE, default=0)
+    referenceNumber = models.CharField(max_length=25, null=True, blank=True)
+    qtyUsed = models.DecimalField(max_digits=10, decimal_places=2)
+    repackQty = models.IntegerField()
+
+    def __str__(self):
+        return self.referenceNumber
+    
+# Signal for OpenStockLog
+@receiver(post_save, sender=RepackStockLog)
+def handle_open_stock_log_confirmation(sender, instance, created, **kwargs):
+    if created or instance.status != "CONFIRMED":
+        return
+
+    log_items = RepackStockLogItem.objects.filter(logID=instance)
+
+    with transaction.atomic():
+        for log_item in log_items:
+            stock_item = log_item.stockItemID
+            product = log_item.productID
+            if not stock_item:
+                raise ValueError(f"StockItem not found for log item {log_item.referenceNumber}")
+
+            # Update StockItem
+            stock_item.openStock = (stock_item.openStock or 0) - log_item.qtyUsed
+            stock_item.save()
+
+            product.displayedStock = (product.displayedStock or 0) + log_item.repackQty
+            product.save()
+
+class RepackedProductStockOutLog(models.Model):
+    # Status Field Choices
+    STATUS_CHOICES = [
+        ('VALIDATING', 'Validating'),
+        ('CONFIRMED', 'Confirmed'),
+    ]
+
+    dateCreated = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='VALIDATING')
+
+    def __str__(self):
+        return str(self.dateCreated)
+    
+class RepackedProductStockOutLogItem(models.Model):
+    logID = models.ForeignKey(StockOutLog, on_delete=models.CASCADE, default=0)
+    productID = models.ForeignKey(RepackedProduct, on_delete=models.CASCADE)
+    stockItemID = models.ForeignKey(StockItem, on_delete=models.CASCADE, default=0)
+    referenceNumber = models.CharField(max_length=25, null=True, blank=True)
+    previousQty = models.IntegerField()
+    stockOutQty = models.IntegerField()
+    stockOutDescription = models.TextField(null=True)
+
+    def __str__(self):
+        return self.referenceNumber
+    
+# Signal for OpenStockLog
+@receiver(post_save, sender=RepackedProductStockOutLog)
+def handle_open_stock_log_confirmation(sender, instance, created, **kwargs):
+    if created or instance.status != "CONFIRMED":
+        return
+
+    log_items = RepackedProductStockOutLogItem.objects.filter(logID=instance)
+
+    with transaction.atomic():
+        for log_item in log_items:
+            stock_item = log_item.stockItemID
+            if not stock_item:
+                raise ValueError(f"StockItem not found for log item {log_item.referenceNumber}")
+
+            # Update StockItem
+            stock_item.stockedOutQty = (stock_item.stockedOutQty or 0) + log_item.stockOutQty
+            stock_item.save()
+
+            #Update RepackedProduct
+            product = log_item.productID
+            product.displayedStock = (product.displayedStock or 0) - log_item.stockOutQty
+            product.save()

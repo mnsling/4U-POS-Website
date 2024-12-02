@@ -468,71 +468,78 @@ const Scanner = () => {
       )}
       {showEndModal && (
         <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50'>
-          <div className='bg-white w-[25vw] h-[92vh] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
-            <h2 className='text-black text-[1.3vw] font-black'>End of Day Cash Denomination</h2>
-            <div className='w-full flex flex-col gap-4'>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱1000.00</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+          <div className='bg-white w-max h-min p-[2vw] rounded-xl shadow-lg flex items-start gap-5'>
+            <div classNAme='flex flex-col w-full'>
+              <h2 className='text-black text-[1.3vw] font-black mb-4'>End of Day Cash Denomination</h2>
+              <div className='w-full flex gap-6'>
+                <div className='w-[48%] flex flex-col gap-4'>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱1000.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱500.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱200.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱100.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱50.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱20.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start gap-4'>
+                    <button
+                      className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-green-500 button'
+                      onClick={handleEndClose}
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-red-500 button'
+                      onClick={handleEndClose}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+                <div className='w-[48%] flex flex-col gap-4'>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱10.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱5.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱1.00</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱0.25</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱0.10</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                  <div className='w-full flex justify-start items-center gap-5'>
+                    <label className='text-[0.7vw] w-[3vw]'>₱0.05</label>
+                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                  </div>
+                </div>
               </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱500.00</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱200.00</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱100.00</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱50.00</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱20.00</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱10.00</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱5.00</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱1.00</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱0.25</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱0.10</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-              <div className='w-full flex justify-start items-center gap-5'>
-                <label className='text-[0.7vw] w-[3vw]'>₱0.05</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-              </div>
-            </div>
-            <div className='w-full flex justify-end gap-4'>
-              <button
-                className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-green-500 button'
-                onClick={handleEndClose}
-              >
-                Confirm
-              </button>
-              <button
-                className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-red-500 button'
-                onClick={handleEndClose}
-              >
-                Cancel
-              </button>
+              
             </div>
           </div>
         </div>

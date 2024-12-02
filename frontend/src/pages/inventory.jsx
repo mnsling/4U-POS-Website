@@ -8,7 +8,6 @@ import axios from 'axios'
 const Inventory = () => {
 
   const [stocks, setStocks] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
   const [product, setProduct] = useState({
     name: '',
@@ -153,28 +152,9 @@ const Inventory = () => {
   };
 
   useEffect(() => {
-    ``
     fetchProducts();
     fetchStocks();
   }, []);
-
-  const [showPrompt, setShowPrompt] = useState(false);
-
-  const handleAddStockClick = () => {
-    setShowPrompt(true);
-  };
-
-  const handleClosePrompt = () => {
-    setShowPrompt(false);
-  };
-
-  const handleConvertClick = () => {
-    setShowPrompt(true);
-  };
-
-  const handleCloseConvertPrompt = () => {
-    setShowPrompt(false);
-  };
 
   const getStockForProduct = (productId) => {
     const stock = stocks.find(stock => stock.productId === productId);

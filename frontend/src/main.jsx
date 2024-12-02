@@ -16,6 +16,7 @@ import Out from './pages/stockout'
 import Second from './pages/sinventory'
 import RP from './pages/RP'
 import Repack from './pages/repack'
+import OpenRepack from './pages/rpopenstock'
 import './index.css';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -37,6 +38,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Route path="/out" element={<ProtectedRoute><Out /></ProtectedRoute>} />
       <Route path="/rp" element={<ProtectedRoute><RP /></ProtectedRoute>} />
       <Route path="/repack" element={<ProtectedRoute><Repack /></ProtectedRoute>} />
+      <Route path="/openrepack" element={<ProtectedRoute><OpenRepack /></ProtectedRoute>} />
     </Routes>
   </BrowserRouter>
 );

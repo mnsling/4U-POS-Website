@@ -16,7 +16,7 @@ class RepackedProductSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = RepackedProduct
-        fields = ('id', 'name', 'stock', 'barcodeNo', 'category', 'category_label', 'unitWeight', 'unitPrice', 'wsmq', 'wsp', 'reorderLevel')
+        fields = ('id', 'name', 'stock', 'barcodeNo', 'category', 'category_label', 'displayedStock', 'unitWeight', 'unitPrice', 'wsmq', 'wsp', 'reorderLevel')
 
     def get_category_label(self, obj):
         return obj.get_category_display()
@@ -98,3 +98,39 @@ class StockOutLogItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockOutLogItem
         fields =('id', 'logID', 'productID', 'stockItemID', 'referenceNumber', 'previousQty', 'stockOutQty', 'stockOutDescription') 
+
+class OpenRepackStockLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OpenRepackStockLog
+        fields =('id', 'dateCreated', 'status')
+
+class OpenRepackStockLogItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OpenRepackStockLogItem
+        fields =('id', 'logID', 'stockID', 'stockItemID', 'referenceNumber', 'openedStock', 'qtyAdded', 'damagedQty')
+
+class RepackStockLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RepackStockLog
+        fields =('id', 'dateCreated', 'status')
+
+class RepackStockLogItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RepackStockLogItem
+        fields =('id', 'logID', 'productID', 'stockItemID', 'referenceNumber', 'qtyUsed', 'repackQty')
+
+class RepackedProductStockOutLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RepackedProductStockOutLog
+        fields =('id', 'dateCreated', 'status')
+
+class RepackedProductStockOutLogItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RepackedProductStockOutLogItem
+        fields =('id', 'logID', 'productID', 'stockItemID', 'referenceNumber', 'previousQty', 'stockOutQty', 'stockOutDescription')

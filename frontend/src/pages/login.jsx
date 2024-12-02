@@ -26,7 +26,7 @@ const Login = () => {
             return;
         }
 
-        const validTerminalNumbers = ['001', '002', '003'];
+        const validTerminalNumbers = ['001', '002', '003', 'admin'];
         if (!validTerminalNumbers.includes(terminalNumber)) {
         alert("Invalid terminal number!");
         return;

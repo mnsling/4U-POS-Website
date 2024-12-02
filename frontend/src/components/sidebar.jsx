@@ -137,6 +137,12 @@ const Sidebar = () => {
                       <h1 className="text-[0.8vw]">Repacked Products Stocks</h1>
                     </button>
                     <button
+                      onClick={() => handleNavigation('/openrepack')}
+                      className="text-white flex gap-4 px-6 items-start py-3 border-b border-white hover:bg-darkp2 button"
+                    >
+                      <h1 className="text-[0.8vw]">Open Repacked Stocks</h1>
+                    </button>
+                    <button
                       onClick={() => handleNavigation('/repack')}
                       className="text-white flex gap-4 px-6 items-start py-3 border-b border-white hover:bg-darkp2 button"
                     >
