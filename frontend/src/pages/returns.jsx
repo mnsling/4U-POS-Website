@@ -10,6 +10,9 @@ import axios from 'axios';
 
 const returns = () => {
 
+  const [products, setProducts] = useState([]);
+  const [repackedProducts, setRepackedProducts] = useState([]);
+
   const [transactions, setTransactions] = useState([]);
   const [transactionItems, setTransactionItems] = useState([]);
 
@@ -25,6 +28,8 @@ const returns = () => {
     returnID: null,
     transactionItemID: null,
     itemQty: 0,
+    itemPrice: 0,
+    amountRefundable: 0,
   });
 
   const handleReturnChange = (e) => {
@@ -39,6 +44,42 @@ const returns = () => {
       console.log('Updated product:', updatedReturn);
       return updatedReturn;
     });
+  };
+
+  const handleReturnItemChange = (e) => {
+    const { name, value } = e.target;
+
+    setReturnItem(prevReturn => {
+      const updatedReturn = {
+        ...prevReturn,
+        [name]: value,
+      };
+      // Log updated product here
+      console.log('Updated product:', updatedReturn);
+      return updatedReturn;
+    });
+  };
+
+  const fetchProducts = () => {
+    axios.get('http://127.0.0.1:8000/product/')
+      .then(response => {
+        setProducts(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  const fetchRepackedProducts = () => {
+    axios.get('http://127.0.0.1:8000/repackedProduct/')
+      .then(response => {
+        setRepackedProducts(response.data);
+        console.log(response.data); // Log the updated product list
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
   };
 
   const fetchTransactions = () => {
@@ -86,6 +127,8 @@ const returns = () => {
   };
 
   useEffect(() => {``
+    fetchProducts();
+    fetchRepackedProducts();
     fetchTransactions();
     fetchTransactionItems();
     fetchReturns();
@@ -130,6 +173,109 @@ const returns = () => {
       });
   };
 
+  const getProduct = (barcode) => {
+    let product = products.find(p => p.barcodeNo === barcode)
+
+    if (!product) {
+      product = repackedProducts.find(p => p.barcodeNo === barcode)
+    }
+    
+    console.log(product)
+    return product
+  }
+
+  const handleAddItem = (e) => {
+    e.preventDefault();
+
+    const transactionItem = transactionItems.find(item => String(item.id) === String(returnItem.transactionItemID));
+
+    if (returnItem.itemQty > transactionItem.quantity) {
+      alert('Quantity to refund exceeds quantity bought. Please enter a valid quantity');
+      return;
+    }
+
+    const product = getProduct(transactionItem.barcodeNo)
+    const amount = product.unitPrice * returnItem.itemQty
+
+    // Send POST request
+    axios.post('http://127.0.0.1:8000/returnItem/', {
+      returnID: currentReturn.id,
+      transactionItemID: returnItem.transactionItemID,
+      itemQty: returnItem.itemQty,
+      itemPrice: product.unitPrice,
+      amountRefundable: amount,
+    })
+      .then(response => {
+        console.log('Product created:', response.data);
+        setReturnItem({
+          returnID: null,
+          transactionItemID: null,
+          itemQty: 0,
+          itemPrice: 0,
+          amountRefundable: 0,
+        })
+        fetchReturns();
+        fetchReturnItems();
+        handleCloseAddItemPrompt();
+      })
+      .catch(error => {
+        console.error('Error creating product:', error);
+      });
+  };
+
+  const handleDeleteItem = (itemID) => {
+    axios.delete(`http://127.0.0.1:8000/returnItem/${itemID}/`)
+      .then(response => {
+        console.log('Return Item deleted:', response.data);
+        fetchReturnItems();
+        fetchReturns();
+      })
+      .catch(error => {
+        console.error('Error deleting product:', error.response ? error.response.data : error.message);
+      });
+  };
+
+  const [currentItemID, setCurrentItemID] = useState([]);
+
+  const handleUpdateItem = (e) => {
+    e.preventDefault();
+
+    const transactionItem = transactionItems.find(item => String(item.id) === String(returnItem.transactionItemID));
+
+    if (returnItem.itemQty > transactionItem.quantity) {
+      alert('Quantity to refund exceeds quantity bought. Please enter a valid quantity');
+      return;
+    }
+
+    const product = getProduct(transactionItem.barcodeNo)
+    const amount = product.unitPrice * returnItem.itemQty
+
+    // Send POST request
+    axios.put(`http://127.0.0.1:8000/returnItem/${currentItemID}/`, {
+      returnID: currentReturn.id,
+      transactionItemID: returnItem.transactionItemID,
+      itemQty: returnItem.itemQty,
+      itemPrice: product.unitPrice,
+      amountRefundable: amount,
+    })
+      .then(response => {
+        console.log('Product created:', response.data);
+        setReturnItem({
+          returnID: null,
+          transactionItemID: null,
+          itemQty: 0,
+          itemPrice: 0,
+          amountRefundable: 0,
+        })
+        fetchReturns();
+        fetchReturnItems();
+        handleCloseEdit3Prompt();
+      })
+      .catch(error => {
+        console.error('Error creating product:', error);
+      });
+  };
+
   const [activeButton, setActiveButton] = useState('DRAFT'); // Set the initial active button
 
   const [showDetailsPrompt, setShowDetailsPrompt] = useState(false);
@@ -148,6 +294,11 @@ const returns = () => {
   };
 
   const handleEdit3Click = (item) => {
+    setCurrentItemID(item.id)
+    setReturnItem({
+      transactionItemID: item.transactionItemID,
+      itemQty: item.itemQty,
+    });
     setShowEdit3Prompt(true);
   };
 
@@ -262,14 +413,36 @@ const returns = () => {
                   <div className='w-full h-[60vh] flex flex-col drop-shadow'>
                     <div className='h-[6vh] bg-darkp opacity-80 border border-darkp rounded-t-2xl text-white text-[0.8vw] flex justify-between items-center px-10'>
                       <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Product Name</h1>
-                      <h1 className='w-[14%] text-[0.7vw] text-center'>Reference #</h1>
-                      <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Boxes Opened</h1>
-                      <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Previous Opened Qty.</h1>
-                      <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Qty. Added</h1>
-                      <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Damaged Qty.</h1>
+                      <h1 className='w-[14%] text-[0.7vw] text-center'>Barcode</h1>
+                      <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Price</h1>
+                      <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Return Quantity</h1>
+                      <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Amount Refundable</h1>
                       <h1 className='w-[14%] text-[0.7vw] leading-tight text-center'>Actions</h1>
                     </div>
                     <div className='w-full h-full bg-white border-x rounded-b-2xl border-b border-darkp overflow-auto'>
+                    {returnItems
+                      .filter(returnItem => returnItem.returnID === currentReturn.id)
+                      .map(returnItem => {
+                        const transactionItem = transactionItems.find(item => String(item.id) === String(returnItem.transactionItemID))
+                        const product = getProduct(transactionItem.barcodeNo)
+                        return (
+                          <div key={returnItem.id} className='h-[9%] py-5 border-b border-darkp flex items-center justify-between px-10'>
+                            <h1 className='w-[14%] text-[0.7vw] text-center'>{product.name}</h1>
+                            <h1 className='w-[14%] text-[0.7vw] text-center'>{product.barcodeNo}</h1>
+                            <h1 className='w-[14%] text-[0.7vw] text-center'>{product.unitPrice}</h1>
+                            <h1 className='w-[14%] text-[0.7vw] text-center'>{returnItem.itemQty}</h1>
+                            <h1 className='w-[14%] text-[0.7vw] text-center'>{returnItem.amountRefundable}</h1>
+                            <h1 className='w-[14%] flex gap-[1vw] justify-center'>
+                            <button onClick={() => handleEdit3Click(returnItem)}>
+                              <img src={edit} alt="Edit" className="w-[0.8vw] h-[0.8vw]" />
+                            </button>
+                            <button onClick={() => handleDeleteItem(returnItem.id)}>
+                              <img src={del} alt="Delete" className="w-[0.8vw] h-[0.8vw]" />
+                            </button>
+                            </h1>
+                          </div>
+                        );
+                    })}
                     </div>
                   </div>
                 </div>
@@ -344,33 +517,43 @@ const returns = () => {
                 <div className='w-full flex gap-5'>
                   <div className='w-full flex flex-col gap-5'>
                     <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Invoice #</label>
+                      <label className='text-[0.7vw]'>Transaction Item</label>
                       <select 
-                        name='transactionID'
-                        value={newReturn.transactionID}
-                        onChange={handleReturnChange}
+                        name='transactionItemID'
+                        value={returnItem.transactionItemID}
+                        onChange={handleReturnItemChange}
                         className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity'
                       >
-                        <option value=''>-Choose Invoice #</option>
-                        {transactions.map((transaction) => (
-                          <option key={transaction.id} value={transaction.id}>
-                            {transaction.id}
-                          </option>
-                        ))}
+                        <option value=''>-Choose Transaction Item-</option>
+                        {transactionItems
+                          .filter(transactionItem => transactionItem.transactionID === currentReturn.transactionID)
+                          .map((transactionItem) => {
+                            const product = getProduct(transactionItem.barcodeNo);
+                            
+                            return (
+                              <option key={transactionItem.id} value={transactionItem.id}>
+                                {product.name}
+                              </option>
+                            )
+                        })}
                       </select>
+                    </div>
+                    <div className='w-full flex flex-col justify-start gap-1'>
+                      <label className='text-[0.7vw]'>Quantity</label>
+                      <input name='itemQty' value={returnItem.itemQty} onChange={handleReturnItemChange} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity'></input>
                     </div>
                   </div>
                 </div>
                 <div className='flex gap-4'>
                   <button
-                  onClick={handleSubmit}
+                  onClick={handleAddItem}
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
                   >
                     Confirm
                   </button>
                   <button
                     className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
-                    onClick={handleCloseAddPrompt}
+                    onClick={handleCloseAddItemPrompt}
                   >
                     Cancel
                   </button>
@@ -381,44 +564,55 @@ const returns = () => {
           {/* Prompt (Modal) na girequest ni master para sa edit item sa sulod sa stock records ngayong oct 17 lang */}
           {showEdit3Prompt && (
             <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50'>
-              <div className='bg-white w-[50vw] h-min p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
-                <h2 className='text-black text-[1.3vw] font-black'>Edit Item</h2>
-                {/* Input for adding stock */}
-                <div className='w-full flex gap-5'>
-                  <div className='w-full flex flex-col gap-5'>
-                    <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Product Name</label>
-                    </div>
-                    <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Reference #</label>
-                    </div>
+            <div className='bg-white w-[50vw] p-[2vw] rounded-xl shadow-lg flex flex-col items-start gap-5'>
+              <h2 className='text-black text-[1.3vw] font-black'>Edit Return</h2>
+              {/* Input for adding stock */}
+              <div className='w-full flex gap-5'>
+                <div className='w-full flex flex-col gap-5'>
+                  <div className='w-full flex flex-col justify-start gap-1'>
+                    <label className='text-[0.7vw]'>Transaction Item</label>
+                    <select 
+                      name='transactionItemID'
+                      value={returnItem.transactionItemID}
+                      onChange={handleReturnItemChange}
+                      className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity'
+                    >
+                      <option value=''>-Choose Transaction Item-</option>
+                      {transactionItems
+                        .filter(transactionItem => transactionItem.transactionID === currentReturn.transactionID)
+                        .map((transactionItem) => {
+                          const product = getProduct(transactionItem.barcodeNo);
+                          
+                          return (
+                            <option key={transactionItem.id} value={transactionItem.id}>
+                              {product.name}
+                            </option>
+                          )
+                      })}
+                    </select>
                   </div>
-                  <div className='w-full flex flex-col gap-5'>
-                    <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Boxes Opened</label>
-                      <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-                    </div>
-                    <div className='w-full flex flex-col justify-start gap-1'>
-                      <label className='text-[0.7vw]'>Damaged Qty</label>
-                      <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
-                    </div>
+                  <div className='w-full flex flex-col justify-start gap-1'>
+                    <label className='text-[0.7vw]'>Quantity</label>
+                    <input name='itemQty' value={returnItem.itemQty} onChange={handleReturnItemChange} className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity'></input>
                   </div>
-                </div>
-                <div className='flex gap-4'>
-                  <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
-                    onClick={handleCloseEdit3Prompt}
-                  >
-                    Cancel
-                  </button>
                 </div>
               </div>
+              <div className='flex gap-4'>
+                <button
+                onClick={handleUpdateItem}
+                  className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-green-500 button'
+                >
+                  Confirm
+                </button>
+                <button
+                  className='px-[1vw] py-[1vh] bg-darkp text-white rounded-lg hover:bg-red-500 button'
+                  onClick={handleCloseEdit3Prompt}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
+          </div>
           )}
         </div>
       </div>

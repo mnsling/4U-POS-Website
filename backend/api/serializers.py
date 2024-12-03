@@ -152,4 +152,4 @@ class ReturnItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReturnItems
-        fields =('id', 'returnID', 'transactionItemIdD', 'itemQty')
+        fields =('id', 'returnID', 'transactionItemID', 'itemQty', 'itemPrice', 'amountRefundable')

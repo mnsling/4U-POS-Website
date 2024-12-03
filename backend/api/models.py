@@ -267,6 +267,31 @@ class TransactionItem(models.Model):
             "price": product_price,
             "displayUoM": display_uom,
         }
+    
+    def adjust_stock(self):
+        try:
+            # Try to fetch the product from the Product model
+            try:
+                product = Product.objects.get(barcodeNo=self.barcodeNo)
+
+                # Fetch the stock entry corresponding to the product
+                stock_entry = Stock.objects.get(productId=product.id)
+
+                # Deduct the transaction item quantity from the stock
+                stock_entry.displayStock -= self.quantity
+
+            except Product.DoesNotExist:
+                # If not found, try to fetch it from the RepackedProduct model
+                product = RepackedProduct.objects.get(barcodeNo=self.barcodeNo)
+
+                # Fetch the stock entry corresponding to the product
+                product.displayedStock = product.displayedStock - self.quantity
+            
+            stock_entry.save()
+
+        except (Product.DoesNotExist, RepackedProduct.DoesNotExist, Stock.DoesNotExist):
+            # Handle the case where the product or stock entry doesn't exist
+            pass
 
     def save(self, *args, **kwargs):
         product_data = self.fetch_product_price_and_display_uom()
@@ -278,6 +303,9 @@ class TransactionItem(models.Model):
             self.productTotal = self.price * self.quantity
 
         super().save(*args, **kwargs)
+
+        # Adjust stock after saving the transaction item
+        self.adjust_stock()
 
     def __str__(self):
         return f"Transaction Item: {self.id}"
@@ -612,8 +640,25 @@ class Returns(models.Model):
 class ReturnItems(models.Model):
 
     returnID = models.ForeignKey(Returns, on_delete=models.CASCADE)
-    transactionItemID = models.ForeignKey(TransactionItem, on_delete=models.CASCADE)
+    transactionItemID = models.OneToOneField(TransactionItem, on_delete=models.CASCADE)
     itemQty = models.IntegerField()
+    itemPrice = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    amountRefundable = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return f"{self.returnID} - {self.transactionItemID}"
+    
+@receiver(post_save, sender=ReturnItems)
+@receiver(post_delete, sender=ReturnItems)
+def update_refund_amount(sender, instance, **kwargs):
+    # Get the related Returns object
+    return_instance = instance.returnID
+
+    # Sum all the amountRefundable values related to this Returns instance
+    total_refund = ReturnItems.objects.filter(returnID=return_instance).aggregate(
+        total=models.Sum('amountRefundable')
+    )['total'] or 0
+
+    # Update the refundAmount field in the Returns object
+    return_instance.refundAmount = total_refund
+    return_instance.save()
