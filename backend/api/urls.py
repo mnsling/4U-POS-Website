@@ -32,4 +32,7 @@ router.register('repackStockOutLogItem', RepackedProductStockOutLogItemViewset, 
 router.register('return', ReturnViewset, basename='return')
 router.register('returnItem', ReturnItemViewset, basename='returnItem')
 
+router.register('startCashCount', StartCashCountViewset, basename='startCashCount')
+router.register('endCashCount', EndCashCountViewset, basename='endCashCount')
+
 urlpatterns = router.urls

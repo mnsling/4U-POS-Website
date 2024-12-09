@@ -5,7 +5,6 @@ import info from '../assets/info.png'
 import exit from '../assets/reject.png'
 import axios from 'axios'
 
-
 const Transaction = () => {
 
   const [transactions, setTransactions] = useState([]);
@@ -64,10 +63,6 @@ const Transaction = () => {
   }, []);
 
   const[transactionView, setTransactionView] = useState([]);
-
-  const transactionTotal = parseFloat(transactions.reduce((total, transaction) => {
-    return total + parseFloat(transaction.finalAmount || 0); // Ensure the value is treated as a number
-  }, 0).toFixed(2)); // Limit the total to 2 decimal places and convert it back to a number 
   
   const getProduct = (barcode) => {
     let product = products.find(p => String(p.barcodeNo) === String(barcode))
@@ -92,6 +87,31 @@ const Transaction = () => {
     setTransactionView();
   };
 
+  const [filter, setFilter] = useState('all');
+  const [date, setDate] = useState('');
+
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value); // Update the filter state with the selected option value
+  };
+
+  const handleDateChange = (e) => {
+    setDate(e.target.value);
+  };
+
+  const filteredTransactions = transactions.filter(transaction => {
+    // Filter by terminal
+    const terminalMatch = filter === 'all' || transaction.terminalIssued === filter;
+
+    // Filter by date (if a date is selected)
+    const dateMatch = date ? new Date(transaction.transactionTime).toLocaleDateString() === new Date(date).toLocaleDateString() : true;
+
+    return terminalMatch && dateMatch;
+  });
+
+  const transactionTotal = parseFloat(filteredTransactions.reduce((total, transaction) => {
+    return total + parseFloat(transaction.finalAmount || 0); // Ensure the value is treated as a number
+  }, 0).toFixed(2)); // Limit the total to 2 decimal places and convert it back to a number
+
   return (
     <div className='w-screen h-screen bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
@@ -102,13 +122,13 @@ const Transaction = () => {
         <div className='h-[100vh] w-[80vw] flex flex-col gap-5 items-center mt-10'>
           <div className='w-full flex justify-between'>
             <div className='w-[15.5vw] flex justify-between gap-5'>
-              <select className='py-2 px-4 w-[8vw] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
-                <option>All</option>
-                <option>Terminal 1</option>
-                <option>Terminal 2</option>
-                <option>Terminal 3</option>
+              <select value={filter} onChange={handleFilterChange} className='py-2 px-4 w-[8vw] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
+                <option value='all'>All</option>
+                <option value='ONE'>Terminal 1</option>
+                <option value='TWO'>Terminal 2</option>
+                <option value='THREE'>Terminal 3</option>
               </select>
-              <input type='datetime-local' className='py-2 px-4 w-[10vw] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
+              <input value={date} onChange={handleDateChange} type='datetime-local' className='py-2 px-4 w-[10vw] text-[0.7vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
             </div>
           </div>
           <div className='w-full h-[63vh] rounded-2xl flex flex-col drop-shadow'>
@@ -121,7 +141,7 @@ const Transaction = () => {
               <h1 className='w-[8vw] text-[0.7vw] text-center'>Actions</h1>
             </div>
             <div className='w-full h-full bg-white rounded-b-2xl overflow-auto hide-scrollbar'>
-            {transactions.map(transaction => {
+            {filteredTransactions.map(transaction => {
               let terminal = '';
 
               if (transaction.terminalIssued === 'ONE') {

@@ -1,73 +1,159 @@
 // InventoryReport.js
-import React, { useState } from 'react';
-import coin from '../assets/coin.png';
-import disc from '../assets/discount.png';
-import rev from '../assets/revenue-growth.png';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const CashierReport = () => {
-    // State to control which row is expanded and store descriptions
-    const [expandedRow, setExpandedRow] = useState(null);
-    const [cashData, setCashData] = useState([
-        {
-            terminal: 'Terminal 1',
-            date: '02-02-2024',
-            expected: '₱10,000.00',
-            actual: '₱9,800.00',
-            variance: '- ₱200.00',
-            description: 'mistakenly entered an incorrect amount during a transaction, which was later corrected but led to a discrepancy in the cash count."'
-        },
-        {
-            terminal: 'Terminal 2',
-            date: '02-02-2024',
-            expected: '₱8,200.00',
-            actual: '₱8,200.00',
-            variance: '+ ₱0.00',
-            description: ''
-        },
-        {
-            terminal: 'Terminal 3',
-            date: '02-02-2024',
-            expected: '₱12,000.00',
-            actual: '₱12,050.00',
-            variance: '+ ₱50.00',
-            description: 'Overpayment by a customer, corrected in system.'
-        }
-    ]);
 
-    // Toggle row expansion
-    const toggleRow = (index) => {
-        setExpandedRow(expandedRow === index ? null : index);
+    const [startCashCounts, setStartCashCounts] = useState([]);
+    const [endCashCounts, setEndCashCounts] = useState([]);
+    const [transactions, setTransactions] = useState([]);
+
+    const fetchStartCashCounts = () => {
+        axios.get('http://127.0.0.1:8000/startCashCount')
+          .then(response => {
+            setStartCashCounts(response.data);
+            console.log(response.data)
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+          });
     };
 
-    // Update description on blur event
-    const handleDescriptionChange = (index, newDescription) => {
-        setCashData((prevData) => {
-            const updatedData = [...prevData];
-            updatedData[index].description = newDescription;
-            return updatedData;
+    const fetchEndCashCounts = () => {
+        axios.get('http://127.0.0.1:8000/endCashCount/')
+            .then(response => {
+                setEndCashCounts(response.data);
+                console.log(response.data)
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    };
+
+    const fetchTransactions = () => {
+        axios.get('http://127.0.0.1:8000/transaction/')
+            .then(response => {
+                setTransactions(response.data);
+                console.log(response.data)
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    };
+
+    useEffect(() => {``
+        console.log('Fetching data...');
+        fetchStartCashCounts();
+        fetchEndCashCounts();
+        fetchTransactions();
+    }, []);
+
+    const [terminalOne, setTerminalOne] = useState({
+        date: '',
+        expectedCash: 0,
+        actualCash: 0,
+        varianceAmount: 0,
+    });
+
+    const [terminalTwo, setTerminalTwo] = useState({
+        date: '',
+        expectedCash: 0,
+        actualCash: 0,
+        varianceAmount: 0,
+    });
+
+    const [terminalThree, setTerminalThree] = useState({
+        date: '',
+        expectedCash: 0,
+        actualCash: 0,
+        varianceAmount: 0,
+    });
+
+    const [filterDate, setFilterDate] = useState("");
+
+    useEffect(() => {
+        console.log('Filter date changed:', filterDate);  // Log the filter date when it changes
+        calculateTerminalData();
+    }, [filterDate]);    
+    
+    const calculateTerminalData = () => {
+        // Helper function to get start cash for a terminal on the given date
+        const getStartCash = () => {
+            const startCash = startCashCounts.find(
+                count => 
+                // count.dateToday === filterDate &&
+                count.terminalIssued === "one"
+            );
+            console.log(startCash)
+            return startCash ? parseFloat(startCash.amountTotal || 0) : 0;
+        };
+    
+        // Helper function to get total transaction amounts for a terminal on the given date
+        // const getTotalTransactionAmount = (terminal) => {
+        //     return transactions
+        //         .filter(tx => tx.date === filterDate && String(tx.terminalIssued) === String(terminal))
+        //         .reduce((sum, tx) => sum + parseFloat(tx.finalAmount || 0), 0);
+        // };
+    
+        // Helper function to get the end cash for a terminal on the given date
+        // const getEndCash = (terminal) => {
+        //     const endCash = endCashCounts.find(
+        //         count => count.dateToday === filterDate && String(count.terminalIssued) === String(terminal)
+        //     );
+        //     return endCash ? parseFloat(endCash.amountTotal || 0) : 0;
+        // };
+    
+        // Calculate data for terminal ONE
+        const terminalOneExpectedCash = getStartCash() ;
+        // const terminalOneActualCash = getEndCash("One") + getTotalTransactionAmount("One");
+        // const terminalOneVariance = terminalOneExpectedCash - terminalOneActualCash;
+        
+        setTerminalOne({
+            date: filterDate,
+            expectedCash: terminalOneExpectedCash,
+            // actualCash: terminalOneActualCash,
+            // varianceAmount: terminalOneVariance,
         });
+    
+        // Calculate data for terminal TWO
+        // const terminalTwoExpectedCash = getStartCash("Two") + getTotalTransactionAmount("Two");
+        // const terminalTwoActualCash = getEndCash("Two");
+        // const terminalTwoVariance = terminalTwoExpectedCash - terminalTwoActualCash;
+        
+        // setTerminalTwo({
+        //     date: filterDate,
+        //     expectedCash: terminalTwoExpectedCash,
+        //     actualCash: terminalTwoActualCash,
+        //     varianceAmount: terminalTwoVariance,
+        // });
+    
+        // Calculate data for terminal THREE
+        // const terminalThreeExpectedCash = getStartCash("Three") + getTotalTransactionAmount("Three");
+        // const terminalThreeActualCash = getEndCash("Three");
+        // const terminalThreeVariance = terminalThreeExpectedCash - terminalThreeActualCash;
+        
+        // setTerminalThree({
+        //     date: filterDate,
+        //     expectedCash: terminalThreeExpectedCash,
+        //     actualCash: terminalThreeActualCash,
+        //     varianceAmount: terminalThreeVariance,
+        // });
     };
 
     return (
         <div className='flex flex-wrap justify-start items-center gap-5'>
             <div className='w-fit flex flex-col gap-3'>
                 <div className='flex gap-2 items-end'>
-                    <div className='flex gap-2'>
-                        <div className='flex flex-col'>
-                            <label className='text-[0.6vw] text-darkp py-1'>Choose Terminal:</label>
-                            <select className='py-2 px-4 w-[10vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp hover:bg-darkp hover:text-white cursor-pointer button'>
-                                <option>All Terminal</option>
-                                <option>Terminal 1</option>
-                                <option>Terminal 2</option>
-                                <option>Terminal 3</option>
-                            </select>
-                        </div>
-                    </div>
                     <div className='flex flex-col'>
                         <label className='text-[0.6vw] text-darkp py-1'>Date:</label>
-                        <input type='date' className='py-2 px-4 w-[10vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button' />
+                        <input
+                            type='date'
+                            name='filterDate'
+                            value={filterDate}
+                            onChange={(e) => setFilterDate(e.target.value)}
+                            className='py-2 px-4 w-[10vw] text-[0.6vw] bg-white border border-darkp opacity-80 rounded-xl text-darkp cursor-pointer hover:bg-darkp hover:text-white button'
+                        />
                     </div>
-                    <button className='bg-darkp text-white text-[0.7vw] px-5 py-2 rounded-lg button'>Enter</button>
                 </div>
             </div>
             <div className='flex gap-7'>
@@ -78,50 +164,35 @@ const CashierReport = () => {
                             <table className="table-auto w-full text-white">
                                 <thead className="sticky top-[-1px] text-[0.8vw] bg-white text-darkp border-y border-white z-10">
                                     <tr>
-                                        <th className="px-4 py-2 text-left"></th>
-                                        <th className="px-4 py-2 text-left">Terminal #</th>
-                                        <th className="px-4 py-2 text-left">Date</th>
-                                        <th className="px-4 py-2 text-left">Expected Cash</th>
-                                        <th className="px-4 py-2 text-left">Actual Cash</th>
-                                        <th className="px-4 py-2 text-left">Variance Amount</th>
+                                        <th className="w-[22%] px-8 py-2 text-left">Terminal #</th>
+                                        <th className="w-[22%] px-8 py-2 text-left">Date</th>
+                                        <th className="w-[22%] px-8 py-2 text-left">Expected Cash</th>
+                                        <th className="w-[22%] px-8 py-2 text-left">Actual Cash</th>
+                                        <th className="w-[22%] px-8 py-2 text-left">Variance Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody className='text-[0.7vw]'>
-                                    {cashData.map((data, index) => (
-                                        <React.Fragment key={index}>
-                                            <tr className='border-white border-t'>
-                                                <td className="px-4 py-4 text-center">
-                                                    <button
-                                                        onClick={() => toggleRow(index)}
-                                                        className="text-white"
-                                                    >
-                                                        {expandedRow === index ? '▲' : '▼'}
-                                                    </button>
-                                                </td>
-                                                <td className="px-4 py-4">{data.terminal}</td>
-                                                <td className="px-4 py-4">{data.date}</td>
-                                                <td className="px-4 py-4">{data.expected}</td>
-                                                <td className="px-4 py-4">{data.actual}</td>
-                                                <td className={`px-4 py-4 ${data.variance.startsWith('-') ? 'text-red-300' : 'text-green-300'}`}>
-                                                    {data.variance}
-                                                </td>
-                                            </tr>
-                                            {expandedRow === index && (
-                                                <tr className='bg-darkp'>
-                                                    <label className='font-bold text-[1.2vw] flex justify-center items-start h-full'>REASON:</label>
-                                                    <td colSpan="5" className="px-4 py-2">
-                                                        <textarea
-                                                            className="w-full h-[10vh] bg-darkp text-white p-2 rounded-md border border-white resize-none"
-                                                            value={data.description}
-                                                            placeholder="Enter reason for discrepancy"
-                                                            onChange={(e) => handleDescriptionChange(index, e.target.value)}
-                                                            rows={3}
-                                                        />
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
+                                    <tr className='border-white border-t'>
+                                        <td className="w-[22%] px-8 py-4">Terminal 1</td>
+                                        <td className="w-[22%] px-8 py-4">{filterDate}</td>
+                                        <td className="w-[22%] px-8 py-4">{terminalOne.expectedCash}</td>
+                                        <td className="w-[22%] px-8 py-4">{terminalOne.actualCash}</td>
+                                        <td className="w-[22%] px-8 py-4">{terminalOne.varianceAmount}</td>
+                                    </tr>
+                                    <tr className='border-white border-t'>
+                                        <td className="w-[22%] px-8 py-4">Terminal 2</td>
+                                        <td className="w-[22%] px-8 py-4">{filterDate}</td>
+                                        <td className="w-[22%] px-8 py-4">{terminalTwo.expectedCash}</td>
+                                        <td className="w-[22%] px-8 py-4">{terminalTwo.actualCash}</td>
+                                        <td className="w-[22%] px-8 py-4">{terminalTwo.varianceAmount}</td>
+                                    </tr>
+                                    <tr className='border-white border-t'>
+                                        <td className="w-[22%] px-8 py-4">Terminal 3</td>
+                                        <td className="w-[22%] px-8 py-4">{filterDate}</td>
+                                        <td className="w-[22%] px-8 py-4">{terminalThree.expectedCash}</td>
+                                        <td className="w-[22%] px-8 py-4">{terminalThree.actualCash}</td>
+                                        <td className="w-[22%] px-8 py-4">{terminalThree.varianceAmount}</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

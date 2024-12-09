@@ -662,3 +662,70 @@ def update_refund_amount(sender, instance, **kwargs):
     # Update the refundAmount field in the Returns object
     return_instance.refundAmount = total_refund
     return_instance.save()
+
+class StartCashCount(models.Model):
+    TERMINAL_CHOICES = [
+        ('ONE', 'One'),
+        ('TWO', 'Two'),
+        ('THREE', 'Three'),
+    ]
+
+    dateToday = models.DateField(auto_now_add=True, unique=True)
+    terminalIssued = models.CharField(max_length=10, choices=TERMINAL_CHOICES, default='One')
+    beginningBalance = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f"{self.dateToday} - {self.beginningBalance}"
+    
+class EndCashCount(models.Model):
+    TERMINAL_CHOICES = [
+        ('ONE', 'One'),
+        ('TWO', 'Two'),
+        ('THREE', 'Three'),
+    ]
+
+    dateToday = models.DateField(auto_now_add=True, unique=True)
+    terminalIssued = models.CharField(max_length=10, choices=TERMINAL_CHOICES, default='One')
+    thousand = models.IntegerField()
+    fiveHundred = models.IntegerField()
+    twoHundred = models.IntegerField()
+    oneHundred = models.IntegerField()
+    fifty = models.IntegerField()
+    twenty = models.IntegerField()
+    ten = models.IntegerField()
+    five = models.IntegerField()
+    one = models.IntegerField()
+    twoFiveCent = models.IntegerField()
+    tenCent = models.IntegerField()
+    fiveCent = models.IntegerField()
+    amountTotal = models.DecimalField(max_digits=20, decimal_places=2, default=0, null=True, blank=True)
+
+    def calculate_total(self):
+        # Define the value of each denomination
+        denomination_values = {
+            'thousand': 1000,
+            'fiveHundred': 500,
+            'twoHundred': 200,
+            'oneHundred': 100,
+            'fifty': 50,
+            'twenty': 20,
+            'ten': 10,
+            'five': 5,
+            'one': 1,
+            'twoFiveCent': 0.25,
+            'tenCent': 0.10,
+            'fiveCent': 0.05,
+        }
+
+        # Calculate the total amount
+        total = sum(getattr(self, field) * value for field, value in denomination_values.items())
+
+        return round(total, 2)
+
+    def save(self, *args, **kwargs):
+        # Update the amountTotal before saving
+        self.amountTotal = self.calculate_total()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.dateToday} - {self.amountTotal}"

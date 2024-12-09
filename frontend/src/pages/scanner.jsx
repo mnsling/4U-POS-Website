@@ -30,6 +30,27 @@ const Scanner = () => {
     price: 0,
   });
 
+  const[startCashCount, setStartCashCount] = useState({
+    beginningBalance: 0,
+    terminalIssued: 'ONE',
+  });
+
+  const[endCashCount, setEndCashCount] = useState({
+    terminalIssued: 'ONE',
+    thousand: 0,
+    fiveHundred: 0,
+    twoHundred: 0,
+    oneHundred: 0,
+    fifty: 0,
+    twenty: 0,
+    ten: 0,
+    five: 0,
+    one: 0,
+    twoFiveCent: 0,
+    tenCent: 0,
+    fiveCent: 0,
+  });
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -54,6 +75,34 @@ const Scanner = () => {
       };
       
       return updatedTransaction;
+    });
+  };
+
+  const handleChangeStartCount = (e) => {
+    const { name, value } = e.target;
+
+    setStartCashCount(prevStartCashCount => {
+      const updatedStartCashCount = {
+        ...prevStartCashCount,
+        [name]: value,
+      };
+      // Log updated product here
+      console.log('Updated Transaction Item:', updatedStartCashCount);
+      return updatedStartCashCount;
+    });
+  };
+
+  const handleChangeEndCount = (e) => {
+    const { name, value } = e.target;
+
+    setEndCashCount(prevEndCashCount => {
+      const updatedEndCashCount = {
+        ...prevEndCashCount,
+        [name]: value,
+      };
+      // Log updated product here
+      console.log('Updated Transaction Item:', updatedEndCashCount);
+      return updatedEndCashCount;
     });
   };
   
@@ -271,10 +320,72 @@ const Scanner = () => {
       stock = stocks.find((s) => String(s.id) === String(product.stock));
     }
 
-    console.log(stock)
-
     return stock
   }
+
+  const handleSubmitStartCash = (e) => {
+    e.preventDefault();
+
+    // Send POST request
+    axios.post('http://127.0.0.1:8000/startCashCount/', {
+      beginningBalance: startCashCount.beginningBalance,
+      terminalIssued: 'ONE',
+    })
+      .then(response => {
+        console.log('Product created:', response.data);
+        setStartCashCount({
+          beginningBalance: 0,
+          terminalIssued: 'ONE',
+        })
+        handleBegClose();
+      })
+      .catch(error => {
+        console.error('Error creating product:', error);
+      });
+  };
+
+  const handleSubmitEndCash = (e) => {
+    e.preventDefault();
+
+    // Send POST request
+    axios.post('http://127.0.0.1:8000/endCashCount/', {
+      terminalIssued: 'ONE',
+      thousand: endCashCount.thousand,
+      fiveHundred: endCashCount.fiveHundred,
+      twoHundred: endCashCount.twoHundred,
+      oneHundred: endCashCount.oneHundred,
+      fifty: endCashCount.fifty,
+      twenty: endCashCount.twenty,
+      ten: endCashCount.ten,
+      five: endCashCount.five,
+      one: endCashCount.one,
+      twoFiveCent: endCashCount.twoFiveCent,
+      tenCent: endCashCount.tenCent,
+      fiveCent: endCashCount.fiveCent,
+    })
+      .then(response => {
+        console.log('Product created:', response.data);
+        setEndCashCount({
+          terminalIssued: 'ONE',
+          thousand: 0,
+          fiveHundred: 0,
+          twoHundred: 0,
+          oneHundred: 0,
+          fifty: 0,
+          twenty: 0,
+          ten: 0,
+          five: 0,
+          one: 0,
+          twoFiveCent: 0,
+          tenCent: 0,
+          fiveCent: 0,
+        })
+        handleEndClose();
+      })
+      .catch(error => {
+        console.error('Error creating product:', error);
+      });
+  };
 
   const [showProductList, setShowProductList] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -344,6 +455,26 @@ const Scanner = () => {
     setShowEndModal(false);
   };
 
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Combine products and repackedProducts and filter based on the searchQuery
+  const filteredProducts = [...products, ...repackedProducts].filter((product) => {
+    // Convert product properties to strings and check if they include the searchQuery
+    const query = searchQuery.toLowerCase();
+    return (
+      product.name?.toLowerCase().includes(query) || // Check if the name matches
+      String(product.barcodeNo).includes(query) // Check if the barcode matches
+    );
+  });
+
+  const handleProductClick = (barcode) => {
+    setTransactionItem((prevTransactionItem) => ({
+      ...prevTransactionItem, // Spread the existing properties
+      barcodeNo: barcode,     // Update only the barcodeNo property
+    }));
+    console.log(transactionItem);
+  };  
+
   return (
     <div className='w-screen h-full bg-cover bg-center flex font-poppins' style={{ backgroundImage: `url(${bg})` }}>
       <Sidebar />
@@ -392,7 +523,6 @@ const Scanner = () => {
                         )})}
                     </div>
                 </div>
-                  
               </div>
             </div>
             <div className='w-full h-[2vw]'/>
@@ -496,13 +626,10 @@ const Scanner = () => {
                 type="text"
                 className='px-4 py-2 text-darkp text-md font-light outline-none w-4/12 rounded-full border border-darkp placeholder:text-darkp2'
                 placeholder="search for products"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <div className='flex gap-3'>
-                <button
-                  className='text-darkp border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button'
-                >
-                  Add
-                </button>
                 <button onClick={handleCloseProductList} className='text-darkp border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button'>
                   Close
                 </button>
@@ -512,14 +639,26 @@ const Scanner = () => {
               <table className='w-full text-left'>
                 <thead>
                   <tr className='bg-darkp text-white sticky top-0'>
-                    <th className='py-2 px-4'>Item Code</th>
-                    <th className='py-2 px-4'>Product Name</th>
-                    <th className='py-2 px-4'>Supplier</th>
-                    <th className='py-2 px-4'>Wholesale Price</th>
-                    <th className='py-2 px-4'>Unit Price</th>
+                    <th className='w-[25%] py-2 px-4 text-left'>Item Code</th>
+                    <th className='w-[25%] py-2 px-4 text-left'>Product Name</th>
+                    <th className='w-[25%] py-2 px-4 text-right'>Wholesale Price</th>
+                    <th className='w-[25%] py-2 px-4 text-right'>Unit Price</th>
                   </tr>
                 </thead>
                 <tbody>
+                  {filteredProducts.map((item, index) => {
+                    const product = getProduct(item.barcodeNo);
+                    const stock = getStock(item);
+                    const productName = product ? product.name : 'N/A';
+
+                    return (
+                      <tr className='h-[5vw] hover:bg-gray-200 transition duration-200 ease-in-out'>
+                        <td className='w-[25%] text-left'>{item.barcodeNo}</td>
+                        <td className='w-[25%] text-left'>{productName}</td>
+                        <td className='w-[25%] text-right'>₱ {product.wsp}</td>
+                        <td className='w-[25%] text-right'>₱ {product.unitPrice}</td>
+                      </tr>
+                    )})}
                 </tbody>
               </table>
             </div>
@@ -612,24 +751,16 @@ const Scanner = () => {
             <div className='w-full flex gap-5'>
               <div className='w-full flex flex-col justify-start gap-1'>
                 <label className='text-[0.7vw]'>Amount</label>
-                <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
+                <input name='beginningBalance' value={startCashCount.beginningBalance} onChange={handleChangeStartCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter amount' />
               </div>
             </div>
             <div className='flex gap-4'>
-            <button
-              onClick={() => {
-                if (selectedProduct) {
-                  addOrUpdateTransactionItem(selectedProduct, Number(transactionItem.quantity));
-                  setSelectedProduct(null); // Reset selection
-                } else {
-                  console.warn('No product selected');
-                }
-              }}
-              className="text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button"
-            >
-              Confirm
-            </button>
-
+              <button
+                onClick={handleSubmitStartCash}
+                className="text-darkp text-[0.7vw] border border-darkp rounded-lg px-4 py-2 hover:bg-darkp hover:text-white button"
+              >
+                Confirm
+              </button>
               <button
                 className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-red-500 button'
                 onClick={handleBegClose}
@@ -649,32 +780,32 @@ const Scanner = () => {
                 <div className='w-[48%] flex flex-col gap-4'>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱1000.00</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='thousand' value={endCashCount.thousand} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱500.00</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='fiveHundred' value={endCashCount.fiveHundred} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱200.00</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='twoHundred' value={endCashCount.twoHundred} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱100.00</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='oneHundred' value={endCashCount.oneHundred} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱50.00</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='fifty' value={endCashCount.fifty} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱20.00</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='twenty' value={endCashCount.twenty} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start gap-4'>
                     <button
                       className='px-[1vw] py-[1vh] bg-darkp text-[0.7vw] text-white rounded-lg hover:bg-green-500 button'
-                      onClick={handleEndClose}
+                      onClick={handleSubmitEndCash}
                     >
                       Confirm
                     </button>
@@ -689,31 +820,30 @@ const Scanner = () => {
                 <div className='w-[48%] flex flex-col gap-4'>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱10.00</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='ten' value={endCashCount.ten} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱5.00</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='five' value={endCashCount.five} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱1.00</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='one' value={endCashCount.one} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱0.25</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='twoFiveCent' value={endCashCount.twoFiveCent} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱0.10</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='tenCent' value={endCashCount.tenCent} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                   <div className='w-full flex justify-start items-center gap-5'>
                     <label className='text-[0.7vw] w-[3vw]'>₱0.05</label>
-                    <input type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
+                    <input name='fiveCent' value={endCashCount.fiveCent} onChange={handleChangeEndCount} type='number' className='w-full border border-darkp rounded-md px-5 py-2 placeholder:text-[0.6vw]' placeholder='enter quantity' />
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>

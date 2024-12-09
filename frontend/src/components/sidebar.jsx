@@ -167,17 +167,17 @@ const Sidebar = () => {
                   </div>
                 </button>
             )}
-            {userRole === 'admin' && (
+            {/* {userRole === 'admin' && (
                 <button
                   onClick={() => handleNavigation('/report')}
                   className="flex gap-4 items-center px-6 py-3 border-b border-white hover:bg-darkp2 button"
                 >
                   <img src={bar} className="w-[1vw]" />
                   <div className="w-full text-white flex justify-between items-center">
-                    <h1 className="text-[0.8vw]">Reports</h1>
+                    <h1 className="text-[0.8vw]">Cash Count</h1>
                   </div>
                 </button>
-            )}
+            )} */}
           {/* Logout button: Visible to all roles */}
           <button
               onClick={() => {

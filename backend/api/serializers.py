@@ -153,3 +153,15 @@ class ReturnItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReturnItems
         fields =('id', 'returnID', 'transactionItemID', 'itemQty', 'itemPrice', 'amountRefundable')
+
+class  StartCashCountSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StartCashCount
+        fields =('id', 'dateToday', 'terminalIssued', 'beginningBalance')
+
+class  EndCashCountSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = EndCashCount
+        fields =('id', 'dateToday', 'terminalIssued', 'thousand', 'fiveHundred', 'twoHundred', 'oneHundred', 'fifty', 'twenty', 'ten', 'five', 'one', 'twoFiveCent', 'tenCent', 'fiveCent', 'amountTotal')
